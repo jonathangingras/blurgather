@@ -8,7 +8,7 @@ add_library(kiki_pwd_mng
     kiPasswordFactory.c
     kiPasswordMsgPackPersister.c
     msgpack_serialize.c
-    kiPasswordMCryptEncryptor.c
+    kiMCryptEncryptor.c
     secret_key.c
 )
 
@@ -19,3 +19,5 @@ target_link_libraries(kiki_pwd_mng
     ${msgpack-static}
 )
 install(TARGETS kiki_pwd_mng DESTINATION lib)
+
+add_subdirectory(cli-frontend)

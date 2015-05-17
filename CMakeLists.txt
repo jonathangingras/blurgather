@@ -9,7 +9,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 include(build-msgpack.cmake)
 
 include_directories(include)
-install(FILES include/* DESTINATION include)
+include_directories(include/kiki)
+include_directories(include/kiki/pwd_mng)
+install(DIRECTORY include/kiki DESTINATION include)
 
 add_subdirectory(src)
 add_subdirectory(test)

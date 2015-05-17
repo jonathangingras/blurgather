@@ -1,4 +1,4 @@
-#include <kiki/utilities.h>
+#include "utilities.h"
 
 size_t kiki_reverse_memlen(unsigned char* str, int end_index) { //like in c++ end index is out of bound
 	unsigned char* iterator = str + end_index;

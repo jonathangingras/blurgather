@@ -13,4 +13,4 @@ endfunction()
 
 add_pwd_mng_test(kiPassword)
 add_pwd_mng_test(kiPasswordMsgPackPersister)
-add_pwd_mng_test(kiPasswordMCryptEncryptor)
+add_pwd_mng_test(kiMCryptEncryptor)

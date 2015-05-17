@@ -69,6 +69,7 @@ int kiki_pwd_mng_Persistance_msgpack_deserialize_kiPassword(msgpack_object* obje
 	memcpy(password->name, name_iterator, name_size);
 	memcpy(password->description, description_iterator, description_size);
 	memcpy(password->value, value_iterator, value_size);
+	password->value_length = kiki_reverse_memlen(password->value, KIKI_PWD_MAX_VALUE_LEN);
 	password->crypted = 1;
 
 	return error_value;

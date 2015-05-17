@@ -4,8 +4,8 @@
 
 #define SETUP \
 kiPasswordMsgPackPersister repository;\
-kiPasswordEncryptor encryptor;\
-kiPasswordDecryptor decryptor;\
+kiEncryptor encryptor;\
+kiDecryptor decryptor;\
 kiPasswordFactory factory;\
 kiki_pwd_mng_kiPasswordFactory_init(&factory, NULL, &encryptor, &decryptor);\
 kiki_pwd_mng_kiPasswordMsgPackPersister_init(&repository, "shadow", &factory);

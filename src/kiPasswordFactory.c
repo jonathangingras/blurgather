@@ -1,11 +1,11 @@
-#include <kiki/pwd_mng/kiPasswordFactory.h>
+#include "kiPasswordFactory.h"
 
 static kiPassword* kiki_pwd_mng_kiPasswordFactory_new_kiPassword(kiPasswordFactory* self);
 
 kiPasswordFactory* kiki_pwd_mng_kiPasswordFactory_init(kiPasswordFactory* _self,
                                                        kiPasswordRepository* repository,
-                                                       kiPasswordEncryptor* encryptor,
-                                                       kiPasswordDecryptor* decryptor) {
+                                                       kiEncryptor* encryptor,
+                                                       kiDecryptor* decryptor) {
 	kiPasswordFactory* self = _self ? _self : (kiPasswordFactory*)malloc(sizeof(kiPasswordFactory));
 
 	self->repository = repository;

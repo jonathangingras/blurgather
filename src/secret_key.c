@@ -1,11 +1,12 @@
-#include <kiki/pwd_mng/kiPassword.h>
+#include "secret_key.h"
+#include "kiPassword.h"
 
 static void kiki_pwd_mng_secret_key_t_destroy(kiki_pwd_mng_secret_key_t* self);
 static int kiki_pwd_mng_secret_key_t_update(kiki_pwd_mng_secret_key_t* self, const void* memory, size_t length);
 
 kiki_pwd_mng_secret_key_t* kiki_pwd_mng_secret_key_t_init(kiki_pwd_mng_secret_key_t* _self) {
 	kiki_pwd_mng_secret_key_t* self = _self ? _self : (kiki_pwd_mng_secret_key_t*)malloc(sizeof(kiki_pwd_mng_secret_key_t));
-	self->value = (char*)calloc(KIKI_PWD_MAX_VALUE_LEN, sizeof(char));
+	self->value = (unsigned char*)calloc(KIKI_PWD_MAX_VALUE_LEN, sizeof(char));
 	self->length = 0;
 
 	self->destroy = &kiki_pwd_mng_secret_key_t_destroy;

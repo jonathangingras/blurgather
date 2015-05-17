@@ -1,4 +1,4 @@
-#include <kiki/pwd_mng/kiPasswordMsgPackPersister.h>
+#include "kiPasswordMsgPackPersister.h"
 #include "msgpack_serialize.h"
 
 static void kiki_pwd_mng_kiPasswordMsgPackPersister_destroy(kiPasswordMsgPackPersister* self);
@@ -7,6 +7,12 @@ static int kiki_pwd_mng_kiPasswordMsgPackPersister_remove(kiPasswordRepository* 
 static int kiki_pwd_mng_kiPasswordMsgPackPersister_load(kiPasswordRepository* self);
 static int kiki_pwd_mng_kiPasswordMsgPackPersister_persist(kiPasswordRepository* self);
 static void kiki_pwd_mng_kiPasswordMsgPackPersister_sort(kiPasswordRepository* _self);
+
+static kiPasswordIterator kiki_pwd_mng_kiPasswordMsgPackPersister_begin(kiPasswordRepository* _self);
+static kiPasswordIterator kiki_pwd_mng_kiPasswordMsgPackPersister_end(kiPasswordRepository* _self);
+
+static kiPassword** kiki_pwd_mng_kiPasswordMsgPackPersister_kiPasswordIterator_previous(kiPasswordIterator* _self);
+static kiPassword** kiki_pwd_mng_kiPasswordMsgPackPersister_kiPasswordIterator_next(kiPasswordIterator* _self);
 
 kiPasswordMsgPackPersister* kiki_pwd_mng_kiPasswordMsgPackPersister_init(kiPasswordMsgPackPersister* _self,
                                                                          const char* fileName,
@@ -21,6 +27,8 @@ kiPasswordMsgPackPersister* kiki_pwd_mng_kiPasswordMsgPackPersister_init(kiPassw
 	self->repository.load = &kiki_pwd_mng_kiPasswordMsgPackPersister_load;
 	self->repository.persist = &kiki_pwd_mng_kiPasswordMsgPackPersister_persist;
 	self->repository.sort = &kiki_pwd_mng_kiPasswordMsgPackPersister_sort;
+	self->repository.begin = &kiki_pwd_mng_kiPasswordMsgPackPersister_begin;
+	self->repository.end = &kiki_pwd_mng_kiPasswordMsgPackPersister_end;
 
 	self->password_factory = password_factory;
 	self->number_passwords = 0;
@@ -30,6 +38,40 @@ kiPasswordMsgPackPersister* kiki_pwd_mng_kiPasswordMsgPackPersister_init(kiPassw
 	strcat(self->persistanceFileName, fileName);
 
 	return self;
+}
+
+static void kiPasswordMsgPackPersisterIterator_init(kiPasswordMsgPackPersister* self, kiPasswordIterator* iterator) {
+	iterator->container = self;
+	iterator->previous = &kiki_pwd_mng_kiPasswordMsgPackPersister_kiPasswordIterator_previous;
+	iterator->next = &kiki_pwd_mng_kiPasswordMsgPackPersister_kiPasswordIterator_next;
+}
+
+kiPasswordIterator kiki_pwd_mng_kiPasswordMsgPackPersister_begin(kiPasswordRepository* _self) {
+	kiPasswordMsgPackPersister* self = (kiPasswordMsgPackPersister*) _self->object;
+
+	kiPasswordIterator iterator;
+	kiPasswordMsgPackPersisterIterator_init(self, &iterator);
+	iterator.value = &self->password_array[0];
+
+	return iterator;
+}
+
+kiPasswordIterator kiki_pwd_mng_kiPasswordMsgPackPersister_end(kiPasswordRepository* _self) {
+	kiPasswordMsgPackPersister* self = (kiPasswordMsgPackPersister*) _self->object;
+
+	kiPasswordIterator iterator;
+	kiPasswordMsgPackPersisterIterator_init(self, &iterator);
+	iterator.value = &self->password_array[self->number_passwords];
+
+	return iterator;
+}
+
+kiPassword** kiki_pwd_mng_kiPasswordMsgPackPersister_kiPasswordIterator_previous(kiPasswordIterator* self) {
+	return --self->value;
+}
+
+kiPassword** kiki_pwd_mng_kiPasswordMsgPackPersister_kiPasswordIterator_next(kiPasswordIterator* self) {
+	return ++self->value;
 }
 
 void kiki_pwd_mng_kiPasswordMsgPackPersister_free(kiPasswordMsgPackPersister* self) {
@@ -125,10 +167,14 @@ int kiki_pwd_mng_kiPasswordMsgPackPersister_load(kiPasswordRepository* _self) {
 	kiPasswordMsgPackPersister* self = (kiPasswordMsgPackPersister*) _self->object;
 
 	FILE* shadow_file = fopen(self->persistanceFileName, "rb");
-	unsigned char* data = (unsigned char*) malloc(2555 * (sizeof(char)));
+	if(!shadow_file) return -4;
+
 	size_t data_length;
-	if(fread(&data_length, sizeof(size_t), 1, shadow_file) != 1) return -1;
-	if(fread(data, sizeof(char), data_length, shadow_file) != data_length) return -2;
+	if(fread(&data_length, sizeof(size_t), 1, shadow_file) != 1) { return -1; }
+	unsigned char* data = (unsigned char*) malloc(data_length * (sizeof(unsigned char)));
+	if(!data) { return -3; }
+
+	if(fread(data, sizeof(char), data_length, shadow_file) != data_length) { return -2; }
 	fclose(shadow_file);
 
 	int error_value = kiki_pwd_mng_Persistance_msgpack_deserialize_kiPasswordArray(self, self->password_factory, data,
