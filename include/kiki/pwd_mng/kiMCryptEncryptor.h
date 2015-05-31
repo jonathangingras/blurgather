@@ -6,6 +6,7 @@
 #include "secret_key.h"
 #include "kiEncryptor.h"
 #include "kiDecryptor.h"
+#include "iv.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,7 +21,7 @@ struct kiMCryptEncryptor {
 	void (* destroy)(kiMCryptEncryptor* self);
 
 	kiki_pwd_mng_secret_key_t* secret_key;
-	unsigned char iv[16];
+	IV_t iv;
 };
 
 kiMCryptEncryptor* kiki_pwd_mng_kiMCryptEncryptor_init(kiMCryptEncryptor* self);

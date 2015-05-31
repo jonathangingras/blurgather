@@ -17,7 +17,7 @@ kiMCryptEncryptor* kiki_pwd_mng_kiMCryptEncryptor_init(kiMCryptEncryptor* _self)
 	if(!_self) { self = (kiMCryptEncryptor*) malloc(sizeof(kiMCryptEncryptor)); }
 
 	self->secret_key = kiki_pwd_mng_secret_key_t_init(NULL);
-	memset(self->iv, 0, 16);
+	self->iv = (IV_t)calloc(16, sizeof(unsigned char));
 
 	self->destroy = &kiki_pwd_mng_kiMCryptEncryptor_destroy;
 
@@ -43,6 +43,7 @@ void kiki_pwd_mng_kiMCryptEncryptor_free(kiMCryptEncryptor* self) {
 
 void kiki_pwd_mng_kiMCryptEncryptor_destroy(kiMCryptEncryptor* self) {
 	self->secret_key->destroy(self->secret_key);
+	free(self->iv);
 }
 
 int kiki_pwd_mng_kiMCryptEncryptor_crypt(kiEncryptor* _self, void* memory,

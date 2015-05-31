@@ -1,12 +1,19 @@
 cmake_minimum_required(VERSION 3.1)
 project(kiki_pwd_mng)
-include(ExternalProject)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-include(build-msgpack.cmake)
+if(ANDROID)
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/msgpack-c/include)
+	set(msgpack-static ${CMAKE_CURRENT_SOURCE_DIR}/msgpack-c/android_build/${ANDROID_ABI}/libmsgpack.a)
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libuuid/include)
+	link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libuuid/android_build/${ANDROID_ABI}/src)
+else()
+	include(ExternalProject)
+	include(build-msgpack.cmake)
+endif()
 
 include_directories(include)
 include_directories(include/kiki)
