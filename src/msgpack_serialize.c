@@ -87,10 +87,6 @@ void kiki_pwd_mng_Persistance_msgpack_serialize_kiPasswordArray(kiPasswordMsgPac
 	}
 }
 
-#define TRY_OR_RETURN(line, error_return)\
-	error_return = line;\
-	if(error_return) { return error_return; }
-
 int kiki_pwd_mng_Persistance_msgpack_deserialize_kiPasswordArray(kiPasswordMsgPackPersister* self, kiPasswordFactory* factory, unsigned char* data, size_t data_length) {
 	msgpack_zone mempool;
 	msgpack_zone_init(&mempool, 2048);
@@ -101,8 +97,10 @@ int kiki_pwd_mng_Persistance_msgpack_deserialize_kiPasswordArray(kiPasswordMsgPa
 	msgpack_object* ptr = deserialized.via.array.ptr;
 	for(i = 0; i < deserialized.via.array.size; ++i) {
 		kiPassword* password = factory->new_kiPassword(factory);
-		TRY_OR_RETURN(kiki_pwd_mng_Persistance_msgpack_deserialize_kiPassword(ptr + i, password), error_value);
-		TRY_OR_RETURN(password->save(password), error_value);
+		error_value = kiki_pwd_mng_Persistance_msgpack_deserialize_kiPassword(ptr + i, password);
+		if(error_value) { return error_value; }
+		error_value = password->save(password);
+		if(error_value) { return error_value; }
 	}
 
 	msgpack_zone_destroy(&mempool);
