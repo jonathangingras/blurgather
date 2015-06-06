@@ -12,6 +12,7 @@ extern "C" {
 declare_kiclass(kiPasswordFactory);
 
 struct kiPasswordFactory {
+	IV_init_callback iv_initializer;
 	kiPasswordRepository* repository;
 	kiEncryptor* encryptor;
 	kiDecryptor* decryptor;
@@ -20,6 +21,7 @@ struct kiPasswordFactory {
 };
 
 kiPasswordFactory* kiki_pwd_mng_kiPasswordFactory_init(kiPasswordFactory* self,
+                                                       IV_init_callback ivInitCallback,
                                                        kiPasswordRepository* repository,
                                                        kiEncryptor* encryptor,
                                                        kiDecryptor* decryptor);

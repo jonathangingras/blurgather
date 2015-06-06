@@ -46,7 +46,7 @@ struct kiPassword {
 	int (* update)(kiPassword* self, const char* password_value, size_t password_length);
 };
 
-kiPassword* kiki_pwd_mng_kiPassword_init(kiPassword* _self, kiEncryptor* encryptor,
+kiPassword* kiki_pwd_mng_kiPassword_init(kiPassword* _self, IV_init_callback iv_initializer, kiEncryptor* encryptor,
                                          kiDecryptor* decryptor, kiPasswordRepository* repository);
 
 void kiki_pwd_mng_kiPassword_free(kiPassword* self);

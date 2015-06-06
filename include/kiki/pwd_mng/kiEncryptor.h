@@ -15,7 +15,7 @@ kiclass(kiEncryptor) {
 	void* object;
 
 	int (* crypt)(kiEncryptor* self, void* memory, size_t* input_length);
-	void (* set_iv)(kiEncryptor* self, IV_t iv);
+	void (* set_iv)(kiEncryptor* self, IV_t* iv);
 	int (* set_secret_key)(kiEncryptor* self, kiki_pwd_mng_secret_key_t* secret_key);
 };
 

@@ -6,6 +6,7 @@
 #include <kiki/pwd_mng/kiMCryptEncryptor.h>
 #include <kiki/pwd_mng/kiPasswordMsgPackPersister.h>
 #include <kiki/utilities.h>
+#include <kiki/pwd_mng/MCryptIV.h>
 
 
 #define init_char_array(varname, length)\
@@ -157,7 +158,7 @@ int main(int argc, char** argv) {
 	kiki_pwd_mng_kiPasswordMsgPackPersister_init(&repository, persistance_filename, &password_factory);
 	free(persistance_filename);
 
-	kiki_pwd_mng_kiPasswordFactory_init(&password_factory, &repository.repository, &cryptor.encryptor,
+	kiki_pwd_mng_kiPasswordFactory_init(&password_factory, &kiki_pwd_mng_mcrypt_iv_init, &repository.repository, &cryptor.encryptor,
 	                                    &cryptor.decryptor);
 
 	int load_return_value = repository.repository.load(&repository.repository);

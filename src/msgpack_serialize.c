@@ -21,8 +21,8 @@ void kiki_pwd_mng_Persistance_msgpack_serialize_kiPassword(msgpack_packer* packe
 
 	msgpack_pack_str(packer, 2);
 	msgpack_pack_str_body(packer, "iv", 2);
-	msgpack_pack_bin(packer, 16);
-	msgpack_pack_bin_body(packer, password->iv, 16);
+	msgpack_pack_bin(packer, password->iv.length);
+	msgpack_pack_bin_body(packer, password->iv.value, password->iv.length);
 
 	msgpack_pack_str(packer, 4);
 	msgpack_pack_str_body(packer, "name", 4);
@@ -38,7 +38,7 @@ void kiki_pwd_mng_Persistance_msgpack_serialize_kiPassword(msgpack_packer* packe
 
 	msgpack_pack_str(packer, 5);
 	msgpack_pack_str_body(packer, "value", 5);
-	size_t value_len = kiki_reverse_memlen(password->value, KIKI_PWD_MAX_VALUE_LEN);
+	size_t value_len = kiki_reverse_memlen((unsigned char*)password->value, KIKI_PWD_MAX_VALUE_LEN);
 	msgpack_pack_bin(packer, value_len);
 	msgpack_pack_bin_body(packer, password->value, value_len);
 }
@@ -65,11 +65,12 @@ int kiki_pwd_mng_Persistance_msgpack_deserialize_kiPassword(msgpack_object* obje
 	                                        -5))) { return error_value; }
 
 	memcpy(password->uuid, uuid_iterator, uuid_size);
-	memcpy(password->iv, iv_iterator, iv_size);
+	memcpy(password->iv.value, iv_iterator, iv_size);
+	password->iv.length = iv_size;
 	memcpy(password->name, name_iterator, name_size);
 	memcpy(password->description, description_iterator, description_size);
 	memcpy(password->value, value_iterator, value_size);
-	password->value_length = kiki_reverse_memlen(password->value, KIKI_PWD_MAX_VALUE_LEN);
+	password->value_length = kiki_reverse_memlen((unsigned char*)password->value, KIKI_PWD_MAX_VALUE_LEN);
 	password->crypted = 1;
 
 	return error_value;
@@ -94,7 +95,7 @@ int kiki_pwd_mng_Persistance_msgpack_deserialize_kiPasswordArray(kiPasswordMsgPa
 	msgpack_zone mempool;
 	msgpack_zone_init(&mempool, 2048);
 	msgpack_object deserialized;
-	msgpack_unpack(data, data_length, NULL, &mempool, &deserialized);
+	msgpack_unpack((char*)data, data_length, NULL, &mempool, &deserialized);
 
 	int i, error_value;
 	msgpack_object* ptr = deserialized.via.array.ptr;

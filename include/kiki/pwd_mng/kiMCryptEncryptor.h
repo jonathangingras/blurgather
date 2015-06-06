@@ -21,7 +21,7 @@ struct kiMCryptEncryptor {
 	void (* destroy)(kiMCryptEncryptor* self);
 
 	kiki_pwd_mng_secret_key_t* secret_key;
-	IV_t iv;
+	IV_t* iv;
 };
 
 kiMCryptEncryptor* kiki_pwd_mng_kiMCryptEncryptor_init(kiMCryptEncryptor* self);

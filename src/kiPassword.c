@@ -8,7 +8,7 @@ static int kiki_pwd_mng_kiPassword_decrypt(kiPassword* self);
 static int kiki_pwd_mng_kiPassword_save(kiPassword* self);
 static int kiki_pwd_mng_kiPassword_update(kiPassword* self, const char* password_value, size_t password_length);
 
-kiPassword* kiki_pwd_mng_kiPassword_init(kiPassword* _self, kiEncryptor* encryptor,
+kiPassword* kiki_pwd_mng_kiPassword_init(kiPassword* _self, IV_init_callback iv_initializer, kiEncryptor* encryptor,
                                          kiDecryptor* decryptor, kiPasswordRepository* repository) {
 	kiPassword* self = _self;
 	if(!_self) {
@@ -20,7 +20,7 @@ kiPassword* kiki_pwd_mng_kiPassword_init(kiPassword* _self, kiEncryptor* encrypt
 	self->repository = repository;
 
 	uuid_generate(self->uuid);
-	self->iv = (unsigned char*) calloc(16, sizeof(unsigned char));
+	iv_initializer(&self->iv);
 	self->name = (char*) calloc(KIKI_PWD_MAX_NAME_LEN, sizeof(char));
 	self->description = (char*) calloc(KIKI_PWD_MAX_DESCRIPTION_LEN, sizeof(char));
 	self->value = (char*) calloc(KIKI_PWD_MAX_VALUE_LEN, sizeof(char));
@@ -45,7 +45,7 @@ void kiki_pwd_mng_kiPassword_free(kiPassword* self) {
 //methods
 
 void kiki_pwd_mng_kiPassword_destroy(kiPassword* self) {
-	free(self->iv);
+	self->iv.destroy(&self->iv);
 	free(self->name);
 	free(self->description);
 	free(self->value);
@@ -61,7 +61,7 @@ int kiki_pwd_mng_kiPassword_crypt(kiPassword* self) {
 	char buffer[KIKI_PWD_MAX_VALUE_LEN];
 	clean_memcpy(buffer, self->value, self->value_length);
 
-	self->encryptor->set_iv(self->encryptor, self->iv);
+	self->encryptor->set_iv(self->encryptor, &self->iv);
 
 	int error_value = 0;
 	if((error_value = self->encryptor->crypt(self->encryptor, buffer, &self->value_length))) { return error_value; }
@@ -77,7 +77,7 @@ int kiki_pwd_mng_kiPassword_decrypt(kiPassword* self) {
 	char buffer[KIKI_PWD_MAX_VALUE_LEN];
 	clean_memcpy(buffer, self->value, self->value_length);
 
-	self->decryptor->set_iv(self->decryptor, self->iv);
+	self->decryptor->set_iv(self->decryptor, &self->iv);
 
 	if(self->decryptor->decrypt(self->decryptor, buffer, &self->value_length)) { return 1; }
 	self->crypted = 0;
@@ -95,7 +95,7 @@ int kiki_pwd_mng_kiPassword_update(kiPassword* self, const char* password_value,
 	clean_memcpy(self->value, password_value, password_length);
 	self->value_length = password_length;
 	self->crypted = 0;
-	uuid_generate(self->iv);
+	self->iv.randomize(&self->iv);
 
 	return 0;
 }

@@ -20,7 +20,7 @@ int dummy_encryptor_crypt(kiEncryptor* self, void* memory, size_t* length) {
 	return 0;
 }
 
-void dummy_encryptor_set_iv(kiEncryptor* self, IV_t iv) {
+void dummy_encryptor_set_iv(kiEncryptor* self, IV_t* iv) {
 	dummy_encryptor* actual_self = (dummy_encryptor*) self->object;
 	actual_self->set_ivCalled = 1;
 }
@@ -48,7 +48,7 @@ int dummy_decryptor_decrypt(kiDecryptor* self, void* memory, size_t* length) {
 	return 0;
 }
 
-void dummy_decryptor_set_iv(kiDecryptor* self, IV_t iv) {
+void dummy_decryptor_set_iv(kiDecryptor* self, IV_t* iv) {
 	dummy_decryptor* actual_self = (dummy_decryptor*) self->object;
 	actual_self->set_ivCalled = 1;
 }
@@ -80,15 +80,19 @@ void init_dummy_persister(dummy_persister* dummy) {
 
 }
 
+#include "dummy_iv.h"
+
 #define SETUP \
 dummy_encryptor encryptor; init_dummy_encryptor(&encryptor);\
 dummy_decryptor decryptor; init_dummy_decryptor(&decryptor);\
 dummy_persister repository; init_dummy_persister(&repository);\
 kiPassword password;\
-kiki_pwd_mng_kiPassword_init(&password, &encryptor.encryptor, &decryptor.decryptor, &repository.repository)
+kiki_pwd_mng_kiPassword_init(&password, &dummy_iv_init, &encryptor.encryptor, &decryptor.decryptor, &repository.repository);\
+randomizeCalled = 0;
 
 #define TEAR_DOWN \
-password.destroy(&password)
+password.destroy(&password);\
+randomizeCalled = 0;
 
 TEST(kiPassword, cryptIsCalledWhenCalledFromPassword) {
 	SETUP;
@@ -215,14 +219,12 @@ TEST(kiPassword, valueChangesWithValueGivenToUpdateWhenUpdateCalled) {
 	TEAR_DOWN;
 }
 
-TEST(kiPassword, ivChangesWhenUpdateCalled) {
+TEST(kiPassword, ivRandomizeCalledWhenUpdateCalled) {
 	SETUP;
-	unsigned char password_iv_copy[16];
-	memcpy(password_iv_copy, password.iv, 16);
 
 	password.update(&password, "im new value", strlen("im new value") + 1);
 
-	EXPECT_NE(0, memcmp(password_iv_copy, password.iv, 16));
+	EXPECT_TRUE(randomizeCalled);
 	TEAR_DOWN;
 }
 

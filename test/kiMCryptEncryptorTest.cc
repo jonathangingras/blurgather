@@ -3,6 +3,7 @@
 #include <kiki/utilities.h>
 #include <kiki/pwd_mng/kiMCryptEncryptor.h>
 #include <kiki/pwd_mng/kiPassword.h>
+#include <kiki/pwd_mng/MCryptIV.h>
 
 #define PLAIN_TEXT_PWD "i am a very secret password"
 
@@ -19,10 +20,16 @@ kiki_pwd_mng_secret_key_t secret_key;\
 kiki_pwd_mng_secret_key_t_init(&secret_key);\
 secret_key.update(&secret_key, lened_str("some secret key"));\
 cryptor.encryptor.set_secret_key(&cryptor.encryptor, &secret_key);\
-cryptor.encryptor.set_iv(&cryptor.encryptor, (IV_t)"1234567891234567");
+IV_t iv;\
+kiki_pwd_mng_mcrypt_iv_init(&iv);\
+memcpy(iv.value, lened_str("1234567891234567"));\
+cryptor.encryptor.set_iv(&cryptor.encryptor, &iv);
 
 #define TEAR_DOWN \
 cryptor.destroy(&cryptor);
+
+#define TEAR_DOWN_KEY_IV \
+iv.destroy(&iv);
 
 
 TEST(kiMCryptEncryptor, cryptReturnsErrorWhenSecretKeyNotSet) {
@@ -66,8 +73,9 @@ TEST(kiMCryptEncryptor, settingSecretKeyAndIVEffective) {
 
 	EXPECT_EQ(0, memcmp(cryptor.secret_key->value, lened_str("some secret key")));
 	EXPECT_EQ(strlen("some secret key") + 1, cryptor.secret_key->length);
-	EXPECT_EQ(0, memcmp(cryptor.iv, "1234567891234567", 16));
+	EXPECT_EQ(0, memcmp(cryptor.iv->value, "1234567891234567", 16));
 	TEAR_DOWN;
+	TEAR_DOWN_KEY_IV;
 }
 
 TEST(kiMCryptEncryptor, cryptReturns0WhenOK) {
@@ -76,6 +84,7 @@ TEST(kiMCryptEncryptor, cryptReturns0WhenOK) {
 
 	EXPECT_EQ(0, cryptor.encryptor.crypt(&cryptor.encryptor, buffer, &buffer_length));
 	TEAR_DOWN;
+	TEAR_DOWN_KEY_IV;
 }
 
 TEST(kiMCryptEncryptor, bufferValueChangesWhenCallingCrypt) {
@@ -86,6 +95,7 @@ TEST(kiMCryptEncryptor, bufferValueChangesWhenCallingCrypt) {
 
 	EXPECT_NE(0, memcmp(PLAIN_TEXT_PWD, buffer, strlen(PLAIN_TEXT_PWD) + 1));
 	TEAR_DOWN;
+	TEAR_DOWN_KEY_IV;
 }
 
 TEST(kiMCryptEncryptor, bufferLengthIsSetToGoodValueWhenCallingCrypt) {
@@ -97,6 +107,7 @@ TEST(kiMCryptEncryptor, bufferLengthIsSetToGoodValueWhenCallingCrypt) {
 	size_t effective_buffer_length = kiki_reverse_memlen((unsigned char*)buffer, KIKI_PWD_MAX_VALUE_LEN);
 	EXPECT_EQ(effective_buffer_length, buffer_length);
 	TEAR_DOWN;
+	TEAR_DOWN_KEY_IV;
 }
 
 TEST(kiMCryptEncryptor, bufferLengthIsSetToGoodValueWhenCallingDecrypt) {
@@ -108,6 +119,7 @@ TEST(kiMCryptEncryptor, bufferLengthIsSetToGoodValueWhenCallingDecrypt) {
 
 	EXPECT_EQ(strlen(PLAIN_TEXT_PWD), buffer_length);
 	TEAR_DOWN;
+	TEAR_DOWN_KEY_IV;
 }
 
 TEST(kiMCryptEncryptor, bufferValueGetsBackToInitialValueWhenCallingDecrypt) {
@@ -121,4 +133,5 @@ TEST(kiMCryptEncryptor, bufferValueGetsBackToInitialValueWhenCallingDecrypt) {
 
 	EXPECT_EQ(0, memcmp(buffer_copy, buffer, KIKI_PWD_MAX_VALUE_LEN));
 	TEAR_DOWN;
+	TEAR_DOWN_KEY_IV;
 }

@@ -10,6 +10,7 @@ add_library(kiki_pwd_mng
     msgpack_serialize.c
     kiMCryptEncryptor.c
     secret_key.c
+    MCryptIV.c
 )
 
 target_link_libraries(kiki_pwd_mng
