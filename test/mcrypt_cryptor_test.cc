@@ -32,13 +32,13 @@ cryptor.destroy(&cryptor);
 iv.destroy(&iv);
 
 
-TEST(kiMCryptEncryptor, cryptReturnsErrorWhenSecretKeyNotSet) {
+TEST(bg_mcrypt_cryptor, cryptReturnsErrorWhenSecretKeyNotSet) {
 	SETUP;
 
 	EXPECT_EQ(-1, cryptor.encryptor.crypt(&cryptor.encryptor, buffer, &buffer_length));
 }
 
-TEST(kiMCryptEncryptor, cryptReturnsErrorWhenIVNotSet) {
+TEST(bg_mcrypt_cryptor, cryptReturnsErrorWhenIVNotSet) {
 	SETUP;
 	bg_secret_key secret_key;
 	bg_secret_key_init(&secret_key);
@@ -49,14 +49,14 @@ TEST(kiMCryptEncryptor, cryptReturnsErrorWhenIVNotSet) {
 	TEAR_DOWN;
 }
 
-TEST(kiMCryptEncryptor, decryptReturnsErrorWhenSecretKeyNotSet) {
+TEST(bg_mcrypt_cryptor, decryptReturnsErrorWhenSecretKeyNotSet) {
 	SETUP;
 
 	EXPECT_EQ(-1, cryptor.decryptor.decrypt(&cryptor.decryptor, buffer, &buffer_length));
 	TEAR_DOWN;
 }
 
-TEST(kiMCryptEncryptor, decryptReturnsErrorWhenIVNotSet) {
+TEST(bg_mcrypt_cryptor, decryptReturnsErrorWhenIVNotSet) {
 	SETUP;
 	bg_secret_key secret_key;
 	bg_secret_key_init(&secret_key);
@@ -67,7 +67,7 @@ TEST(kiMCryptEncryptor, decryptReturnsErrorWhenIVNotSet) {
 	TEAR_DOWN;
 }
 
-TEST(kiMCryptEncryptor, settingSecretKeyAndIVEffective) {
+TEST(bg_mcrypt_cryptor, settingSecretKeyAndIVEffective) {
 	SETUP;
 	SETUP_KEY_IV;
 
@@ -78,7 +78,7 @@ TEST(kiMCryptEncryptor, settingSecretKeyAndIVEffective) {
 	TEAR_DOWN_KEY_IV;
 }
 
-TEST(kiMCryptEncryptor, cryptReturns0WhenOK) {
+TEST(bg_mcrypt_cryptor, cryptReturns0WhenOK) {
 	SETUP;
 	SETUP_KEY_IV;
 
@@ -87,7 +87,7 @@ TEST(kiMCryptEncryptor, cryptReturns0WhenOK) {
 	TEAR_DOWN_KEY_IV;
 }
 
-TEST(kiMCryptEncryptor, bufferValueChangesWhenCallingCrypt) {
+TEST(bg_mcrypt_cryptor, bufferValueChangesWhenCallingCrypt) {
 	SETUP;
 	SETUP_KEY_IV;
 
@@ -98,7 +98,7 @@ TEST(kiMCryptEncryptor, bufferValueChangesWhenCallingCrypt) {
 	TEAR_DOWN_KEY_IV;
 }
 
-TEST(kiMCryptEncryptor, bufferLengthIsSetToGoodValueWhenCallingCrypt) {
+TEST(bg_mcrypt_cryptor, bufferLengthIsSetToGoodValueWhenCallingCrypt) {
 	SETUP;
 	SETUP_KEY_IV;
 
@@ -110,7 +110,7 @@ TEST(kiMCryptEncryptor, bufferLengthIsSetToGoodValueWhenCallingCrypt) {
 	TEAR_DOWN_KEY_IV;
 }
 
-TEST(kiMCryptEncryptor, bufferLengthIsSetToGoodValueWhenCallingDecrypt) {
+TEST(bg_mcrypt_cryptor, bufferLengthIsSetToGoodValueWhenCallingDecrypt) {
 	SETUP;
 	SETUP_KEY_IV;
 	cryptor.encryptor.crypt(&cryptor.encryptor, buffer, &buffer_length);
@@ -122,7 +122,7 @@ TEST(kiMCryptEncryptor, bufferLengthIsSetToGoodValueWhenCallingDecrypt) {
 	TEAR_DOWN_KEY_IV;
 }
 
-TEST(kiMCryptEncryptor, bufferValueGetsBackToInitialValueWhenCallingDecrypt) {
+TEST(bg_mcrypt_cryptor, bufferValueGetsBackToInitialValueWhenCallingDecrypt) {
 	SETUP;
 	SETUP_KEY_IV;
 	char buffer_copy[BLURGATHER_PWD_MAX_VALUE_LEN];

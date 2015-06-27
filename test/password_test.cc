@@ -94,7 +94,7 @@ randomizeCalled = 0;
 password.destroy(&password);\
 randomizeCalled = 0;
 
-TEST(kiPassword, cryptIsCalledWhenCalledFromPassword) {
+TEST(bg_password, cryptIsCalledWhenCalledFromPassword) {
 	SETUP;
 
 	EXPECT_FALSE(encryptor.cryptCalled);
@@ -103,14 +103,14 @@ TEST(kiPassword, cryptIsCalledWhenCalledFromPassword) {
 	TEAR_DOWN;
 }
 
-TEST(kiPassword, cryptReturns0WhenOk) {
+TEST(bg_password, cryptReturns0WhenOk) {
 	SETUP;
 
 	EXPECT_FALSE(password.crypt(&password));
 	TEAR_DOWN;
 }
 
-TEST(kiPassword, cannotCryptWhenNULLEncryptor) {
+TEST(bg_password, cannotCryptWhenNULLEncryptor) {
 	SETUP;
 	password.encryptor = NULL;
 
@@ -119,7 +119,7 @@ TEST(kiPassword, cannotCryptWhenNULLEncryptor) {
 	TEAR_DOWN;
 }
 
-TEST(kiPassword, cryptReturnsNon0WhenNotOk) {
+TEST(bg_password, cryptReturnsNon0WhenNotOk) {
 	SETUP;
 	password.crypted = 1;
 
@@ -127,7 +127,7 @@ TEST(kiPassword, cryptReturnsNon0WhenNotOk) {
 	TEAR_DOWN;
 }
 
-TEST(kiPassword, decryptReturns0WhenOk) {
+TEST(bg_password, decryptReturns0WhenOk) {
 	SETUP;
 	password.crypted = 1;
 
@@ -135,7 +135,7 @@ TEST(kiPassword, decryptReturns0WhenOk) {
 	TEAR_DOWN;
 }
 
-TEST(kiPassword, cannotDecryptWhenNULLDecryptor) {
+TEST(bg_password, cannotDecryptWhenNULLDecryptor) {
 	SETUP;
 	password.decryptor = NULL;
 
@@ -143,7 +143,7 @@ TEST(kiPassword, cannotDecryptWhenNULLDecryptor) {
 	TEAR_DOWN;
 }
 
-TEST(kiPassword, valueChangesWithValueSentByEncryptorWhenCallingCrypt) {
+TEST(bg_password, valueChangesWithValueSentByEncryptorWhenCallingCrypt) {
 	SETUP;
 	password.update(&password, "hello", strlen("hello") + 1);
 	password.crypted = 0;
@@ -154,7 +154,7 @@ TEST(kiPassword, valueChangesWithValueSentByEncryptorWhenCallingCrypt) {
 	TEAR_DOWN;
 }
 
-TEST(kiPassword, setIVIsCalledFromEncryptorWhenCallingCrypt) {
+TEST(bg_password, setIVIsCalledFromEncryptorWhenCallingCrypt) {
 	SETUP;
 	EXPECT_EQ(0, encryptor.set_ivCalled);
 
@@ -164,7 +164,7 @@ TEST(kiPassword, setIVIsCalledFromEncryptorWhenCallingCrypt) {
 	TEAR_DOWN;
 }
 
-TEST(kiPassword, valueChangesWithValueSentByDecryptorWhenCallingDecrypt) {
+TEST(bg_password, valueChangesWithValueSentByDecryptorWhenCallingDecrypt) {
 	SETUP;
 	password.update(&password, "veawfverwagarg", strlen("veawfverwagarg") + 1);
 	password.crypted = 1;
@@ -175,7 +175,7 @@ TEST(kiPassword, valueChangesWithValueSentByDecryptorWhenCallingDecrypt) {
 	TEAR_DOWN;
 }
 
-TEST(kiPassword, setIVIsCalledFromDecryptorWhenCallingDecrypt) {
+TEST(bg_password, setIVIsCalledFromDecryptorWhenCallingDecrypt) {
 	SETUP;
 	EXPECT_EQ(0, decryptor.set_ivCalled);
 	password.crypted = 1;
@@ -186,7 +186,7 @@ TEST(kiPassword, setIVIsCalledFromDecryptorWhenCallingDecrypt) {
 	TEAR_DOWN;
 }
 
-TEST(kiPassword, addIsCalledWhenCallingSave) {
+TEST(bg_password, addIsCalledWhenCallingSave) {
 	SETUP;
 	repository.addCalled = 0;
 
@@ -197,7 +197,7 @@ TEST(kiPassword, addIsCalledWhenCallingSave) {
 }
 
 
-TEST(kiPassword, addIsNotCalledWhenCallingSaveWhenNULLRepository) {
+TEST(bg_password, addIsNotCalledWhenCallingSaveWhenNULLRepository) {
 	SETUP;
 	repository.addCalled = 0;
 	password.repository = NULL;
@@ -208,7 +208,7 @@ TEST(kiPassword, addIsNotCalledWhenCallingSaveWhenNULLRepository) {
 	TEAR_DOWN;
 }
 
-TEST(kiPassword, valueChangesWithValueGivenToUpdateWhenUpdateCalled) {
+TEST(bg_password, valueChangesWithValueGivenToUpdateWhenUpdateCalled) {
 	SETUP;
 	strcat(password.value, "hey");
 	EXPECT_EQ(0, strcmp("hey", password.value));
@@ -219,7 +219,7 @@ TEST(kiPassword, valueChangesWithValueGivenToUpdateWhenUpdateCalled) {
 	TEAR_DOWN;
 }
 
-TEST(kiPassword, ivRandomizeCalledWhenUpdateCalled) {
+TEST(bg_password, ivRandomizeCalledWhenUpdateCalled) {
 	SETUP;
 
 	password.update(&password, "im new value", strlen("im new value") + 1);
@@ -228,7 +228,7 @@ TEST(kiPassword, ivRandomizeCalledWhenUpdateCalled) {
 	TEAR_DOWN;
 }
 
-TEST(kiPassword, uuidDoesntChangesWhenUpdateCalled) {
+TEST(bg_password, uuidDoesntChangesWhenUpdateCalled) {
 	SETUP;
 	unsigned char password_uuid_copy[16];
 	memcpy(password_uuid_copy, password.uuid, 16);
@@ -239,7 +239,7 @@ TEST(kiPassword, uuidDoesntChangesWhenUpdateCalled) {
 	TEAR_DOWN;
 }
 
-TEST(kiPassword, persistAintCalledWhenUpdateCalled) {
+TEST(bg_password, persistAintCalledWhenUpdateCalled) {
 	SETUP;
 
 	password.update(&password, "im new value", strlen("im new value") + 1);
@@ -248,7 +248,7 @@ TEST(kiPassword, persistAintCalledWhenUpdateCalled) {
 	TEAR_DOWN;
 }
 
-TEST(kiPassword, cryptedBooleanIsSetToFalseWhenUpdateCalled) {
+TEST(bg_password, cryptedBooleanIsSetToFalseWhenUpdateCalled) {
 	SETUP;
 	password.crypt(&password);
 
