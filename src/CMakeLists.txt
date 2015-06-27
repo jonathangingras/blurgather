@@ -3,22 +3,22 @@ add_library(kiki_utilities
 )
 install(TARGETS kiki_utilities DESTINATION lib)
 
-add_library(kiki_pwd_mng
-    kiPassword.c
-    kiPasswordFactory.c
-    kiPasswordMsgPackPersister.c
+add_library(blurgather
+    password.c
+    password_factory.c
+    password_msgpack_persister.c
     msgpack_serialize.c
-    kiMCryptEncryptor.c
+    mcrypt_cryptor.c
     secret_key.c
-    MCryptIV.c
+    mcrypt_iv.c
 )
 
-target_link_libraries(kiki_pwd_mng
+target_link_libraries(blurgather
     kiki_utilities
     uuid
     mcrypt
     ${msgpack-static}
 )
-install(TARGETS kiki_pwd_mng DESTINATION lib)
+install(TARGETS blurgather DESTINATION lib)
 
 add_subdirectory(cli-frontend)

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
-project(kiki_pwd_mng)
+project(blurgather)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -17,7 +17,8 @@ endif()
 
 include_directories(include)
 include_directories(include/kiki)
-include_directories(include/kiki/pwd_mng)
+include_directories(include/blurgather)
+install(DIRECTORY include/blurgather DESTINATION include)
 install(DIRECTORY include/kiki DESTINATION include)
 
 add_subdirectory(src)

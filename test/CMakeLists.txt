@@ -1,9 +1,9 @@
-function(add_pwd_mng_test className)
-    add_executable(${className}Test
-        ${className}Test.cc
+function(add_gtest_case test_case)
+    add_executable(${test_case}_test
+        ${test_case}_test.cc
     )
-    target_link_libraries(${className}Test
-        kiki_pwd_mng
+    target_link_libraries(${test_case}_test
+        blurgather
 
         gtest
         gtest_main
@@ -11,6 +11,6 @@ function(add_pwd_mng_test className)
     )
 endfunction()
 
-add_pwd_mng_test(kiPassword)
-add_pwd_mng_test(kiPasswordMsgPackPersister)
-add_pwd_mng_test(kiMCryptEncryptor)
+add_gtest_case(password)
+add_gtest_case(password_msgpack_persister)
+add_gtest_case(mcrypt_cryptor)

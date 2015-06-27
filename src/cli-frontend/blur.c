@@ -1,21 +1,21 @@
 #include <unistd.h>
 #include <assert.h>
 
-#include <kiki/pwd_mng/kiPassword.h>
-#include <kiki/pwd_mng/kiPasswordFactory.h>
-#include <kiki/pwd_mng/kiMCryptEncryptor.h>
-#include <kiki/pwd_mng/kiPasswordMsgPackPersister.h>
+#include "password.h"
+#include "password_factory.h"
+#include "mcrypt_cryptor.h"
+#include "password_msgpack_persister.h"
 #include <kiki/utilities.h>
-#include <kiki/pwd_mng/MCryptIV.h>
+#include "mcrypt_iv.h"
 
 
 #define init_char_array(varname, length)\
   char varname [length];\
   memset(varname, 0, length);
 
-int unlock_pwd_mng(kiki_pwd_mng_secret_key_t* secret_key, int confirmation_needed) {
-	init_char_array(password1, KIKI_PWD_MAX_VALUE_LEN);
-	init_char_array(password2, KIKI_PWD_MAX_VALUE_LEN);
+int unlock_pwd_mng(bg_secret_key* secret_key, int confirmation_needed) {
+	init_char_array(password1, BLURGATHER_PWD_MAX_VALUE_LEN);
+	init_char_array(password2, BLURGATHER_PWD_MAX_VALUE_LEN);
 
 	char* password = getpass("master password: ");
 	strcat(password1, password);
@@ -41,20 +41,20 @@ void get_field(char* out, char* showing, int max_length) {
 	}
 }
 
-int create_password_from_user(kiPasswordFactory* password_factory) {
-	kiPassword* password = password_factory->new_kiPassword(password_factory);
+int create_password_from_user(bg_password_factory* password_factory) {
+	bg_password* password = password_factory->new_password(password_factory);
 
-	init_char_array(name, KIKI_PWD_MAX_NAME_LEN);
-	get_field(name, "password name: ", KIKI_PWD_MAX_NAME_LEN);
+	init_char_array(name, BLURGATHER_PWD_MAX_NAME_LEN);
+	get_field(name, "password name: ", BLURGATHER_PWD_MAX_NAME_LEN);
 
-	init_char_array(description, KIKI_PWD_MAX_DESCRIPTION_LEN);
-	get_field(description, "description: ", KIKI_PWD_MAX_DESCRIPTION_LEN);
+	init_char_array(description, BLURGATHER_PWD_MAX_DESCRIPTION_LEN);
+	get_field(description, "description: ", BLURGATHER_PWD_MAX_DESCRIPTION_LEN);
 
 	strcat(password->name, name);
 	strcat(password->description, description);
 
-	init_char_array(value1, KIKI_PWD_MAX_VALUE_LEN);
-	init_char_array(value2, KIKI_PWD_MAX_VALUE_LEN);
+	init_char_array(value1, BLURGATHER_PWD_MAX_VALUE_LEN);
+	init_char_array(value2, BLURGATHER_PWD_MAX_VALUE_LEN);
 	char* value = getpass("password value: ");
 	strcat(value1, value);
 	value = getpass("password value confirmation: ");
@@ -73,7 +73,7 @@ int create_password_from_user(kiPasswordFactory* password_factory) {
 	return return_value;
 }
 
-int add_password(kiPasswordFactory* password_factory, kiPasswordRepository* repository, kiki_pwd_mng_secret_key_t* secret_key) {
+int add_password(bg_password_factory* password_factory, bg_password_repository* repository, bg_secret_key* secret_key) {
 	if(unlock_pwd_mng(secret_key, 1)) {
 		fprintf(stderr, "master password values do not match!\n");
 		return 1;
@@ -90,20 +90,30 @@ int add_password(kiPasswordFactory* password_factory, kiPasswordRepository* repo
 }
 
 void send_password_to_xclipdoard(const char* password) {
-	init_char_array(command, KIKI_PWD_MAX_VALUE_LEN + 40);
+	init_char_array(command, BLURGATHER_PWD_MAX_VALUE_LEN + 40);
 	strcat(command, "echo -n '");
 	strcat(command, password);
 	strcat(command, "' | xclip -selection clipboard -i");
 	system(command);
 }
 
-kiPassword* find_password_by_name(kiPasswordRepository* repository, const char* name) {
-	kiPassword* result = NULL;
-	kiPasswordIterator iterator = repository->begin(repository);
-	kiPasswordIterator end = repository->end(repository);
+int kiPassword_compare_names(void* attribute, bg_password* password) {
+	return strcmp((const char*)attribute, password->name);
+}
+
+int kiPassword_compare_uuids(void* attribute, bg_password* password) {
+	return memcmp((const unsigned char*)attribute, password->uuid, 16);
+}
+
+typedef int kiPassword_compare_callback_t(void* attribute, bg_password* password);
+
+bg_password* find_password_by_attribute(bg_password_repository* repository, void* attribute, kiPassword_compare_callback_t compare_callback) {
+	bg_password* result = NULL;
+	bg_password_iterator iterator = repository->begin(repository);
+	bg_password_iterator end = repository->end(repository);
 
 	for(; iterator.value != end.value; iterator.next(&iterator)) {
-		if(strcmp(name, (*iterator.value)->name) == 0) {
+		if(compare_callback(attribute, (*iterator.value)) == 0) {
 			result = *iterator.value;
 			break;
 		}
@@ -112,8 +122,8 @@ kiPassword* find_password_by_name(kiPasswordRepository* repository, const char* 
 	return result;
 }
 
-int send_password_to_user(kiPasswordRepository* repository, const char* name, kiki_pwd_mng_secret_key_t* secret_key) {
-	kiPassword* password = find_password_by_name(repository, name);
+int send_password_to_user(bg_password_repository* repository, const char* name, bg_secret_key* secret_key) {
+	bg_password* password = find_password_by_attribute(repository, (void*)name, kiPassword_compare_names);
 
 	if(!password) {
 		fprintf(stderr, "no such password!\n");
@@ -148,17 +158,17 @@ return _return_value_;
 int main(int argc, char** argv) {
 	assert(argc > 1 && argc < 4);
 
-	kiPasswordFactory password_factory;
-	kiMCryptEncryptor cryptor;
-	kiPasswordMsgPackPersister repository;
+	bg_password_factory password_factory;
+	bg_mcrypt_cryptor cryptor;
+	bg_password_msgpack_persister repository;
 
-	kiki_pwd_mng_kiMCryptEncryptor_init(&cryptor);
+	bg_mcrypt_cryptor_init(&cryptor);
 
 	char* persistance_filename = get_persistance_filename();
-	kiki_pwd_mng_kiPasswordMsgPackPersister_init(&repository, persistance_filename, &password_factory);
+	bg_password_msgpack_persister_init(&repository, persistance_filename, &password_factory);
 	free(persistance_filename);
 
-	kiki_pwd_mng_kiPasswordFactory_init(&password_factory, &kiki_pwd_mng_mcrypt_iv_init, &repository.repository, &cryptor.encryptor,
+	bg_password_factory_init(&password_factory, &bg_mcrypt_iv_init, &repository.repository, &cryptor.encryptor,
 	                                    &cryptor.decryptor);
 
 	int load_return_value = repository.repository.load(&repository.repository);
@@ -172,7 +182,7 @@ int main(int argc, char** argv) {
 			DESTROY_STACK_OBJECTS_AND_RETURN(1);
 		}
 	} else if(!strcmp(argv[1], "info")) {
-		printf("%d passwords in repo\n", repository.number_passwords);
+		printf("%zu passwords in repo\n", repository.number_passwords);
 	} else if(!strcmp(argv[1], "get")) {
 		if(argc != 3) {
 			fprintf(stderr, "no name provided!");

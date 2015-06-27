@@ -1,17 +1,17 @@
 #include <gtest/gtest.h>
 
-#include <kiki/pwd_mng/kiPassword.h>
-#include <kiki/pwd_mng/kiEncryptor.h>
-#include <kiki/pwd_mng/kiDecryptor.h>
+#include "password.h"
+#include "encryptor.h"
+#include "decryptor.h"
 
 extern "C" {
 
 struct dummy_encryptor {
-	kiEncryptor encryptor;
+	bg_encryptor encryptor;
 	int cryptCalled, set_ivCalled;
 };
 
-int dummy_encryptor_crypt(kiEncryptor* self, void* memory, size_t* length) {
+int dummy_encryptor_crypt(bg_encryptor* self, void* memory, size_t* length) {
 	dummy_encryptor* actual_self = (dummy_encryptor*) self->object;
 	memset(memory, 0, 255);
 	memcpy(memory, "i was crypted", strlen("i was crypted") + 1);
@@ -20,7 +20,7 @@ int dummy_encryptor_crypt(kiEncryptor* self, void* memory, size_t* length) {
 	return 0;
 }
 
-void dummy_encryptor_set_iv(kiEncryptor* self, IV_t* iv) {
+void dummy_encryptor_set_iv(bg_encryptor* self, IV_t* iv) {
 	dummy_encryptor* actual_self = (dummy_encryptor*) self->object;
 	actual_self->set_ivCalled = 1;
 }
@@ -35,11 +35,11 @@ void init_dummy_encryptor(dummy_encryptor* dummy) {
 
 
 struct dummy_decryptor {
-	kiDecryptor decryptor;
+	bg_decryptor decryptor;
 	int decryptCalled, set_ivCalled;
 };
 
-int dummy_decryptor_decrypt(kiDecryptor* self, void* memory, size_t* length) {
+int dummy_decryptor_decrypt(bg_decryptor* self, void* memory, size_t* length) {
 	dummy_decryptor* actual_self = (dummy_decryptor*) self->object;
 	memset(memory, 0, 255);
 	memcpy(memory, "i was decrypted", strlen("i was decrypted") + 1);
@@ -48,7 +48,7 @@ int dummy_decryptor_decrypt(kiDecryptor* self, void* memory, size_t* length) {
 	return 0;
 }
 
-void dummy_decryptor_set_iv(kiDecryptor* self, IV_t* iv) {
+void dummy_decryptor_set_iv(bg_decryptor* self, IV_t* iv) {
 	dummy_decryptor* actual_self = (dummy_decryptor*) self->object;
 	actual_self->set_ivCalled = 1;
 }
@@ -62,11 +62,11 @@ void init_dummy_decryptor(dummy_decryptor* dummy) {
 }
 
 struct dummy_persister {
-	kiPasswordRepository repository;
+	bg_password_repository repository;
 	int addCalled;
 };
 
-int dummy_persister_add(kiPasswordRepository* self, kiPassword* password) {
+int dummy_persister_add(bg_password_repository* self, bg_password* password) {
 	dummy_persister* actual_self = (dummy_persister*) self->object;
 	actual_self->addCalled = 1;
 	return 0;
@@ -86,8 +86,8 @@ void init_dummy_persister(dummy_persister* dummy) {
 dummy_encryptor encryptor; init_dummy_encryptor(&encryptor);\
 dummy_decryptor decryptor; init_dummy_decryptor(&decryptor);\
 dummy_persister repository; init_dummy_persister(&repository);\
-kiPassword password;\
-kiki_pwd_mng_kiPassword_init(&password, &dummy_iv_init, &encryptor.encryptor, &decryptor.decryptor, &repository.repository);\
+bg_password password;\
+bg_password_init(&password, &dummy_iv_init, &encryptor.encryptor, &decryptor.decryptor, &repository.repository);\
 randomizeCalled = 0;
 
 #define TEAR_DOWN \

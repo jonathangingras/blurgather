@@ -11,7 +11,7 @@ static int get_keyvalue_iterator(const char* field, msgpack_object_kv** keyvalue
 	return 0;
 }
 
-void kiki_pwd_mng_Persistance_msgpack_serialize_kiPassword(msgpack_packer* packer, kiPassword* password) {
+void bg_persistence_msgpack_serialize_password(msgpack_packer* packer, bg_password* password) {
 	msgpack_pack_map(packer, 5);
 
 	msgpack_pack_str(packer, 4);
@@ -38,12 +38,12 @@ void kiki_pwd_mng_Persistance_msgpack_serialize_kiPassword(msgpack_packer* packe
 
 	msgpack_pack_str(packer, 5);
 	msgpack_pack_str_body(packer, "value", 5);
-	size_t value_len = kiki_reverse_memlen((unsigned char*)password->value, KIKI_PWD_MAX_VALUE_LEN);
+	size_t value_len = kiki_reverse_memlen((unsigned char*)password->value, BLURGATHER_PWD_MAX_VALUE_LEN);
 	msgpack_pack_bin(packer, value_len);
 	msgpack_pack_bin_body(packer, password->value, value_len);
 }
 
-int kiki_pwd_mng_Persistance_msgpack_deserialize_kiPassword(msgpack_object* object, kiPassword* password) {
+int bg_persistence_msgpack_deserialize_password(msgpack_object* object, bg_password* password) {
 	msgpack_object_kv* keyvalue_iterator = object->via.map.ptr;
 	int error_value = 0;
 	const char* uuid_iterator, * iv_iterator, * name_iterator, * description_iterator, * value_iterator;
@@ -70,24 +70,24 @@ int kiki_pwd_mng_Persistance_msgpack_deserialize_kiPassword(msgpack_object* obje
 	memcpy(password->name, name_iterator, name_size);
 	memcpy(password->description, description_iterator, description_size);
 	memcpy(password->value, value_iterator, value_size);
-	password->value_length = kiki_reverse_memlen((unsigned char*)password->value, KIKI_PWD_MAX_VALUE_LEN);
+	password->value_length = kiki_reverse_memlen((unsigned char*)password->value, BLURGATHER_PWD_MAX_VALUE_LEN);
 	password->crypted = 1;
 
 	return error_value;
 }
 
-void kiki_pwd_mng_Persistance_msgpack_serialize_kiPasswordArray(kiPasswordMsgPackPersister* self, msgpack_sbuffer* buffer) {
+void bg_persistence_msgpack_serialize_password_array(bg_password_msgpack_persister* self, msgpack_sbuffer* buffer) {
 	msgpack_packer pk;
 	msgpack_packer_init(&pk, buffer, msgpack_sbuffer_write);
 
 	msgpack_pack_array(&pk, self->number_passwords);
 	int i;
 	for(i = 0; i < self->number_passwords; ++i) {
-		kiki_pwd_mng_Persistance_msgpack_serialize_kiPassword(&pk, self->password_array[i]);
+		bg_persistence_msgpack_serialize_password(&pk, self->password_array[i]);
 	}
 }
 
-int kiki_pwd_mng_Persistance_msgpack_deserialize_kiPasswordArray(kiPasswordMsgPackPersister* self, kiPasswordFactory* factory, unsigned char* data, size_t data_length) {
+int bg_persistence_msgpack_deserialize_password_array(bg_password_msgpack_persister* self, bg_password_factory* factory, unsigned char* data, size_t data_length) {
 	msgpack_zone mempool;
 	msgpack_zone_init(&mempool, 2048);
 	msgpack_object deserialized;
@@ -96,8 +96,8 @@ int kiki_pwd_mng_Persistance_msgpack_deserialize_kiPasswordArray(kiPasswordMsgPa
 	int i, error_value;
 	msgpack_object* ptr = deserialized.via.array.ptr;
 	for(i = 0; i < deserialized.via.array.size; ++i) {
-		kiPassword* password = factory->new_kiPassword(factory);
-		error_value = kiki_pwd_mng_Persistance_msgpack_deserialize_kiPassword(ptr + i, password);
+		bg_password* password = factory->new_password(factory);
+		error_value = bg_persistence_msgpack_deserialize_password(ptr + i, password);
 		if(error_value) { return error_value; }
 		error_value = password->save(password);
 		if(error_value) { return error_value; }

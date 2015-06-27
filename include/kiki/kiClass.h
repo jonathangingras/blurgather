@@ -12,6 +12,13 @@ extern "C" {
 #define kiclass(x) \
 	struct x
 
+struct kiobject {
+	void (* destroy)(void* self);
+};
+
+#define ki_destroy(object_ptr) \
+	((struct kiobject*)(object_ptr))->destroy((object_ptr))
+
 #ifdef __cplusplus
 }
 #endif

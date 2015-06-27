@@ -1,7 +1,7 @@
-add_executable(kipwdmng
-    kipwdmng.c
+add_executable(blur
+    blur.c
 )
 
-target_link_libraries(kipwdmng
-    kiki_pwd_mng
+target_link_libraries(blur
+    blurgather
 )

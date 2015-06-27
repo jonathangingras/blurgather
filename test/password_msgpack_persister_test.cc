@@ -1,23 +1,23 @@
 #include <gtest/gtest.h>
 
-#include <kiki/pwd_mng/kiPasswordMsgPackPersister.h>
+#include "password_msgpack_persister.h"
 
 #include "dummy_iv.h"
 
 #define SETUP \
-kiPasswordMsgPackPersister repository;\
-kiEncryptor encryptor;\
-kiDecryptor decryptor;\
-kiPasswordFactory factory;\
-kiki_pwd_mng_kiPasswordFactory_init(&factory, &dummy_iv_init, NULL, &encryptor, &decryptor);\
-kiki_pwd_mng_kiPasswordMsgPackPersister_init(&repository, "shadow", &factory);
+bg_password_msgpack_persister repository;\
+bg_encryptor encryptor;\
+bg_decryptor decryptor;\
+bg_password_factory factory;\
+bg_password_factory_init(&factory, &dummy_iv_init, NULL, &encryptor, &decryptor);\
+bg_password_msgpack_persister_init(&repository, "shadow", &factory);
 
 #define TEAR_DOWN \
 repository.destroy(&repository)
 
-TEST(kiPasswordMsgPackPersister, canAddPassword) {
+TEST(bg_password_msgpack_persister, canAddPassword) {
 	SETUP;
-	kiPassword* password = kiki_pwd_mng_kiPassword_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+	bg_password* password = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 
 	EXPECT_EQ(0, repository.number_passwords);
 
@@ -27,10 +27,10 @@ TEST(kiPasswordMsgPackPersister, canAddPassword) {
 	TEAR_DOWN;
 }
 
-TEST(kiPasswordMsgPackPersister, canAdd2Passwords) {
+TEST(bg_password_msgpack_persister, canAdd2Passwords) {
 	SETUP;
-	kiPassword* password = kiki_pwd_mng_kiPassword_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
-	kiPassword* password2 = kiki_pwd_mng_kiPassword_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+	bg_password* password = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+	bg_password* password2 = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 
 	EXPECT_EQ(0, repository.number_passwords);
 
@@ -41,9 +41,9 @@ TEST(kiPasswordMsgPackPersister, canAdd2Passwords) {
 	TEAR_DOWN;
 }
 
-TEST(kiPasswordMsgPackPersister, passwordHasGoodPointerWhenAdded) {
+TEST(bg_password_msgpack_persister, passwordHasGoodPointerWhenAdded) {
 	SETUP;
-	kiPassword* password = kiki_pwd_mng_kiPassword_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+	bg_password* password = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 
 	repository.repository.add(&repository.repository, password);
 
@@ -51,9 +51,9 @@ TEST(kiPasswordMsgPackPersister, passwordHasGoodPointerWhenAdded) {
 	TEAR_DOWN;
 }
 
-TEST(kiPasswordMsgPackPersister, passwordNotAddedTwiceWhenSavedMoreThanOnce) {
+TEST(bg_password_msgpack_persister, passwordNotAddedTwiceWhenSavedMoreThanOnce) {
 	SETUP;
-	kiPassword* password = kiki_pwd_mng_kiPassword_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+	bg_password* password = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 
 	repository.repository.add(&repository.repository, password);
 	repository.repository.add(&repository.repository, password);
@@ -72,9 +72,9 @@ static char SAVED_UUID_1[16], SAVED_IV_1[DUMMY_IV_LENGTH], SAVED_VALUE_1[32];
 #define SAVED_DESCRIPTION_2 "some password2 description2"
 static char SAVED_UUID_2[16], SAVED_IV_2[DUMMY_IV_LENGTH], SAVED_VALUE_2[32];
 
-TEST(kiPasswordMsgPackPersister, canSerializeContainedPasswords) {
+TEST(bg_password_msgpack_persister, canSerializeContainedPasswords) {
 	SETUP;
-	kiPassword* password = kiki_pwd_mng_kiPassword_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+	bg_password* password = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 	memcpy(SAVED_UUID_1, password->uuid, 16);
 	memcpy(SAVED_IV_1, password->iv.value, DUMMY_IV_LENGTH);
 	strcat(password->name, SAVED_NAME_1);
@@ -92,12 +92,12 @@ TEST(kiPasswordMsgPackPersister, canSerializeContainedPasswords) {
 	TEAR_DOWN;
 }
 
-TEST(kiPasswordMsgPackPersister, canDeserializeContainedPasswords) {
+TEST(bg_password_msgpack_persister, canDeserializeContainedPasswords) {
 	SETUP;
-	kiPasswordMsgPackPersister repository2;
-	kiPasswordFactory factory2;
-	kiki_pwd_mng_kiPasswordMsgPackPersister_init(&repository2, "shadow", &factory2);
-	kiki_pwd_mng_kiPasswordFactory_init(&factory2, &dummy_iv_init, &repository2.repository, &encryptor, &decryptor);
+	bg_password_msgpack_persister repository2;
+	bg_password_factory factory2;
+	bg_password_msgpack_persister_init(&repository2, "shadow", &factory2);
+	bg_password_factory_init(&factory2, &dummy_iv_init, &repository2.repository, &encryptor, &decryptor);
 
 	EXPECT_EQ(0, repository2.number_passwords);
 	EXPECT_EQ(0, repository2.repository.load(&repository2.repository));
@@ -107,12 +107,12 @@ TEST(kiPasswordMsgPackPersister, canDeserializeContainedPasswords) {
 	TEAR_DOWN;
 }
 
-TEST(kiPasswordMsgPackPersister, deserializationIsDeserializingGoodValue) {
+TEST(bg_password_msgpack_persister, deserializationIsDeserializingGoodValue) {
 	SETUP;
-	kiPasswordMsgPackPersister repository2;
-	kiPasswordFactory factory2;
-	kiki_pwd_mng_kiPasswordMsgPackPersister_init(&repository2, "shadow", &factory2);
-	kiki_pwd_mng_kiPasswordFactory_init(&factory2, &dummy_iv_init, &repository2.repository, &encryptor, &decryptor);
+	bg_password_msgpack_persister repository2;
+	bg_password_factory factory2;
+	bg_password_msgpack_persister_init(&repository2, "shadow", &factory2);
+	bg_password_factory_init(&factory2, &dummy_iv_init, &repository2.repository, &encryptor, &decryptor);
 
 	EXPECT_EQ(0, repository2.repository.load(&repository2.repository));
 
@@ -120,19 +120,19 @@ TEST(kiPasswordMsgPackPersister, deserializationIsDeserializingGoodValue) {
 	EXPECT_EQ(0, memcmp(SAVED_IV_1, repository2.password_array[0]->iv.value, DUMMY_IV_LENGTH));
 	EXPECT_EQ(0, strcmp(SAVED_NAME_1, repository2.password_array[0]->name));
 	EXPECT_EQ(0, strcmp(SAVED_DESCRIPTION_1, repository2.password_array[0]->description));
-	char passvalue[KIKI_PWD_MAX_VALUE_LEN];
-	memset(passvalue, 0, KIKI_PWD_MAX_VALUE_LEN);
+	char passvalue[BLURGATHER_PWD_MAX_VALUE_LEN];
+	memset(passvalue, 0, BLURGATHER_PWD_MAX_VALUE_LEN);
 	memcpy(passvalue, SAVED_VALUE_1, 32);
-	EXPECT_EQ(0, memcmp(passvalue, repository2.password_array[0]->value, KIKI_PWD_MAX_VALUE_LEN));
+	EXPECT_EQ(0, memcmp(passvalue, repository2.password_array[0]->value, BLURGATHER_PWD_MAX_VALUE_LEN));
 
 	repository2.destroy(&repository2);
 	TEAR_DOWN;
 }
 
-TEST(kiPasswordMsgPackPersister, canSerialize2ContainedPasswords) {
+TEST(bg_password_msgpack_persister, canSerialize2ContainedPasswords) {
 	SETUP;
 
-	kiPassword* password = kiki_pwd_mng_kiPassword_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+	bg_password* password = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 	memcpy(SAVED_UUID_1, password->uuid, 16);
 	memcpy(SAVED_IV_1, password->iv.value, DUMMY_IV_LENGTH);
 	strcat(password->name, SAVED_NAME_1);
@@ -142,7 +142,7 @@ TEST(kiPasswordMsgPackPersister, canSerialize2ContainedPasswords) {
 	memcpy(password->value, SAVED_VALUE_1, 32);
 	repository.repository.add(&repository.repository, password);
 
-	kiPassword* password2 = kiki_pwd_mng_kiPassword_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+	bg_password* password2 = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 	memcpy(SAVED_UUID_2, password2->uuid, 16);
 	memcpy(SAVED_IV_2, password2->iv.value, DUMMY_IV_LENGTH);
 	strcat(password2->name, SAVED_NAME_2);
@@ -160,12 +160,12 @@ TEST(kiPasswordMsgPackPersister, canSerialize2ContainedPasswords) {
 	TEAR_DOWN;
 }
 
-TEST(kiPasswordMsgPackPersister, canDeserializeContained2Passwords) {
+TEST(bg_password_msgpack_persister, canDeserializeContained2Passwords) {
 	SETUP;
-	kiPasswordMsgPackPersister repository2;
-	kiPasswordFactory factory2;
-	kiki_pwd_mng_kiPasswordMsgPackPersister_init(&repository2, "shadow", &factory2);
-	kiki_pwd_mng_kiPasswordFactory_init(&factory2, &dummy_iv_init, &repository2.repository, &encryptor, &decryptor);
+	bg_password_msgpack_persister repository2;
+	bg_password_factory factory2;
+	bg_password_msgpack_persister_init(&repository2, "shadow", &factory2);
+	bg_password_factory_init(&factory2, &dummy_iv_init, &repository2.repository, &encryptor, &decryptor);
 
 	EXPECT_EQ(0, repository2.number_passwords);
 	EXPECT_EQ(0, repository2.repository.load(&repository2.repository));
@@ -175,12 +175,12 @@ TEST(kiPasswordMsgPackPersister, canDeserializeContained2Passwords) {
 	TEAR_DOWN;
 }
 
-TEST(kiPasswordMsgPackPersister, deserializationIsDeserializingGoodValueFor2Passwords) {
+TEST(bg_password_msgpack_persister, deserializationIsDeserializingGoodValueFor2Passwords) {
 	SETUP;
-	kiPasswordMsgPackPersister repository2;
-	kiPasswordFactory factory2;
-	kiki_pwd_mng_kiPasswordMsgPackPersister_init(&repository2, "shadow", &factory2);
-	kiki_pwd_mng_kiPasswordFactory_init(&factory2, &dummy_iv_init, &repository2.repository, &encryptor, &decryptor);
+	bg_password_msgpack_persister repository2;
+	bg_password_factory factory2;
+	bg_password_msgpack_persister_init(&repository2, "shadow", &factory2);
+	bg_password_factory_init(&factory2, &dummy_iv_init, &repository2.repository, &encryptor, &decryptor);
 
 	EXPECT_EQ(0, repository2.repository.load(&repository2.repository));
 
@@ -188,27 +188,27 @@ TEST(kiPasswordMsgPackPersister, deserializationIsDeserializingGoodValueFor2Pass
 	EXPECT_EQ(0, memcmp(SAVED_IV_1, repository2.password_array[0]->iv.value, DUMMY_IV_LENGTH));
 	EXPECT_EQ(0, strcmp(SAVED_NAME_1, repository2.password_array[0]->name));
 	EXPECT_EQ(0, strcmp(SAVED_DESCRIPTION_1, repository2.password_array[0]->description));
-	char passvalue[KIKI_PWD_MAX_VALUE_LEN];
-	memset(passvalue, 0, KIKI_PWD_MAX_VALUE_LEN);
+	char passvalue[BLURGATHER_PWD_MAX_VALUE_LEN];
+	memset(passvalue, 0, BLURGATHER_PWD_MAX_VALUE_LEN);
 	memcpy(passvalue, SAVED_VALUE_1, 32);
-	EXPECT_EQ(0, memcmp(passvalue, repository2.password_array[0]->value, KIKI_PWD_MAX_VALUE_LEN));
+	EXPECT_EQ(0, memcmp(passvalue, repository2.password_array[0]->value, BLURGATHER_PWD_MAX_VALUE_LEN));
 
 	EXPECT_EQ(0, memcmp(SAVED_UUID_2, repository2.password_array[1]->uuid, 16));
 	EXPECT_EQ(0, memcmp(SAVED_IV_2, repository2.password_array[1]->iv.value, DUMMY_IV_LENGTH));
 	EXPECT_EQ(0, strcmp(SAVED_NAME_2, repository2.password_array[1]->name));
 	EXPECT_EQ(0, strcmp(SAVED_DESCRIPTION_2, repository2.password_array[1]->description));
-	char passvalue2[KIKI_PWD_MAX_VALUE_LEN];
-	memset(passvalue2, 0, KIKI_PWD_MAX_VALUE_LEN);
+	char passvalue2[BLURGATHER_PWD_MAX_VALUE_LEN];
+	memset(passvalue2, 0, BLURGATHER_PWD_MAX_VALUE_LEN);
 	memcpy(passvalue2, SAVED_VALUE_2, 32);
-	EXPECT_EQ(0, memcmp(passvalue2, repository2.password_array[1]->value, KIKI_PWD_MAX_VALUE_LEN));
+	EXPECT_EQ(0, memcmp(passvalue2, repository2.password_array[1]->value, BLURGATHER_PWD_MAX_VALUE_LEN));
 
 	repository2.destroy(&repository2);
 	TEAR_DOWN;
 }
 
-TEST(kiPasswordMsgPackPersister, canRemove1PasswordWhen1Stored) {
+TEST(bg_password_msgpack_persister, canRemove1PasswordWhen1Stored) {
 	SETUP;
-	kiPassword* password1 = kiki_pwd_mng_kiPassword_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+	bg_password* password1 = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 	repository.repository.add(&repository.repository, password1);
 
 	EXPECT_EQ(1, repository.number_passwords);
@@ -217,11 +217,11 @@ TEST(kiPasswordMsgPackPersister, canRemove1PasswordWhen1Stored) {
 	TEAR_DOWN;
 }
 
-TEST(kiPasswordMsgPackPersister, canRemoveFirstPasswordWhen2Stored) {
+TEST(bg_password_msgpack_persister, canRemoveFirstPasswordWhen2Stored) {
 	SETUP;
-	kiPassword* password1 = kiki_pwd_mng_kiPassword_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+	bg_password* password1 = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 	repository.repository.add(&repository.repository, password1);
-	kiPassword* password2 = kiki_pwd_mng_kiPassword_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+	bg_password* password2 = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 	repository.repository.add(&repository.repository, password2);
 
 	EXPECT_EQ(2, repository.number_passwords);
@@ -232,11 +232,11 @@ TEST(kiPasswordMsgPackPersister, canRemoveFirstPasswordWhen2Stored) {
 	TEAR_DOWN;
 }
 
-TEST(kiPasswordMsgPackPersister, canRemoveSecondPasswordWhen2Stored) {
+TEST(bg_password_msgpack_persister, canRemoveSecondPasswordWhen2Stored) {
 	SETUP;
-	kiPassword* password1 = kiki_pwd_mng_kiPassword_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+	bg_password* password1 = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 	repository.repository.add(&repository.repository, password1);
-	kiPassword* password2 = kiki_pwd_mng_kiPassword_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+	bg_password* password2 = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 	repository.repository.add(&repository.repository, password2);
 
 	EXPECT_EQ(2, repository.number_passwords);
@@ -247,13 +247,13 @@ TEST(kiPasswordMsgPackPersister, canRemoveSecondPasswordWhen2Stored) {
 	TEAR_DOWN;
 }
 
-TEST(kiPasswordMsgPackPersister, canRemoveMiddlePasswordWhen3Stored) {
+TEST(bg_password_msgpack_persister, canRemoveMiddlePasswordWhen3Stored) {
 	SETUP;
-	kiPassword* password1 = kiki_pwd_mng_kiPassword_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+	bg_password* password1 = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 	repository.repository.add(&repository.repository, password1);
-	kiPassword* password2 = kiki_pwd_mng_kiPassword_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+	bg_password* password2 = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 	repository.repository.add(&repository.repository, password2);
-	kiPassword* password3 = kiki_pwd_mng_kiPassword_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+	bg_password* password3 = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 	repository.repository.add(&repository.repository, password3);
 
 	EXPECT_EQ(3, repository.number_passwords);
@@ -264,31 +264,31 @@ TEST(kiPasswordMsgPackPersister, canRemoveMiddlePasswordWhen3Stored) {
 	TEAR_DOWN;
 }
 
-TEST(kiPasswordMsgPackPersister, cannotRemovePasswordWhenInvalidUUID) {
+TEST(bg_password_msgpack_persister, cannotRemovePasswordWhenInvalidUUID) {
 	SETUP;
-	kiPassword* password1 = kiki_pwd_mng_kiPassword_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+	bg_password* password1 = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 	repository.repository.add(&repository.repository, password1);
-	kiPassword* password2 = kiki_pwd_mng_kiPassword_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+	bg_password* password2 = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 	repository.repository.add(&repository.repository, password2);
-	kiPassword* password3 = kiki_pwd_mng_kiPassword_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+	bg_password* password3 = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 
 	EXPECT_EQ(2, repository.number_passwords);
 	EXPECT_EQ(-1, repository.repository.remove(&repository.repository, password3->uuid));
 	EXPECT_EQ(2, repository.number_passwords);
 	EXPECT_EQ(password2, repository.password_array[1]);
-	kiki_pwd_mng_kiPassword_free(password3);
+	bg_password_free(password3);
 	TEAR_DOWN;
 }
 
-TEST(kiPasswordMsgPackPersister, canSortByNamesPasswordsWhen3Stored) {
+TEST(bg_password_msgpack_persister, canSortByNamesPasswordsWhen3Stored) {
 	SETUP;
-	kiPassword* password1 = kiki_pwd_mng_kiPassword_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+	bg_password* password1 = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 	repository.repository.add(&repository.repository, password1);
 	strcat(password1->name, "passC");
-	kiPassword* password2 = kiki_pwd_mng_kiPassword_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+	bg_password* password2 = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 	repository.repository.add(&repository.repository, password2);
 	strcat(password2->name, "passA");
-	kiPassword* password3 = kiki_pwd_mng_kiPassword_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+	bg_password* password3 = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 	repository.repository.add(&repository.repository, password3);
 	strcat(password3->name, "passB");
 
