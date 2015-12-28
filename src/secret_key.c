@@ -11,6 +11,8 @@ bg_secret_key* bg_secret_key_init(bg_secret_key* _self) {
 
 	self->destroy = &bg_secret_key_destroy;
 	self->update = &bg_secret_key_update;
+        
+        return self;
 }
 
 void bg_secret_key_free(bg_secret_key* self) {

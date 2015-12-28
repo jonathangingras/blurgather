@@ -19,7 +19,6 @@ bg_password* bg_password_init(bg_password* _self, IV_init_callback iv_initialize
 	self->decryptor = decryptor;
 	self->repository = repository;
 
-	uuid_generate(self->uuid);
 	iv_initializer(&self->iv);
 	self->name = (char*) calloc(BLURGATHER_PWD_MAX_NAME_LEN, sizeof(char));
 	self->description = (char*) calloc(BLURGATHER_PWD_MAX_DESCRIPTION_LEN, sizeof(char));

@@ -15,6 +15,7 @@ else()
 	include(build-msgpack.cmake)
 endif()
 
+include_directories(/usr/local/include)
 include_directories(include)
 include_directories(include/kiki)
 include_directories(include/blurgather)
@@ -22,4 +23,7 @@ install(DIRECTORY include/blurgather DESTINATION include)
 install(DIRECTORY include/kiki DESTINATION include)
 
 add_subdirectory(src)
-add_subdirectory(test)
+
+if(WITH_TESTS)
+  add_subdirectory(test)
+endif()

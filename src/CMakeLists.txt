@@ -15,7 +15,6 @@ add_library(blurgather
 
 target_link_libraries(blurgather
     kiki_utilities
-    uuid
     mcrypt
     ${msgpack-static}
 )

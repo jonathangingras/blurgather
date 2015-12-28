@@ -3,7 +3,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <uuid/uuid.h>
 
 #include "iv.h"
 #include "secret_key.h"
@@ -25,8 +24,6 @@ typedef struct bg_password bg_password;
 
 struct bg_password {
 	void (* destroy)(bg_password* self);
-
-	uuid_t uuid;
 
 	IV_t iv;
 	char* name; //max 100 bytes

@@ -23,18 +23,18 @@ struct bg_password_msgpack_persister {
 	bg_password_repository repository;
 	bg_password_factory* password_factory;
 
-	char* persistanceFileName;
+	char* persistence_filename;
 
 	size_t number_passwords;
 	bg_password_array password_array;
 	size_t allocated_length;
 };
 
-bg_password_msgpack_persister* bg_password_msgpack_persister_init(bg_password_msgpack_persister* msgpackPersister,
+bg_password_msgpack_persister* bg_password_msgpack_persister_init(bg_password_msgpack_persister* msgpack_persister,
                                                                          const char* fileName,
                                                                          bg_password_factory* password_factory);
 
-void bg_password_msgpack_persister_free(bg_password_msgpack_persister* msgpackPersister);
+void bg_password_msgpack_persister_free(bg_password_msgpack_persister* msgpack_persister);
 
 #ifdef __cplusplus
 }

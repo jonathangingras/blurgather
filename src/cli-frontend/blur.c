@@ -66,7 +66,7 @@ int create_password_from_user(bg_password_factory* password_factory) {
 
 	password->update(password, lened_str(value1));
 
-	int return_value;
+	int return_value = 0;
 	if((return_value = password->crypt(password))) { return return_value; }
 	if((return_value = password->save(password))) { return return_value; }
 
@@ -92,17 +92,13 @@ int add_password(bg_password_factory* password_factory, bg_password_repository* 
 void send_password_to_xclipdoard(const char* password) {
 	init_char_array(command, BLURGATHER_PWD_MAX_VALUE_LEN + 40);
 	strcat(command, "echo -n '");
-	strcat(command, password);
-	strcat(command, "' | xclip -selection clipboard -i");
-	system(command);
+	printf("%s", password);
+	//strcat(command, "' | xclip -selection clipboard -i");
+	//system(command);
 }
 
 int kiPassword_compare_names(void* attribute, bg_password* password) {
 	return strcmp((const char*)attribute, password->name);
-}
-
-int kiPassword_compare_uuids(void* attribute, bg_password* password) {
-	return memcmp((const unsigned char*)attribute, password->uuid, 16);
 }
 
 typedef int kiPassword_compare_callback_t(void* attribute, bg_password* password);

@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-struct bg_devryptor;
+struct bg_decryptor;
 typedef struct bg_decryptor bg_decryptor;
 
 struct bg_decryptor {

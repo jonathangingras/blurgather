@@ -12,23 +12,18 @@ static int get_keyvalue_iterator(const char* field, msgpack_object_kv** keyvalue
 }
 
 void bg_persistence_msgpack_serialize_password(msgpack_packer* packer, bg_password* password) {
-	msgpack_pack_map(packer, 5);
+	msgpack_pack_map(packer, 4);
 
-	msgpack_pack_str(packer, 4);
-	msgpack_pack_str_body(packer, "uuid", 4);
-	msgpack_pack_bin(packer, 16);
-	msgpack_pack_bin_body(packer, password->uuid, 16);
+        msgpack_pack_str(packer, 4);
+	msgpack_pack_str_body(packer, "name", 4);
+	size_t name_len = strlen(password->name);
+	msgpack_pack_str(packer, name_len);
+	msgpack_pack_str_body(packer, password->name, name_len);
 
 	msgpack_pack_str(packer, 2);
 	msgpack_pack_str_body(packer, "iv", 2);
 	msgpack_pack_bin(packer, password->iv.length);
 	msgpack_pack_bin_body(packer, password->iv.value, password->iv.length);
-
-	msgpack_pack_str(packer, 4);
-	msgpack_pack_str_body(packer, "name", 4);
-	size_t name_len = strlen(password->name);
-	msgpack_pack_str(packer, name_len);
-	msgpack_pack_str_body(packer, password->name, name_len);
 
 	msgpack_pack_str(packer, 11);
 	msgpack_pack_str_body(packer, "description", 11);
@@ -46,17 +41,14 @@ void bg_persistence_msgpack_serialize_password(msgpack_packer* packer, bg_passwo
 int bg_persistence_msgpack_deserialize_password(msgpack_object* object, bg_password* password) {
 	msgpack_object_kv* keyvalue_iterator = object->via.map.ptr;
 	int error_value = 0;
-	const char* uuid_iterator, * iv_iterator, * name_iterator, * description_iterator, * value_iterator;
-	size_t uuid_size, iv_size, name_size, description_size, value_size;
+	const char * iv_iterator, * name_iterator, * description_iterator, * value_iterator;
+	size_t iv_size, name_size, description_size, value_size;
 
-	if((error_value = get_keyvalue_iterator("uuid", &keyvalue_iterator, &uuid_iterator, &uuid_size,
-	                                        -1))) { return error_value; }
+        if((error_value = get_keyvalue_iterator("name", &keyvalue_iterator, &name_iterator, &name_size,
+	                                        -3))) { return error_value; }
 	++keyvalue_iterator;
 	if((error_value = get_keyvalue_iterator("iv", &keyvalue_iterator, &iv_iterator, &iv_size,
 	                                        -2))) { return error_value; }
-	++keyvalue_iterator;
-	if((error_value = get_keyvalue_iterator("name", &keyvalue_iterator, &name_iterator, &name_size,
-	                                        -3))) { return error_value; }
 	++keyvalue_iterator;
 	if((error_value = get_keyvalue_iterator("description", &keyvalue_iterator, &description_iterator,
 	                                        &description_size, -4))) { return error_value; }
@@ -64,8 +56,7 @@ int bg_persistence_msgpack_deserialize_password(msgpack_object* object, bg_passw
 	if((error_value = get_keyvalue_iterator("value", &keyvalue_iterator, &value_iterator, &value_size,
 	                                        -5))) { return error_value; }
 
-	memcpy(password->uuid, uuid_iterator, uuid_size);
-	memcpy(password->iv.value, iv_iterator, iv_size);
+        memcpy(password->iv.value, iv_iterator, iv_size);
 	password->iv.length = iv_size;
 	memcpy(password->name, name_iterator, name_size);
 	memcpy(password->description, description_iterator, description_size);
