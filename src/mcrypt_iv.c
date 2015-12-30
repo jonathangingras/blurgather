@@ -10,7 +10,7 @@ static int bg_mcrypt_iv_generate(IV_t* _iv) {
   FILE* urandom = fopen("/dev/urandom", "rb");
   if(!urandom) { return -1; }
   
-  fread(_iv->value, sizeof(unsigned char), sizeof(_iv->length), urandom);
+  fread(_iv->value, sizeof(unsigned char), _iv->length, urandom);
 
   fclose(urandom);
   return 0;
