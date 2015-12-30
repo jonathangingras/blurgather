@@ -7,11 +7,9 @@
 #include "password_msgpack_persister.h"
 #include <kiki/utilities.h>
 #include "mcrypt_iv.h"
+#include "utils.h"
+#include "clipboard.h"
 
-
-#define init_char_array(varname, length)\
-  char varname [length];\
-  memset(varname, 0, length);
 
 int unlock_pwd_mng(bg_secret_key* secret_key, int confirmation_needed) {
 	init_char_array(password1, BLURGATHER_PWD_MAX_VALUE_LEN);
@@ -89,14 +87,6 @@ int add_password(bg_password_factory* password_factory, bg_password_repository* 
 	return 0;
 }
 
-void send_password_to_xclipdoard(const char* password) {
-	init_char_array(command, BLURGATHER_PWD_MAX_VALUE_LEN + 40);
-	strcat(command, "echo -n '");
-	printf("%s", password);
-	//strcat(command, "' | xclip -selection clipboard -i");
-	//system(command);
-}
-
 int kiPassword_compare_names(void* attribute, bg_password* password) {
 	return strcmp((const char*)attribute, password->name);
 }
@@ -133,7 +123,7 @@ int send_password_to_user(bg_password_repository* repository, const char* name, 
 		fprintf(stderr, "could not decrypt password!");
 		return 1;
 	}
-	send_password_to_xclipdoard(password->value);
+	send_to_clipboard(password->value);
 	password->crypt(password);
 
 	return 0;
@@ -142,7 +132,7 @@ int send_password_to_user(bg_password_repository* repository, const char* name, 
 char* get_persistance_filename() {
 	char* persistance_file = calloc(500, sizeof(char));
 	strcat(persistance_file, getenv("HOME"));
-	strcat(persistance_file, "/.kipwdmng_shadow");
+	strcat(persistance_file, "/.blrgthrrc");
 	return persistance_file;
 }
 
