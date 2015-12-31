@@ -27,7 +27,7 @@ int unlock_pwd_mng(bg_secret_key* secret_key, int confirmation_needed) {
 }
 
 void get_field(char* out, char* showing, int max_length) {
-	printf(showing);
+	printf("%s", showing);
 	fgets(out, max_length, stdin);
 	fflush(stdin);
 	int i;

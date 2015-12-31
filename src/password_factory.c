@@ -15,6 +15,8 @@ bg_password_factory* bg_password_factory_init(bg_password_factory* _self,
 	self->decryptor = decryptor;
 
 	self->new_password = &bg_password_factory_new_password;
+
+        return self;
 }
 
 void bg_password_factory_free(bg_password_factory* self) {

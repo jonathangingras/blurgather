@@ -18,4 +18,5 @@ endfunction()
 
 add_test_case(password)
 add_test_case(password_msgpack_persister)
+add_test_case(password_msgpack_persister_integration)
 #add_gtest_case(mcrypt_cryptor)

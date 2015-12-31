@@ -20,6 +20,7 @@ sweetgreen_teardown(persister) {
 
 sweetgreen_test_define(persister, canAddPassword) {
   bg_password* password = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+  strcat(password->name, "1");
 
   sweetgreen_expect_equal(0, repository.number_passwords);
 
@@ -32,9 +33,9 @@ sweetgreen_test_define(persister, canAddPassword) {
 
 sweetgreen_test_define(persister, canAdd2Passwords) {
   bg_password* password = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
-  password->name = "1";
+  strcat(password->name, "1");
   bg_password* password2 = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
-  password2->name = "2";
+  strcat(password2->name, "2");
 
   sweetgreen_expect_equal(0, repository.number_passwords);
 
@@ -57,7 +58,7 @@ sweetgreen_test_define(persister, passwordHasGoodPointerWhenAdded) {
 
 sweetgreen_test_define(persister, passwordNotAddedTwiceWhenSavedMoreThanOnce) {
   bg_password* password = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
-  password->name = "1";
+  strcat(password->name, "1");
 
   repository.repository.add(&repository.repository, password);
   repository.repository.add(&repository.repository, password);
@@ -65,5 +66,33 @@ sweetgreen_test_define(persister, passwordNotAddedTwiceWhenSavedMoreThanOnce) {
   repository.repository.add(&repository.repository, password);
 
   sweetgreen_expect_equal(1, repository.number_passwords);
+}
+
+sweetgreen_test_define(persister, canRemove1PasswordWhen1Stored) {
+	bg_password* password1 = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+        strcat(password1->name, "1");
+
+	repository.repository.add(&repository.repository, password1);
+
+	sweetgreen_expect_equal(1, repository.number_passwords);
+	sweetgreen_expect_zero(repository.repository.remove(&repository.repository, password1->name));
+	sweetgreen_expect_equal(0, repository.number_passwords);
+}
+
+sweetgreen_test_define(persister, canRemoveFirstPasswordWhen2Stored) {
+	bg_password* password1 = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+        strcat(password1->name, "1");
+
+	repository.repository.add(&repository.repository, password1);
+	bg_password* password2 = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
+        strcat(password2->name, "2");
+        
+	repository.repository.add(&repository.repository, password2);
+
+	sweetgreen_expect_equal(2, repository.number_passwords);
+	sweetgreen_expect_same_address(password1, repository.password_array[0]);
+	sweetgreen_expect_zero(repository.repository.remove(&repository.repository, password1->name));
+	sweetgreen_expect_equal(1, repository.number_passwords);
+	sweetgreen_expect_same_address(password2, repository.password_array[0]);
 }
 

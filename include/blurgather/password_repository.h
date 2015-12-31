@@ -1,8 +1,6 @@
 #ifndef BLURGATHER_PASSWORD_REPOSITORY_H
 #define BLURGATHER_PASSWORD_REPOSITORY_H
 
-#include <uuid/uuid.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -17,7 +15,7 @@ struct bg_password_repository {
 	void* object;
 
 	int (* add)(bg_password_repository* self, bg_password* password);
-	int (* remove)(bg_password_repository* self, uuid_t password_uuid);
+	int (* remove)(bg_password_repository* self, const char* name);
 
 	void (* sort)(bg_password_repository* self);
 	bg_password_iterator (* begin)(bg_password_repository* self);
