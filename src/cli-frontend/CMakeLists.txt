@@ -6,7 +6,7 @@ if(APPLE)
   target_link_libraries(blurpasteboard objc)
   set(BLUR_SPECIFIC_FLAGS "-framework Foundation -framework AppKit")
 elseif(UNIX)
-  set(CLIPBOARD_SRC_FILE xclipboard.c)
+  set(CLIPBOARD_SRC xclipboard.c)
 endif()
 
 add_executable(blur
