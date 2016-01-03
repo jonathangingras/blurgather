@@ -11,15 +11,17 @@ struct IV_t;
 typedef struct IV_t IV_t;
 
 struct IV_t {
-	void (* destroy)(IV_t* self);
-
-	unsigned char* value;
-	size_t length;
-
-	int (* randomize)(IV_t* self);
+  void (* destroy)(IV_t* self);
+  
+  unsigned char* value;
+  size_t length;
+  
+  int (* randomize)(IV_t* self);
 };
 
 typedef IV_t* (*IV_init_callback)(IV_t* iv);
+
+int bg_iv_copy(IV_t *dst, const IV_t *src);
 
 #ifdef __cplusplus
 }

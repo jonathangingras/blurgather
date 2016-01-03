@@ -84,7 +84,7 @@ void init_dummy_persister(dummy_persister* dummy) {
 dummy_encryptor encryptor;
 dummy_decryptor decryptor;
 dummy_persister repository;
-bg_password password;
+bg_password *password;
 
 
 sweetgreen_setup(password) {
@@ -92,81 +92,82 @@ sweetgreen_setup(password) {
   init_dummy_decryptor(&decryptor);
   init_dummy_persister(&repository);
 
-  bg_password_init(&password, &dummy_iv_init, &encryptor.encryptor, &decryptor.decryptor, &repository.repository);
+  password = bg_password_init(NULL, &dummy_iv_init, &encryptor.encryptor, &decryptor.decryptor, &repository.repository);
   
   randomizeCalled = 0;
 }
 
 sweetgreen_teardown(password) {
-  password.destroy(&password);
+  bg_password_free(password);
   randomizeCalled = 0;
 }
 
 sweetgreen_test_define(password, cryptIsCalledWhenCalledFromPassword) {
-  password.crypt(&password);
+  bg_password_crypt(password);
 
   sweetgreen_expect_true(encryptor.cryptCalled);
 }
 
 sweetgreen_test_define(password, cryptReturns0WhenOk) {
-  sweetgreen_expect_zero(password.crypt(&password));
+  sweetgreen_expect_zero(bg_password_crypt(password));
 }
 
 sweetgreen_test_define(password, cannotCryptWhenNULLEncryptor) {
-  password.encryptor = NULL;
+  bg_password_destroy(password);
+  bg_password_init(password, &dummy_iv_init, NULL, &decryptor.decryptor, &repository.repository);
   
-  sweetgreen_expect_equal(-1, password.crypt(&password));
+  sweetgreen_expect_equal(-1, bg_password_crypt(password));
 }
 
-sweetgreen_test_define(password, cryptReturnsNon0WhenNotOk) {
-  password.crypted = 1;
+sweetgreen_test_define(password, cryptReturnsNon0WhenAlreadyCrypted) {
+  bg_password_crypt(password);
 
-  sweetgreen_expect_non_zero(password.crypt(&password));
+  sweetgreen_expect_non_zero(bg_password_crypt(password));
 }
 
 sweetgreen_test_define(password, decryptReturns0WhenOk) {
-  password.crypted = 1;
+  bg_password_crypt(password);
   
-  sweetgreen_expect_zero(password.decrypt(&password));
+  sweetgreen_expect_zero(bg_password_decrypt(password));
 }
 
 sweetgreen_test_define(password, cannotDecryptWhenNULLDecryptor) {
-  password.decryptor = NULL;
+  bg_password_destroy(password);
+  bg_password_init(password, &dummy_iv_init, &encryptor.encryptor, NULL, &repository.repository);
   
-  sweetgreen_expect_equal(-1, password.decrypt(&password));
+  sweetgreen_expect_equal(-1, bg_password_decrypt(password));
 }
 
 sweetgreen_test_define(password, valueChangesWithValueSentByEncryptorWhenCallingCrypt) {
-  password.update(&password, "hello", strlen("hello") + 1);
-  password.crypted = 0;
+  bg_password_update_value(password, "hello");
   
-  password.crypt(&password);
+  bg_password_crypt(password);
         
-  sweetgreen_expect_equal(0, strcmp("i was crypted", password.value));
+  sweetgreen_expect_equal_string("i was crypted", bg_password_value(password));
 }
 
 sweetgreen_test_define(password, setIVIsCalledFromEncryptorWhenCallingCrypt) {
   sweetgreen_expect_false(encryptor.set_ivCalled);
   
-  password.crypt(&password);
+  bg_password_crypt(password);
   
   sweetgreen_expect_true(encryptor.set_ivCalled);
 }
 
 sweetgreen_test_define(password, valueChangesWithValueSentByDecryptorWhenCallingDecrypt) {
-  password.update(&password, "veawfverwagarg", strlen("veawfverwagarg") + 1);
-  password.crypted = 1;
+  bg_password_update_value(password, "veawfverwagarg");
+  bg_password_crypt(password);
   
-  password.decrypt(&password);
+  bg_password_decrypt(password);
 
-  sweetgreen_expect_equal(0, strcmp("i was decrypted", password.value));
+  sweetgreen_expect_equal(0, strcmp("i was decrypted", bg_password_value(password)));
 }
 
 sweetgreen_test_define(password, setIVIsCalledFromDecryptorWhenCallingDecrypt) {
   sweetgreen_expect_false(decryptor.set_ivCalled);
-  password.crypted = 1;
+  bg_password_crypt(password);
   
-  password.decrypt(&password);
+  bg_password_decrypt(password);
         
   sweetgreen_expect_true(decryptor.set_ivCalled);
 }
@@ -174,45 +175,66 @@ sweetgreen_test_define(password, setIVIsCalledFromDecryptorWhenCallingDecrypt) {
 sweetgreen_test_define(password, addIsCalledWhenCallingSave) {
   repository.addCalled = 0;
   
-  password.save(&password);
+  bg_password_save(password);
   
   sweetgreen_expect_true(repository.addCalled);
 }
 
 sweetgreen_test_define(password, addIsNotCalledWhenCallingSaveWhenNULLRepository) {
   repository.addCalled = 0;
-  password.repository = NULL;
+  bg_password_destroy(password);
+  bg_password_init(password, &dummy_iv_init, &encryptor.encryptor, &decryptor.decryptor, NULL);
 
-  sweetgreen_expect_equal(-1, password.save(&password));
+  sweetgreen_expect_equal(-1, bg_password_save(password));
 
   sweetgreen_expect_false(repository.addCalled);
 }
 
 sweetgreen_test_define(password, valueChangesWithValueGivenToUpdateWhenUpdateCalled) {
-  strcat(password.value, "hey");
-  sweetgreen_expect_equal(0, strcmp("hey", password.value));
+  bg_password_update_value(password, "hey");
+  sweetgreen_expect_equal(0, strcmp("hey", bg_password_value(password)));
 
-  password.update(&password, "im new value", strlen("im new value") + 1);
+  bg_password_update_value(password, "im new value");
 
-  sweetgreen_expect_equal(0, strcmp("im new value", password.value));
+  sweetgreen_expect_equal(0, strcmp("im new value", bg_password_value(password)));
 }
 
 sweetgreen_test_define(password, ivRandomizeCalledWhenUpdateCalled) {
-  password.update(&password, "im new value", strlen("im new value") + 1);
+  bg_password_update_value(password, "im new value");
 
   sweetgreen_expect_true(randomizeCalled);
 }
 
 sweetgreen_test_define(password, persistAintCalledWhenUpdateCalled) {
-  password.update(&password, "im new value", strlen("im new value") + 1);
+  bg_password_update_value(password, "im new value");
 
   sweetgreen_expect_false(repository.addCalled);
 }
 
 sweetgreen_test_define(password, cryptedBooleanIsSetToFalseWhenUpdateCalled) {	
-  password.crypt(&password);
+  bg_password_crypt(password);
 
-  password.update(&password, "im new value", strlen("im new value") + 1);
+  bg_password_update_value(password, "im new value");
 
-  sweetgreen_expect_false(password.crypted);
+  sweetgreen_expect_false(bg_password_crypted(password));
+}
+
+sweetgreen_test_define(password, fill_rawSetsValueToGoodLengthAndMemory) {
+  const char value[] = "SomeEncryptedPassword";
+  const IV_t iv = {.value = (unsigned char *)"SoMeIvVaLuE000000000000", .length = 24};
+  
+  sweetgreen_expect_zero(bg_password_fill_raw(password, &iv, value, strlen(value)));
+
+  sweetgreen_expect_equal_memory(value, bg_password_value(password), strlen(value));
+  sweetgreen_expect_equal(strlen(value), bg_password_value_length(password));
+}
+
+sweetgreen_test_define(password, fill_rawSetsIVToGoodLengthAndMemory) {
+  const char value[] = "SomeEncryptedPassword";
+  const IV_t iv = {.value = (unsigned char *)"SoMeIvVaLuE000000000000", .length = 24};
+  
+  sweetgreen_expect_zero(bg_password_fill_raw(password, &iv, value, strlen(value)));
+
+  sweetgreen_expect_equal_memory(iv.value, bg_password_iv_value(password), iv.length);
+  sweetgreen_expect_equal(iv.length, bg_password_iv_length(password));
 }

@@ -8,11 +8,7 @@
 extern "C" {
 #endif
 
-size_t kiki_reverse_memlen(unsigned char* str, int end_index);
-void utf_itoa(char* output_array, long value);
-int find_endline(unsigned char* bytes, int n_bytes);
-void binstr(char* output_array, unsigned char byte);
-int utf8_char_length(unsigned char first_byte);
+size_t kiki_reverse_memlen(const void* str, int end_index);
 
 #define lened_str(str) \
 	str, strlen(str) + 1

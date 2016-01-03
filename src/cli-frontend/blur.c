@@ -48,8 +48,8 @@ int create_password_from_user(bg_password_factory* password_factory) {
 	init_char_array(description, BLURGATHER_PWD_MAX_DESCRIPTION_LEN);
 	get_field(description, "description: ", BLURGATHER_PWD_MAX_DESCRIPTION_LEN);
 
-	strcat(password->name, name);
-	strcat(password->description, description);
+        bg_password_update_name(password, name);
+	bg_password_update_description(password, description);
 
 	init_char_array(value1, BLURGATHER_PWD_MAX_VALUE_LEN);
 	init_char_array(value2, BLURGATHER_PWD_MAX_VALUE_LEN);
@@ -62,11 +62,11 @@ int create_password_from_user(bg_password_factory* password_factory) {
 		return -1;
 	}
 
-	password->update(password, lened_str(value1));
+	bg_password_update_value(password, value1);
 
 	int return_value = 0;
-	if((return_value = password->crypt(password))) { return return_value; }
-	if((return_value = password->save(password))) { return return_value; }
+	if((return_value = bg_password_crypt(password))) { return return_value; }
+	if((return_value = bg_password_save(password))) { return return_value; }
 
 	return return_value;
 }
@@ -87,13 +87,13 @@ int add_password(bg_password_factory* password_factory, bg_password_repository* 
 	return 0;
 }
 
-int kiPassword_compare_names(void* attribute, bg_password* password) {
-	return strcmp((const char*)attribute, password->name);
+int password_compare_names(void* attribute, bg_password* password) {
+	return strcmp((const char*)attribute, bg_password_name(password));
 }
 
-typedef int kiPassword_compare_callback_t(void* attribute, bg_password* password);
+typedef int password_compare_callback_t(void* attribute, bg_password* password);
 
-bg_password* find_password_by_attribute(bg_password_repository* repository, void* attribute, kiPassword_compare_callback_t compare_callback) {
+bg_password* find_password_by_attribute(bg_password_repository* repository, void* attribute, password_compare_callback_t compare_callback) {
 	bg_password* result = NULL;
 	bg_password_iterator iterator = repository->begin(repository);
 	bg_password_iterator end = repository->end(repository);
@@ -109,7 +109,7 @@ bg_password* find_password_by_attribute(bg_password_repository* repository, void
 }
 
 int send_password_to_user(bg_password_repository* repository, const char* name, bg_secret_key* secret_key) {
-	bg_password* password = find_password_by_attribute(repository, (void*)name, kiPassword_compare_names);
+	bg_password* password = find_password_by_attribute(repository, (void*)name, password_compare_names);
 
 	if(!password) {
 		fprintf(stderr, "no such password!\n");
@@ -119,12 +119,12 @@ int send_password_to_user(bg_password_repository* repository, const char* name, 
 		fprintf(stderr, "could not unlock master key!");
 		return 1;
 	}
-	if(password->decrypt(password)) {
+	if(bg_password_decrypt(password)) {
 		fprintf(stderr, "could not decrypt password!");
 		return 1;
 	}
-	send_to_clipboard(password->value);
-	password->crypt(password);
+	send_to_clipboard(bg_password_value(password));
+	bg_password_crypt(password);
 
 	return 0;
 }
@@ -154,8 +154,7 @@ int main(int argc, char** argv) {
 	bg_password_msgpack_persister_init(&repository, persistance_filename, &password_factory);
 	free(persistance_filename);
 
-	bg_password_factory_init(&password_factory, &bg_mcrypt_iv_init, &repository.repository, &cryptor.encryptor,
-	                                    &cryptor.decryptor);
+	bg_password_factory_init(&password_factory, &bg_mcrypt_iv_init, &repository.repository, &cryptor.encryptor, &cryptor.decryptor);
 
 	int load_return_value = repository.repository.load(&repository.repository);
 	if(load_return_value != 0 && load_return_value != -4) {

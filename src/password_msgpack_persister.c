@@ -94,7 +94,7 @@ static bg_password* find_password_by_name(bg_password_msgpack_persister* self, c
 	bg_password* password = NULL;
 	int i;
 	for(i = 0; i < self->number_passwords; ++i) {
-		if(memcmp(self->password_array[i]->name, name, BLURGATHER_PWD_MAX_NAME_LEN) == 0) {
+		if(memcmp(bg_password_name(self->password_array[i]), name, BLURGATHER_PWD_MAX_NAME_LEN) == 0) {
 			password = self->password_array[i];
 			if(index_found) {
 				*index_found = i;
@@ -119,7 +119,7 @@ static int add_new_password(bg_password_msgpack_persister* self, bg_password* pa
 int bg_password_msgpack_persister_add(bg_password_repository* _self, bg_password* _password) {
 	bg_password_msgpack_persister* self = (bg_password_msgpack_persister*) _self->object;
 
-	bg_password* password = find_password_by_name(self, _password->name, NULL);
+	bg_password* password = find_password_by_name(self, bg_password_name(_password), NULL);
 
 	if(!password) {
 		return add_new_password(self, _password);
@@ -186,7 +186,7 @@ int bg_password_msgpack_persister_load(bg_password_repository* _self) {
 
 static int compare_passwords(const void* _pass1, const void* _pass2) {
 	bg_password* pass1 = *(bg_password**) _pass1, * pass2 = *(bg_password**) _pass2;
-	return strcmp(pass1->name, pass2->name);
+	return strcmp(bg_password_name(pass1), bg_password_name(pass2));
 }
 
 void bg_password_msgpack_persister_sort(bg_password_repository* _self) {

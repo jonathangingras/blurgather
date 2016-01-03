@@ -17,10 +17,10 @@ static int bg_mcrypt_iv_generate(IV_t* _iv) {
 }
 
 IV_t* bg_mcrypt_iv_init(IV_t* _iv) {
-	IV_t* iv = _iv ? _iv : (IV_t*)malloc(sizeof(IV_t));
-	iv->length = 16;
-	iv->value = (unsigned char*)calloc(iv->length, sizeof(unsigned char));
-	iv->destroy = &bg_mcrypt_iv_destroy;
-	iv->randomize = &bg_mcrypt_iv_generate;
-	return iv;
+  IV_t* iv = _iv ? _iv : (IV_t*)malloc(sizeof(IV_t));
+  iv->length = 16;
+  iv->value = (unsigned char*)calloc(iv->length, sizeof(unsigned char));
+  iv->destroy = &bg_mcrypt_iv_destroy;
+  iv->randomize = &bg_mcrypt_iv_generate;
+  return iv;
 }

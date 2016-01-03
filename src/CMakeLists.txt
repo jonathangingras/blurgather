@@ -10,6 +10,7 @@ add_library(blurgather
     msgpack_serialize.c
     mcrypt_cryptor.c
     secret_key.c
+    iv.c
     mcrypt_iv.c
 )
 

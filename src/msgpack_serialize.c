@@ -1,11 +1,10 @@
 #include "msgpack_serialize.h"
 
-static int get_keyvalue_iterator(const char* field, msgpack_object_kv** keyvalue_iterator_ptr,
-                          const char** iterator, size_t* size, int error_value) {
+static int get_keyvalue_iterator(const char* field, msgpack_object_kv** keyvalue_iterator_ptr, char** iterator, size_t* size, int error_value) {
 	if(memcmp(field, (*keyvalue_iterator_ptr)->key.via.str.ptr, (*keyvalue_iterator_ptr)->key.via.str.size)) {
 		return error_value;
 	}
-	*iterator = (*keyvalue_iterator_ptr)->val.via.str.ptr;
+	*iterator = (char*)(*keyvalue_iterator_ptr)->val.via.str.ptr;
 	*size = (*keyvalue_iterator_ptr)->val.via.str.size;
 
 	return 0;
@@ -16,53 +15,62 @@ void bg_persistence_msgpack_serialize_password(msgpack_packer* packer, bg_passwo
 
         msgpack_pack_str(packer, 4);
 	msgpack_pack_str_body(packer, "name", 4);
-	size_t name_len = strlen(password->name);
+	size_t name_len = strlen(bg_password_name(password));
 	msgpack_pack_str(packer, name_len);
-	msgpack_pack_str_body(packer, password->name, name_len);
+	msgpack_pack_str_body(packer, bg_password_name(password), name_len);
 
 	msgpack_pack_str(packer, 2);
 	msgpack_pack_str_body(packer, "iv", 2);
-	msgpack_pack_bin(packer, password->iv.length);
-	msgpack_pack_bin_body(packer, password->iv.value, password->iv.length);
+	msgpack_pack_bin(packer, bg_password_iv_length(password));
+	msgpack_pack_bin_body(packer, bg_password_iv_value(password), bg_password_iv_length(password));
 
 	msgpack_pack_str(packer, 11);
 	msgpack_pack_str_body(packer, "description", 11);
-	size_t description_len = strlen(password->description);
+	size_t description_len = strlen(bg_password_description(password));
 	msgpack_pack_str(packer, description_len);
-	msgpack_pack_str_body(packer, password->description, description_len);
+	msgpack_pack_str_body(packer, bg_password_description(password), description_len);
 
 	msgpack_pack_str(packer, 5);
 	msgpack_pack_str_body(packer, "value", 5);
-	size_t value_len = kiki_reverse_memlen((unsigned char*)password->value, BLURGATHER_PWD_MAX_VALUE_LEN);
+	size_t value_len = kiki_reverse_memlen(bg_password_value(password), BLURGATHER_PWD_MAX_VALUE_LEN);
 	msgpack_pack_bin(packer, value_len);
-	msgpack_pack_bin_body(packer, password->value, value_len);
+	msgpack_pack_bin_body(packer, bg_password_value(password), value_len);
 }
 
 int bg_persistence_msgpack_deserialize_password(msgpack_object* object, bg_password* password) {
 	msgpack_object_kv* keyvalue_iterator = object->via.map.ptr;
 	int error_value = 0;
-	const char * iv_iterator, * name_iterator, * description_iterator, * value_iterator;
+        char * name_iterator, * description_iterator;
+        unsigned char * iv_iterator, * value_iterator;
 	size_t iv_size, name_size, description_size, value_size;
 
         if((error_value = get_keyvalue_iterator("name", &keyvalue_iterator, &name_iterator, &name_size,
 	                                        -3))) { return error_value; }
 	++keyvalue_iterator;
-	if((error_value = get_keyvalue_iterator("iv", &keyvalue_iterator, &iv_iterator, &iv_size,
+	if((error_value = get_keyvalue_iterator("iv", &keyvalue_iterator, (char **)&iv_iterator, &iv_size,
 	                                        -2))) { return error_value; }
 	++keyvalue_iterator;
 	if((error_value = get_keyvalue_iterator("description", &keyvalue_iterator, &description_iterator,
 	                                        &description_size, -4))) { return error_value; }
 	++keyvalue_iterator;
-	if((error_value = get_keyvalue_iterator("value", &keyvalue_iterator, &value_iterator, &value_size,
+	if((error_value = get_keyvalue_iterator("value", &keyvalue_iterator, (char **)&value_iterator, &value_size,
 	                                        -5))) { return error_value; }
 
-        memcpy(password->iv.value, iv_iterator, iv_size);
-	password->iv.length = iv_size;
-	memcpy(password->name, name_iterator, name_size);
-	memcpy(password->description, description_iterator, description_size);
-	memcpy(password->value, value_iterator, value_size);
-	password->value_length = kiki_reverse_memlen((unsigned char*)password->value, BLURGATHER_PWD_MAX_VALUE_LEN);
-	password->crypted = 1;
+
+        IV_t iv = {.value = (unsigned char*)iv_iterator, .length = iv_size};
+        if(bg_password_fill_raw(password, &iv, value_iterator, value_size)) {
+          return -1;
+        }
+        
+        char *name_buffer = calloc(name_size + 1, sizeof(char));
+        memcpy(name_buffer, name_iterator, name_size);
+        bg_password_update_name(password, name_buffer);
+        free(name_buffer);
+
+        char *desc_buffer = calloc(description_size, sizeof(char));
+        memcpy(desc_buffer, description_iterator, description_size);
+        bg_password_update_description(password, desc_buffer);
+        free(desc_buffer);
 
 	return error_value;
 }
@@ -90,7 +98,7 @@ int bg_persistence_msgpack_deserialize_password_array(bg_password_msgpack_persis
 		bg_password* password = factory->new_password(factory);
 		error_value = bg_persistence_msgpack_deserialize_password(ptr + i, password);
 		if(error_value) { return error_value; }
-		error_value = password->save(password);
+		error_value = bg_password_save(password);
 		if(error_value) { return error_value; }
 	}
 

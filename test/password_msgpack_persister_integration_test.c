@@ -30,10 +30,10 @@ static char SAVED_IV_2[DUMMY_IV_LENGTH], SAVED_VALUE_2[32 + 1] = "12345678234567
 sweetgreen_test_define(persister_integration_test, canSerializeContainedPasswords) {
   bg_password* password = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 
-  memcpy(SAVED_IV_1, password->iv.value, DUMMY_IV_LENGTH);
-  strcat(password->name, SAVED_NAME_1);
-  strcat(password->description, SAVED_DESCRIPTION_1);
-  memcpy(password->value, SAVED_VALUE_1, 32);
+  memcpy(SAVED_IV_1, bg_password_iv_value(password), DUMMY_IV_LENGTH);
+  bg_password_update_name(password, SAVED_NAME_1);
+  bg_password_update_description(password, SAVED_DESCRIPTION_1);
+  bg_password_update_value(password, SAVED_VALUE_1);
   
   repository.repository.add(&repository.repository, password);
 
@@ -66,13 +66,13 @@ sweetgreen_test_define(persister_integration_test, deserializationIsDeserializin
 
   sweetgreen_expect_equal(0, repository2.repository.load(&repository2.repository));
 
-  sweetgreen_expect_equal(0, memcmp(SAVED_IV_1, repository2.password_array[0]->iv.value, DUMMY_IV_LENGTH));
-  sweetgreen_expect_equal(0, strcmp(SAVED_NAME_1, repository2.password_array[0]->name));
-  sweetgreen_expect_equal(0, strcmp(SAVED_DESCRIPTION_1, repository2.password_array[0]->description));
+  sweetgreen_expect_equal_memory(SAVED_IV_1, bg_password_iv_value(repository2.password_array[0]), DUMMY_IV_LENGTH);
+  sweetgreen_expect_equal_string(SAVED_NAME_1, bg_password_name(repository2.password_array[0]));
+  sweetgreen_expect_equal_string(SAVED_DESCRIPTION_1, bg_password_description(repository2.password_array[0]));
   char passvalue[BLURGATHER_PWD_MAX_VALUE_LEN];
   memset(passvalue, 0, BLURGATHER_PWD_MAX_VALUE_LEN);
   memcpy(passvalue, SAVED_VALUE_1, 32);
-  sweetgreen_expect_equal(0, memcmp(passvalue, repository2.password_array[0]->value, BLURGATHER_PWD_MAX_VALUE_LEN));
+  sweetgreen_expect_equal_memory(passvalue, bg_password_value(repository2.password_array[0]), BLURGATHER_PWD_MAX_VALUE_LEN);
 
   repository2.destroy(&repository2);
 }
@@ -80,18 +80,18 @@ sweetgreen_test_define(persister_integration_test, deserializationIsDeserializin
 sweetgreen_test_define(persister_integration_test, canSerialize2ContainedPasswords) {
   bg_password* password = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 	
-  memcpy(SAVED_IV_1, password->iv.value, DUMMY_IV_LENGTH);
-  strcat(password->name, SAVED_NAME_1);
-  strcat(password->description, SAVED_DESCRIPTION_1);
-  memcpy(password->value, SAVED_VALUE_1, 32);
+  memcpy(SAVED_IV_1, bg_password_iv_value(password), DUMMY_IV_LENGTH);
+  bg_password_update_name(password, SAVED_NAME_1);
+  bg_password_update_description(password, SAVED_DESCRIPTION_1);
+  bg_password_update_value(password, SAVED_VALUE_1);
   repository.repository.add(&repository.repository, password);
 
   bg_password* password2 = bg_password_init(NULL, &dummy_iv_init, &encryptor, &decryptor, &repository.repository);
 	
-  memcpy(SAVED_IV_2, password2->iv.value, DUMMY_IV_LENGTH);
-  strcat(password2->name, SAVED_NAME_2);
-  strcat(password2->description, SAVED_DESCRIPTION_2);
-  memcpy(password2->value, SAVED_VALUE_2, 32);
+  memcpy(SAVED_IV_2, bg_password_iv_value(password2), DUMMY_IV_LENGTH);
+  bg_password_update_name(password2, SAVED_NAME_2);
+  bg_password_update_description(password2, SAVED_DESCRIPTION_2);
+  bg_password_update_value(password2, SAVED_VALUE_2);
   repository.repository.add(&repository.repository, password2);
 
   remove("shadow");
@@ -121,21 +121,21 @@ sweetgreen_test_define(persister_integration_test, deserializationIsDeserializin
 
   sweetgreen_expect_zero(repository2.repository.load(&repository2.repository));
 
-  sweetgreen_expect_equal_memory(SAVED_IV_1, repository2.password_array[0]->iv.value, DUMMY_IV_LENGTH);
-  sweetgreen_expect_equal_string(SAVED_NAME_1, repository2.password_array[0]->name);
-  sweetgreen_expect_equal_string(SAVED_DESCRIPTION_1, repository2.password_array[0]->description);
+  sweetgreen_expect_equal_memory(SAVED_IV_1, bg_password_iv_value(repository2.password_array[0]), DUMMY_IV_LENGTH);
+  sweetgreen_expect_equal_string(SAVED_NAME_1, bg_password_name(repository2.password_array[0]));
+  sweetgreen_expect_equal_string(SAVED_DESCRIPTION_1, bg_password_description(repository2.password_array[0]));
   char passvalue[BLURGATHER_PWD_MAX_VALUE_LEN];
   memset(passvalue, 0, BLURGATHER_PWD_MAX_VALUE_LEN);
   memcpy(passvalue, SAVED_VALUE_1, 32);
-  sweetgreen_expect_equal_memory(passvalue, repository2.password_array[0]->value, BLURGATHER_PWD_MAX_VALUE_LEN);
+  sweetgreen_expect_equal_memory(passvalue, bg_password_value(repository2.password_array[0]), BLURGATHER_PWD_MAX_VALUE_LEN);
 
-  sweetgreen_expect_equal_memory(SAVED_IV_2, repository2.password_array[1]->iv.value, DUMMY_IV_LENGTH);
-  sweetgreen_expect_equal_string(SAVED_NAME_2, repository2.password_array[1]->name);
-  sweetgreen_expect_equal_string(SAVED_DESCRIPTION_2, repository2.password_array[1]->description);
+  sweetgreen_expect_equal_memory(SAVED_IV_2, bg_password_iv_value(repository2.password_array[1]), DUMMY_IV_LENGTH);
+  sweetgreen_expect_equal_string(SAVED_NAME_2, bg_password_name(repository2.password_array[1]));
+  sweetgreen_expect_equal_string(SAVED_DESCRIPTION_2, bg_password_description(repository2.password_array[1]));
   char passvalue2[BLURGATHER_PWD_MAX_VALUE_LEN];
   memset(passvalue2, 0, BLURGATHER_PWD_MAX_VALUE_LEN);
   memcpy(passvalue2, SAVED_VALUE_2, 32);
-  sweetgreen_expect_equal_memory(passvalue2, repository2.password_array[1]->value, BLURGATHER_PWD_MAX_VALUE_LEN);
+  sweetgreen_expect_equal_memory(passvalue2, bg_password_value(repository2.password_array[1]), BLURGATHER_PWD_MAX_VALUE_LEN);
 
   repository2.destroy(&repository2);
 }
