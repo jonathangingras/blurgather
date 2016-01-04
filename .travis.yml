@@ -21,7 +21,7 @@ install:
     fi
 
 before_script:
-  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 20 --slave /usr/bin/g++ g++ /usr/bin/g++-5 20
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 60 --slave /usr/bin/g++ g++ /usr/bin/g++-5
   - (mkdir build && cd build && /usr/local/build_env/cmake/bin/cmake -DWITH_TESTS=1 ..)
 
 script:
