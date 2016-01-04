@@ -4,7 +4,7 @@ compiler:
         - clang
         - gcc
 
-before_install: 
+install: 
   - |
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
       CMAKE_URL="http://www.cmake.org/files/v3.3/cmake-3.3.2-Linux-x86_64.tar.gz"
@@ -14,6 +14,6 @@ before_install:
       brew install cmake
     fi
 
-install: cmake -DWITH_TESTS=1 . && make
+before_script: cmake -DWITH_TESTS=1 . && make
 
 script: sh run_tests.sh
