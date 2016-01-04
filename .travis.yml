@@ -20,13 +20,8 @@ install:
       sudo mv cmake /usr/local/build_env
     fi
 
-before_script: 
-  - sudo update-alternatives --remove-all gcc
-  - sudo update-alternatives --remove-all g++
-  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 20
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 20
-  - sudo update-alternatives --config gcc
-  - sudo update-alternatives --config g++
+before_script:
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 20 --slave /usr/bin/g++ g++ /usr/bin/g++-5 20
   - (mkdir build && cd build && /usr/local/build_env/cmake/bin/cmake -DWITH_TESTS=1 ..)
 
 script:
