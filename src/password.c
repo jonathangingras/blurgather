@@ -97,7 +97,7 @@ int bg_password_decrypt(bg_password* self) {
 
 int bg_password_save(bg_password* self) {
 	if(!self->repository) { return -1; }
-	return self->repository->add(self->repository, self);
+	return bg_pwd_repository_add(self->repository, self);
 }
 
 const char *bg_password_name(bg_password *password) {

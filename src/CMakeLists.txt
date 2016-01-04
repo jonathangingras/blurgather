@@ -6,6 +6,7 @@ install(TARGETS kiki_utilities DESTINATION lib)
 add_library(blurgather
     password.c
     password_factory.c
+    repository.c
     password_msgpack_persister.c
     msgpack_serialize.c
     mcrypt_cryptor.c

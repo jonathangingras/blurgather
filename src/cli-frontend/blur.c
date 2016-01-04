@@ -79,7 +79,7 @@ int add_password(bg_password_factory* password_factory, bg_password_repository* 
 	if(create_password_from_user(password_factory)) {
 		return 1;
 	}
-	if(repository->persist(repository)) {
+	if(bg_pwd_repository_persist(repository)) {
 		fprintf(stderr, "could not persist new password!\n");
 		return 1;
 	}
@@ -95,8 +95,8 @@ typedef int password_compare_callback_t(void* attribute, bg_password* password);
 
 bg_password* find_password_by_attribute(bg_password_repository* repository, void* attribute, password_compare_callback_t compare_callback) {
 	bg_password* result = NULL;
-	bg_password_iterator iterator = repository->begin(repository);
-	bg_password_iterator end = repository->end(repository);
+	bg_password_iterator iterator = bg_pwd_repository_begin(repository);
+	bg_password_iterator end = bg_pwd_repository_end(repository);
 
 	for(; iterator.value != end.value; iterator.next(&iterator)) {
 		if(compare_callback(attribute, (*iterator.value)) == 0) {
@@ -137,7 +137,7 @@ char* get_persistance_filename() {
 }
 
 #define DESTROY_STACK_OBJECTS_AND_RETURN(_return_value_) \
-repository.destroy(&repository);\
+bg_pwd_repository_destroy(&repository.repository);\
 cryptor.destroy(&cryptor);\
 return _return_value_;
 
@@ -156,7 +156,7 @@ int main(int argc, char** argv) {
 
 	bg_password_factory_init(&password_factory, &bg_mcrypt_iv_init, &repository.repository, &cryptor.encryptor, &cryptor.decryptor);
 
-	int load_return_value = repository.repository.load(&repository.repository);
+	int load_return_value = bg_pwd_repository_load(&repository.repository);
 	if(load_return_value != 0 && load_return_value != -4) {
 		fprintf(stderr, "could not load password repository");
 		DESTROY_STACK_OBJECTS_AND_RETURN(1);

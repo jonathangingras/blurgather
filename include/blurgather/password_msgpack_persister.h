@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 #include "password.h"
+#include "password_repository.h"
 #include "password_factory.h"
 
 #ifdef __cplusplus
@@ -18,8 +19,6 @@ struct bg_password_msgpack_persister;
 typedef struct bg_password_msgpack_persister bg_password_msgpack_persister;
 
 struct bg_password_msgpack_persister {
-	void (* destroy)(bg_password_msgpack_persister* self);
-
 	bg_password_repository repository;
 	bg_password_factory* password_factory;
 

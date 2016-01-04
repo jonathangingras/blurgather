@@ -71,9 +71,13 @@ int dummy_persister_add(bg_password_repository* self, bg_password* password) {
 	return 0;
 }
 
+struct bg_password_repository_vtable dummy_persister_vtable = {
+  .add = &dummy_persister_add
+};
+
 void init_dummy_persister(dummy_persister* dummy) {
 	dummy->repository.object = (void*) dummy;
-	dummy->repository.add = &dummy_persister_add;
+	dummy->repository.vtable = &dummy_persister_vtable;
 	dummy->addCalled = 0;
 }
 

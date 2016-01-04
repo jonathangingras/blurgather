@@ -1,7 +1,7 @@
 #include "password_msgpack_persister.h"
 #include "msgpack_serialize.h"
 
-static void bg_password_msgpack_persister_destroy(bg_password_msgpack_persister* self);
+static void bg_password_msgpack_persister_destroy(bg_password_repository* _self);
 static int bg_password_msgpack_persister_add(bg_password_repository* self, bg_password* password);
 static int bg_password_msgpack_persister_remove(bg_password_repository* self, const char *name);
 static int bg_password_msgpack_persister_load(bg_password_repository* self);
@@ -14,21 +14,22 @@ static bg_password_iterator bg_password_msgpack_persister_end(bg_password_reposi
 static bg_password** bg_password_msgpack_persister_password_iterator_previous(bg_password_iterator* _self);
 static bg_password** bg_password_msgpack_persister_password_iterator_next(bg_password_iterator* _self);
 
-bg_password_msgpack_persister* bg_password_msgpack_persister_init(bg_password_msgpack_persister* _self,
-                                                                         const char* filename,
-                                                                         bg_password_factory* password_factory) {
-	bg_password_msgpack_persister* self = _self ? _self : (bg_password_msgpack_persister*) malloc(
-		sizeof(bg_password_msgpack_persister));
+static struct bg_password_repository_vtable bg_password_msgpack_persister_vtable = {
+  .destroy = &bg_password_msgpack_persister_destroy,
+  .add = &bg_password_msgpack_persister_add,
+  .remove = &bg_password_msgpack_persister_remove,
+  .load = &bg_password_msgpack_persister_load,
+  .persist = &bg_password_msgpack_persister_persist,
+  .sort = &bg_password_msgpack_persister_sort,
+  .begin = &bg_password_msgpack_persister_begin,
+  .end = &bg_password_msgpack_persister_end
+};
 
-	self->destroy = &bg_password_msgpack_persister_destroy;
-	self->repository.object = (void*) self;
-	self->repository.add = &bg_password_msgpack_persister_add;
-	self->repository.remove = &bg_password_msgpack_persister_remove;
-	self->repository.load = &bg_password_msgpack_persister_load;
-	self->repository.persist = &bg_password_msgpack_persister_persist;
-	self->repository.sort = &bg_password_msgpack_persister_sort;
-	self->repository.begin = &bg_password_msgpack_persister_begin;
-	self->repository.end = &bg_password_msgpack_persister_end;
+bg_password_msgpack_persister* bg_password_msgpack_persister_init(bg_password_msgpack_persister* _self, const char* filename, bg_password_factory* password_factory) {
+	bg_password_msgpack_persister* self = _self ? _self : (bg_password_msgpack_persister*) malloc(sizeof(bg_password_msgpack_persister));
+	
+        self->repository.object = (void *) self;
+	self->repository.vtable = &bg_password_msgpack_persister_vtable;    
 
 	self->password_factory = password_factory;
 	self->number_passwords = 0;
@@ -75,19 +76,21 @@ bg_password** bg_password_msgpack_persister_password_iterator_next(bg_password_i
 }
 
 void bg_password_msgpack_persister_free(bg_password_msgpack_persister* self) {
-	self->destroy(self);
+	bg_pwd_repository_destroy(&self->repository);
 	free(self);
 }
 
 //methods
 
-void bg_password_msgpack_persister_destroy(bg_password_msgpack_persister* self) {
-	free(self->persistence_filename);
-	int i;
-	for(i = 0; i < self->number_passwords; ++i) {
-		bg_password_free(self->password_array[i]);
-	}
-	free(self->password_array);
+void bg_password_msgpack_persister_destroy(bg_password_repository* _self) {
+  bg_password_msgpack_persister* self = (bg_password_msgpack_persister*) _self->object;
+  
+  free(self->persistence_filename);
+  int i;
+  for(i = 0; i < self->number_passwords; ++i) {
+    bg_password_free(self->password_array[i]);
+  }
+  free(self->password_array);
 }
 
 static bg_password* find_password_by_name(bg_password_msgpack_persister* self, const char *name, int* index_found) {
