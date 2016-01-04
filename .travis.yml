@@ -12,13 +12,6 @@ before_install:
 
 install: 
   - sudo apt-get install -y libmcrypt-dev gcc-5 g++-5
-  - sudo update-alternatives 
-  - sudo update-alternatives --remove-all gcc
-  - sudo update-alternatives --remove-all g++
-  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 20
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 20
-  - sudo update-alternatives --config gcc
-  - sudo update-alternatives --config g++
   - |
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
       CMAKE_URL="http://www.cmake.org/files/v3.3/cmake-3.3.2-Linux-x86_64.tar.gz"
@@ -27,7 +20,14 @@ install:
       sudo mv cmake /usr/local/build_env
     fi
 
-before_script: (mkdir build && cd build && /usr/local/build_env/cmake/bin/cmake -DWITH_TESTS=1 ..)
+before_script: 
+  - sudo update-alternatives --remove-all gcc
+  - sudo update-alternatives --remove-all g++
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 20
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 20
+  - sudo update-alternatives --config gcc
+  - sudo update-alternatives --config g++
+  - (mkdir build && cd build && /usr/local/build_env/cmake/bin/cmake -DWITH_TESTS=1 ..)
 
 script:
   - (cd build && make)
