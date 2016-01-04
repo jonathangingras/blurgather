@@ -1,7 +1,10 @@
 #include <unistd.h>
+
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
+#include "password.h"
 #include "utils.h"
 
 void send_to_clipboard(const char* password) {
