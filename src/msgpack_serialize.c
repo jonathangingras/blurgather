@@ -32,7 +32,7 @@ void bg_persistence_msgpack_serialize_password(msgpack_packer* packer, bg_passwo
 
 	msgpack_pack_str(packer, 5);
 	msgpack_pack_str_body(packer, "value", 5);
-	size_t value_len = kiki_reverse_memlen(bg_password_value(password), BLURGATHER_PWD_MAX_VALUE_LEN);
+	size_t value_len = bg_reverse_memlen(bg_password_value(password), BLURGATHER_PWD_MAX_VALUE_LEN);
 	msgpack_pack_bin(packer, value_len);
 	msgpack_pack_bin_body(packer, bg_password_value(password), value_len);
 }

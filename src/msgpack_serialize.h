@@ -2,7 +2,7 @@
 #define _KIKI_MSGPACK_SERIALIZE_H_
 
 #include <msgpack.h>
-#include <kiki/utilities.h>
+#include "utilities.h"
 #include "password.h"
 #include "password_factory.h"
 #include "password_msgpack_persister.h"

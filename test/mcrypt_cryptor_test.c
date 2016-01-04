@@ -1,6 +1,6 @@
 #include <sweetgreen/sweetgreen.h>
 
-#include <kiki/utilities.h>
+#include "utilities.h"
 #include "mcrypt_cryptor.h"
 #include "password.h"
 #include "mcrypt_iv.h"
@@ -92,7 +92,7 @@ sweetgreen_test_define(cryptor, bufferValueChangesWhenCallingCrypt) {
 sweetgreen_test_define(cryptor, bufferLengthIsSetToGoodValueWhenCallingCrypt) {
   cryptor.encryptor.crypt(&cryptor.encryptor, buffer, &buffer_length);
 
-  size_t effective_buffer_length = kiki_reverse_memlen((unsigned char*)buffer, BLURGATHER_PWD_MAX_VALUE_LEN);
+  size_t effective_buffer_length = bg_reverse_memlen((unsigned char*)buffer, BLURGATHER_PWD_MAX_VALUE_LEN);
   sweetgreen_expect_equal(effective_buffer_length, buffer_length);
 }
 

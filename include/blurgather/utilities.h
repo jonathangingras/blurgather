@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-size_t kiki_reverse_memlen(const void* str, int end_index);
+size_t bg_reverse_memlen(const void* str, int end_index);
 
 #define lened_str(str) \
 	str, strlen(str) + 1

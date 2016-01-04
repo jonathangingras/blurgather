@@ -5,7 +5,7 @@
 #include "password_factory.h"
 #include "mcrypt_cryptor.h"
 #include "password_msgpack_persister.h"
-#include <kiki/utilities.h>
+#include "utilities.h"
 #include "mcrypt_iv.h"
 #include "utils.h"
 #include "clipboard.h"

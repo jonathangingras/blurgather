@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include <kiki/utilities.h>
 
+#include "utilities.h"
 #include "mcrypt_cryptor.h"
 
 static void bg_mcrypt_cryptor_destroy(bg_mcrypt_cryptor* self);
@@ -77,7 +77,7 @@ int bg_mcrypt_cryptor_decrypt(bg_decryptor* _self, void* memory,
 	mcrypt_generic_deinit(mcrypt_thread_descriptor);
 	mcrypt_module_close(mcrypt_thread_descriptor);
 
-	*input_length = kiki_reverse_memlen(memory, *input_length);
+	*input_length = bg_reverse_memlen(memory, *input_length);
 
 	return 0;
 }
