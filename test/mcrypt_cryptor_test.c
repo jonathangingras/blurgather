@@ -54,7 +54,6 @@ sweetgreen_test_define(uninitialized_key_iv_cryptor, cryptReturnsErrorWhenSecret
 }
 
 sweetgreen_test_define(uninitialized_key_iv_cryptor, cryptReturnsErrorWhenIVNotSet) {
-  bg_secret_key secret_key;
   bg_secret_key_init(&secret_key);
   secret_key.update(&secret_key, PLAIN_SECRET_KEY, strlen(PLAIN_SECRET_KEY) + 1);
   cryptor.encryptor.set_secret_key(&cryptor.encryptor, &secret_key);
@@ -67,7 +66,6 @@ sweetgreen_test_define(uninitialized_key_iv_cryptor, decryptReturnsErrorWhenSecr
 }
 
 sweetgreen_test_define(uninitialized_key_iv_cryptor, decryptReturnsErrorWhenIVNotSet) {
-  bg_secret_key secret_key;
   bg_secret_key_init(&secret_key);
   secret_key.update(&secret_key, PLAIN_SECRET_KEY, strlen(PLAIN_SECRET_KEY) + 1);
   cryptor.decryptor.set_secret_key(&cryptor.decryptor, &secret_key);
