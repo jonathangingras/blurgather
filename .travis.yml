@@ -1,0 +1,11 @@
+language: c
+
+compiler:
+        - clang
+        - gcc
+
+before_install: mkdir build && cd build && cmake -DWITH_TESTS=1 ..
+
+install: cd build && make
+
+script: sh run_tests.sh
