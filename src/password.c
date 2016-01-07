@@ -72,7 +72,7 @@ int bg_password_crypt(bg_password* self) {
 	self->encryptor->set_iv(self->encryptor, &self->iv);
 
 	int error_value = 0;
-	if((error_value = self->encryptor->crypt(self->encryptor, buffer, &self->value_length))) { return error_value; }
+	if((error_value = self->encryptor->crypt(self->encryptor, buffer, self->value_length, BLURGATHER_PWD_MAX_VALUE_LEN, &self->value_length))) { return error_value; }
 	self->crypted = 1;
 
 	clean_memcpy(self->value, buffer, self->value_length);
@@ -87,7 +87,7 @@ int bg_password_decrypt(bg_password* self) {
 
 	self->decryptor->set_iv(self->decryptor, &self->iv);
 
-	if(self->decryptor->decrypt(self->decryptor, buffer, &self->value_length)) { return 1; }
+	if(self->decryptor->decrypt(self->decryptor, buffer, self->value_length, BLURGATHER_PWD_MAX_VALUE_LEN, &self->value_length)) { return 1; }
 	self->crypted = 0;
 
 	clean_memcpy(self->value, buffer, self->value_length);

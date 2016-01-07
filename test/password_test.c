@@ -10,11 +10,11 @@ typedef struct {
 	int cryptCalled, set_ivCalled;
 } dummy_encryptor;
 
-int dummy_encryptor_crypt(bg_encryptor* self, void* memory, size_t* length) {
+int dummy_encryptor_crypt(bg_encryptor *self, void *memory, size_t memlen, size_t max_length, size_t *writelen) {
 	dummy_encryptor* actual_self = (dummy_encryptor*) self->object;
 	memset(memory, 0, 255);
 	memcpy(memory, "i was crypted", strlen("i was crypted") + 1);
-	*length = strlen("i was crypted");
+	*writelen = strlen("i was crypted");
 	actual_self->cryptCalled = 1;
 	return 0;
 }
@@ -38,11 +38,11 @@ typedef struct {
 	int decryptCalled, set_ivCalled;
 } dummy_decryptor;
 
-int dummy_decryptor_decrypt(bg_decryptor* self, void* memory, size_t* length) {
+int dummy_decryptor_decrypt(bg_decryptor* self, void *memory, size_t memlen, size_t max_length, size_t *writelen) {
 	dummy_decryptor* actual_self = (dummy_decryptor*) self->object;
 	memset(memory, 0, 255);
 	memcpy(memory, "i was decrypted", strlen("i was decrypted") + 1);
-	*length = strlen("i was decrypted");
+	*writelen = strlen("i was decrypted");
 	actual_self->decryptCalled = 1;
 	return 0;
 }
