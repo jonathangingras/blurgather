@@ -108,6 +108,20 @@ bg_password* find_password_by_attribute(bg_password_repository* repository, void
 	return result;
 }
 
+int print_pwd_name(bg_password *password, void *output_stream) {
+  fprintf((FILE *)output_stream, "%s\n", bg_password_name(password));
+  return 0;
+}
+
+int list_password_names(FILE *output_stream, bg_password_repository *repo, bg_secret_key *secret_key) {
+  if(unlock_pwd_mng(secret_key, 0)) {
+		fprintf(stderr, "could not unlock master key!");
+		return 1;
+	}
+
+  return bg_pwd_repository_foreach(repo, &print_pwd_name, output_stream);
+}
+
 int send_password_to_user(bg_password_repository* repository, const char* name, bg_secret_key* secret_key) {
 	bg_password* password = find_password_by_attribute(repository, (void*)name, password_compare_names);
 
@@ -174,6 +188,10 @@ int main(int argc, char** argv) {
 			DESTROY_STACK_OBJECTS_AND_RETURN(1);
 		}
 		if(send_password_to_user(&repository.repository, argv[2], cryptor.secret_key)) {
+			DESTROY_STACK_OBJECTS_AND_RETURN(1);
+		}
+	} else if(!strcmp(argv[1], "list")) {
+		if(list_password_names(stdout, &repository.repository, cryptor.secret_key)) {
 			DESTROY_STACK_OBJECTS_AND_RETURN(1);
 		}
 	}

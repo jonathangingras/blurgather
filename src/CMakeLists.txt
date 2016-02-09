@@ -4,6 +4,7 @@ add_library(kiki_utilities
 install(TARGETS kiki_utilities DESTINATION lib)
 
 add_library(blurgather
+    stream.c
     password.c
     password_factory.c
     repository.c

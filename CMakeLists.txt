@@ -27,6 +27,9 @@ include_directories(include/blurgather)
 install(DIRECTORY include/blurgather DESTINATION include)
 install(DIRECTORY include/kiki DESTINATION include)
 
+#do not compile tests by default
+option(WITH_TESTS "compile tests" OFF)
+
 #subdirectories
 add_subdirectory(src)
 if(WITH_TESTS)

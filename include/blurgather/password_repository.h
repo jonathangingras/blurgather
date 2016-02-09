@@ -42,6 +42,8 @@ bg_password_iterator bg_pwd_repository_end(bg_password_repository* self);
 int bg_pwd_repository_load(bg_password_repository* self);
 int bg_pwd_repository_persist(bg_password_repository* self);
 
+int bg_pwd_repository_foreach(bg_password_repository *self, int (* callback)(bg_password *, void *), void *output);
+
 #ifdef __cplusplus
 }
 #endif
