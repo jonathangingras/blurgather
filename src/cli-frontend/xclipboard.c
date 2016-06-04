@@ -10,7 +10,7 @@
 void send_to_clipboard(const char* password) {
 	init_char_array(command, BLURGATHER_PWD_MAX_VALUE_LEN + 40);
 	strcat(command, "echo -n '");
-	printf("%s", password);
+	sprintf(command + 9, "%s", password);
 	strcat(command, "' | xclip -selection clipboard -i");
 	system(command);
 }
