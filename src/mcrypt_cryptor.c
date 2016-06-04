@@ -46,7 +46,7 @@ int bg_mcrypt_cryptor_crypt(bg_encryptor* _self, void *memory, size_t memlen, si
 	bg_mcrypt_cryptor* self = (bg_mcrypt_cryptor*) _self->object;
 	if(!self->secret_key->length) { return -1; }
 	if(!self->iv) { return -2; }
-        
+
         size_t input_length = memlen;
 
 	MCRYPT mcrypt_thread_descriptor = mcrypt_module_open("rijndael-128", NULL, "cbc", NULL);
@@ -77,7 +77,7 @@ int bg_mcrypt_cryptor_decrypt(bg_decryptor* _self, void *memory, size_t memlen, 
 
 	MCRYPT mcrypt_thread_descriptor = mcrypt_module_open("rijndael-128", NULL, "cbc", NULL);
 	int block_size = mcrypt_enc_get_block_size(mcrypt_thread_descriptor);
-	if(input_length % block_size != 0 || input_length > max_length) { 
+	if(input_length % block_size != 0 || input_length > max_length) {
           mcrypt_module_close(mcrypt_thread_descriptor);
           return -3;
         }

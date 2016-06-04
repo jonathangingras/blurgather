@@ -84,7 +84,7 @@ void bg_password_msgpack_persister_free(bg_password_msgpack_persister* self) {
 
 void bg_password_msgpack_persister_destroy(bg_password_repository* _self) {
   bg_password_msgpack_persister* self = (bg_password_msgpack_persister*) _self->object;
-  
+
   free(self->persistence_filename);
   int i;
   for(i = 0; i < self->number_passwords; ++i) {
@@ -96,8 +96,12 @@ void bg_password_msgpack_persister_destroy(bg_password_repository* _self) {
 static bg_password* find_password_by_name(bg_password_msgpack_persister* self, const char *name, int* index_found) {
 	bg_password* password = NULL;
 	int i;
+  char name_[BLURGATHER_PWD_MAX_NAME_LEN];
+  memset(name_, 0, BLURGATHER_PWD_MAX_NAME_LEN);
+  strcat(name_, name);
+
 	for(i = 0; i < self->number_passwords; ++i) {
-		if(memcmp(bg_password_name(self->password_array[i]), name, BLURGATHER_PWD_MAX_NAME_LEN) == 0) {
+		if(memcmp(bg_password_name(self->password_array[i]), name_, BLURGATHER_PWD_MAX_NAME_LEN) == 0) {
 			password = self->password_array[i];
 			if(index_found) {
 				*index_found = i;
@@ -127,7 +131,7 @@ int bg_password_msgpack_persister_add(bg_password_repository* _self, bg_password
 	if(!password) {
 		return add_new_password(self, _password);
 	}
-	return 0;
+	return -1;
 }
 
 int bg_password_msgpack_persister_remove(bg_password_repository* _self, const char *name) {
