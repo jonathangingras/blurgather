@@ -1,5 +1,5 @@
-#include "utilities.h"
-#include "password.h"
+#include "blurgather/utilities.h"
+#include "blurgather/password.h"
 
 struct bg_password {
 	void (* destroy)(bg_password* self);
@@ -76,6 +76,7 @@ int bg_password_crypt(bg_password* self) {
 	self->crypted = 1;
 
 	clean_memcpy(self->value, buffer, self->value_length);
+
 	return 0;
 }
 

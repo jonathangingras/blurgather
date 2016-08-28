@@ -1,16 +1,16 @@
 #include <sweetgreen/sweetgreen.h>
 
-#include "utilities.h"
-#include "mcrypt_cryptor.h"
-#include "password.h"
-#include "mcrypt_iv.h"
+#include "blurgather/utilities.h"
+#include "blurgather/mcrypt_cryptor.h"
+#include "blurgather/password.h"
+#include "blurgather/mcrypt_iv.h"
 
 #define PLAIN_TEXT_PWD "i am a very secret password"
 #define PLAIN_SECRET_KEY "some secret key"
 #define PLAIN_IV "1234567891234567"
 
 bg_mcrypt_cryptor cryptor;
-bg_secret_key secret_key;
+bg_secret_key_t *secret_key;
 IV_t iv;
 char buffer[BLURGATHER_PWD_MAX_VALUE_LEN];
 size_t buffer_length;
@@ -33,10 +33,9 @@ sweetgreen_setup(cryptor) {
   memset(buffer, 0, BLURGATHER_PWD_MAX_VALUE_LEN);
   strcat(buffer, PLAIN_TEXT_PWD);
   buffer_length = strlen(buffer);
-  
-  bg_secret_key_init(&secret_key);
-  secret_key.update(&secret_key, PLAIN_SECRET_KEY, strlen(PLAIN_SECRET_KEY) + 1);
-  cryptor.encryptor.set_secret_key(&cryptor.encryptor, &secret_key);
+
+  secret_key = bg_secret_key_new(PLAIN_SECRET_KEY, strlen(PLAIN_SECRET_KEY));
+  cryptor.encryptor.set_secret_key(&cryptor.encryptor, secret_key);
   
   bg_mcrypt_iv_init(&iv);
   memcpy(iv.value, PLAIN_IV, strlen(PLAIN_IV));
@@ -54,9 +53,8 @@ sweetgreen_test_define(uninitialized_key_iv_cryptor, cryptReturnsErrorWhenSecret
 }
 
 sweetgreen_test_define(uninitialized_key_iv_cryptor, cryptReturnsErrorWhenIVNotSet) {
-  bg_secret_key_init(&secret_key);
-  secret_key.update(&secret_key, PLAIN_SECRET_KEY, strlen(PLAIN_SECRET_KEY) + 1);
-  cryptor.encryptor.set_secret_key(&cryptor.encryptor, &secret_key);
+  secret_key = bg_secret_key_new(PLAIN_SECRET_KEY, strlen(PLAIN_SECRET_KEY));
+  cryptor.encryptor.set_secret_key(&cryptor.encryptor, secret_key);
 
   sweetgreen_expect_equal(-2, cryptor.encryptor.crypt(&cryptor.encryptor, buffer, buffer_length, BLURGATHER_PWD_MAX_VALUE_LEN, &buffer_length));
 }
@@ -66,16 +64,15 @@ sweetgreen_test_define(uninitialized_key_iv_cryptor, decryptReturnsErrorWhenSecr
 }
 
 sweetgreen_test_define(uninitialized_key_iv_cryptor, decryptReturnsErrorWhenIVNotSet) {
-  bg_secret_key_init(&secret_key);
-  secret_key.update(&secret_key, PLAIN_SECRET_KEY, strlen(PLAIN_SECRET_KEY) + 1);
-  cryptor.decryptor.set_secret_key(&cryptor.decryptor, &secret_key);
+  secret_key = bg_secret_key_new(PLAIN_SECRET_KEY, strlen(PLAIN_SECRET_KEY));
+  cryptor.decryptor.set_secret_key(&cryptor.decryptor, secret_key);
 
   sweetgreen_expect_equal(-2, cryptor.decryptor.decrypt(&cryptor.decryptor, buffer, buffer_length, BLURGATHER_PWD_MAX_VALUE_LEN, &buffer_length));
 }
 
 sweetgreen_test_define(cryptor, settingSecretKeyAndIVEffective) {
-  sweetgreen_expect_equal_memory(cryptor.secret_key->value, PLAIN_SECRET_KEY, strlen(PLAIN_SECRET_KEY));
-  sweetgreen_expect_equal(strlen(PLAIN_SECRET_KEY) + 1, cryptor.secret_key->length);
+  sweetgreen_expect_equal_memory(bg_secret_key_data(cryptor.secret_key), PLAIN_SECRET_KEY, strlen(PLAIN_SECRET_KEY));
+  sweetgreen_expect_equal(strlen(PLAIN_SECRET_KEY), bg_secret_key_length(cryptor.secret_key));
   sweetgreen_expect_equal_memory(cryptor.iv->value, PLAIN_IV, 16);
 }
 

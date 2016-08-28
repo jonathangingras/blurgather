@@ -21,7 +21,7 @@ struct bg_mcrypt_cryptor {
 	bg_encryptor encryptor;
 	bg_decryptor decryptor;
 
-	bg_secret_key* secret_key;
+	bg_secret_key_t* secret_key;
 	IV_t* iv;
 };
 

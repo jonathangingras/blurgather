@@ -1,7 +1,7 @@
-add_library(kiki_utilities
+add_library(bg_utilities
     utilities.c
 )
-install(TARGETS kiki_utilities DESTINATION lib)
+install(TARGETS bg_utilities DESTINATION lib)
 
 add_library(blurgather
     stream.c
@@ -14,10 +14,11 @@ add_library(blurgather
     secret_key.c
     iv.c
     mcrypt_iv.c
+    string.c
 )
 
 target_link_libraries(blurgather
-    kiki_utilities
+    bg_utilities
     mcrypt
     ${msgpack-static}
 )

@@ -1,8 +1,8 @@
 #include <sweetgreen/sweetgreen.h>
 
-#include "password.h"
-#include "encryptor.h"
-#include "decryptor.h"
+#include "blurgather/password.h"
+#include "blurgather/encryptor.h"
+#include "blurgather/decryptor.h"
 
 
 typedef struct {

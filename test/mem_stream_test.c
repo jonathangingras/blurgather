@@ -1,6 +1,6 @@
 #include <string.h>
 
-#include "stream.h"
+#include "blurgather/stream.h"
 
 #include <sweetgreen/sweetgreen.h>
 

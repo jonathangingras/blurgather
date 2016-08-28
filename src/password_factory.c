@@ -1,6 +1,5 @@
-#include "password_factory.h"
+#include "blurgather/password_factory.h"
 
-static bg_password* bg_password_factory_new_password(bg_password_factory* self);
 
 bg_password_factory* bg_password_factory_init(bg_password_factory* _self,
                                                        IV_init_callback iv_initializer,
@@ -14,9 +13,7 @@ bg_password_factory* bg_password_factory_init(bg_password_factory* _self,
 	self->encryptor = encryptor;
 	self->decryptor = decryptor;
 
-	self->new_password = &bg_password_factory_new_password;
-
-        return self;
+  return self;
 }
 
 void bg_password_factory_free(bg_password_factory* self) {

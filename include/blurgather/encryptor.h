@@ -16,7 +16,7 @@ struct bg_encryptor {
 
 	int (* crypt)(bg_encryptor *self, void *memory, size_t memlen, size_t max_length, size_t *writelen);
 	void (* set_iv)(bg_encryptor* self, IV_t* iv);
-	int (* set_secret_key)(bg_encryptor* self, bg_secret_key* secret_key);
+	int (* set_secret_key)(bg_encryptor* self, bg_secret_key_t* secret_key);
 };
 
 #ifdef __cplusplus

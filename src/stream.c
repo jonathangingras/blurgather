@@ -1,7 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "stream.h"
+#include "blurgather/stream.h"
 
 struct bg_stream_vtable {
   void (* close)(bg_stream *stream);

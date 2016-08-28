@@ -1,4 +1,4 @@
-#include "password_msgpack_persister.h"
+#include "blurgather/password_msgpack_persister.h"
 #include "msgpack_serialize.h"
 
 static void bg_password_msgpack_persister_destroy(bg_password_repository* _self);
@@ -29,7 +29,7 @@ bg_password_msgpack_persister* bg_password_msgpack_persister_init(bg_password_ms
 	bg_password_msgpack_persister* self = _self ? _self : (bg_password_msgpack_persister*) malloc(sizeof(bg_password_msgpack_persister));
 	
         self->repository.object = (void *) self;
-	self->repository.vtable = &bg_password_msgpack_persister_vtable;    
+	self->repository.vtable = &bg_password_msgpack_persister_vtable;
 
 	self->password_factory = password_factory;
 	self->number_passwords = 0;

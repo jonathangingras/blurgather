@@ -1,12 +1,13 @@
 #include <unistd.h>
 #include <assert.h>
+#include <string.h>
 
-#include "password.h"
-#include "password_factory.h"
-#include "mcrypt_cryptor.h"
-#include "password_msgpack_persister.h"
-#include "utilities.h"
-#include "mcrypt_iv.h"
+#include "blurgather/password.h"
+#include "blurgather/password_factory.h"
+#include "blurgather/mcrypt_cryptor.h"
+#include "blurgather/password_msgpack_persister.h"
+#include "blurgather/utilities.h"
+#include "blurgather/mcrypt_iv.h"
 #include "utils.h"
 #include "clipboard.h"
 
@@ -14,7 +15,7 @@
 #define CONFIRMATION_NEEDED     1
 #define CONFIRMATION_NOT_NEEDED 0
 
-int unlock_pwd_mng(bg_secret_key* secret_key, int confirmation_needed);
+int unlock_pwd_mng(bg_secret_key_t* secret_key, int confirmation_needed);
 void getfield(char* out, const char* showing, size_t max_length);
 
 char *(*blur_getmasterpass)(const char *showing) = &getpass;
@@ -22,7 +23,7 @@ char *(*blur_getpass)(const char *showing) = &getpass;
 void (*blur_getnamefield)(char *output, const char *showing, size_t max_lenght) = &getfield;
 void (*blur_getdescriptionfield)(char *output, const char *showing, size_t max_lenght) = &getfield;
 
-int unlock_pwd_mng(bg_secret_key* secret_key, int confirmation) {
+int unlock_pwd_mng(bg_secret_key_t* secret_key, int confirmation) {
 	init_char_array(password1, BLURGATHER_PWD_MAX_VALUE_LEN);
 	init_char_array(password2, BLURGATHER_PWD_MAX_VALUE_LEN);
 
@@ -34,14 +35,14 @@ int unlock_pwd_mng(bg_secret_key* secret_key, int confirmation) {
 		if(strcmp(password1, password2)) { return -1; }
   }
 
-	return secret_key->update(secret_key, lened_str(password));
+	return bg_secret_key_update(secret_key, lened_str(password));
 }
 
 void getfield(char* out, const char* showing, size_t max_length) {
 	printf("%s", showing);
 	fgets(out, max_length, stdin);
 	fflush(stdin);
-	int i;
+	size_t i;
 	for(i = max_length - 1; i > -1; --i) {
 		if(out[i] == '\n') {
 			out[i] = 0;
@@ -69,7 +70,7 @@ char *getpass_fixed(const char *showing) {
 }
 
 int create_password_from_user(bg_password_factory* password_factory) {
-	bg_password* password = password_factory->new_password(password_factory);
+	bg_password* password = bg_password_factory_new_password(password_factory);
 
 	init_char_array(name, BLURGATHER_PWD_MAX_NAME_LEN);
 	blur_getnamefield(name, "password name: ", BLURGATHER_PWD_MAX_NAME_LEN);
@@ -100,7 +101,7 @@ int create_password_from_user(bg_password_factory* password_factory) {
 	return return_value;
 }
 
-int add_password(bg_password_factory* password_factory, bg_password_repository* repository, bg_secret_key* secret_key) {
+int add_password(bg_password_factory* password_factory, bg_password_repository* repository, bg_secret_key_t* secret_key) {
 	if(unlock_pwd_mng(secret_key, CONFIRMATION_NEEDED)) {
 		fprintf(stderr, "master password values do not match!\n");
 		return 1;
@@ -142,7 +143,7 @@ int print_pwd_name(bg_password *password, void *output_stream) {
   return 0;
 }
 
-int list_password_names(FILE *output_stream, bg_password_repository *repo, bg_secret_key *secret_key) {
+int list_password_names(FILE *output_stream, bg_password_repository *repo, bg_secret_key_t *secret_key) {
   if(unlock_pwd_mng(secret_key, CONFIRMATION_NOT_NEEDED)) {
 		fprintf(stderr, "could not unlock master key!");
 		return 1;
@@ -151,7 +152,7 @@ int list_password_names(FILE *output_stream, bg_password_repository *repo, bg_se
   return bg_pwd_repository_foreach(repo, &print_pwd_name, output_stream);
 }
 
-int send_password_to_user(bg_password_repository* repository, const char* name, bg_secret_key* secret_key) {
+int send_password_to_user(bg_password_repository* repository, const char* name, bg_secret_key_t *secret_key) {
 	bg_password* password = find_password_by_attribute(repository, (void*)name, password_compare_names);
 
 	if(!password) {
@@ -209,7 +210,7 @@ int dump_password(bg_password *pwd, void *file) {
   return 0;
 }
 
-int migrate_passwords_to_file(bg_password_repository *repo, const char *filename, bg_secret_key* secret_key) {
+int migrate_passwords_to_file(bg_password_repository *repo, const char *filename, bg_secret_key_t* secret_key) {
   if(unlock_pwd_mng(secret_key, CONFIRMATION_NEEDED)) {
 		fprintf(stderr, "could not unlock master key!");
 		return 1;
@@ -228,7 +229,7 @@ int migrate_passwords_to_file(bg_password_repository *repo, const char *filename
   return 0;
 }
 
-int remove_password(bg_password_repository *repo, const char *name, bg_secret_key *secret_key) {
+int remove_password(bg_password_repository *repo, const char *name, bg_secret_key_t *secret_key) {
   if(unlock_pwd_mng(secret_key, CONFIRMATION_NEEDED)) {
     fprintf(stderr, "could not unlock password manager!");
     return 1;

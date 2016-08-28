@@ -2,10 +2,10 @@
 #define _KIKI_MSGPACK_SERIALIZE_H_
 
 #include <msgpack.h>
-#include "utilities.h"
-#include "password.h"
-#include "password_factory.h"
-#include "password_msgpack_persister.h"
+#include "blurgather/utilities.h"
+#include "blurgather/password.h"
+#include "blurgather/password_factory.h"
+#include "blurgather/password_msgpack_persister.h"
 
 #ifdef __cplusplus
 extern "C" {

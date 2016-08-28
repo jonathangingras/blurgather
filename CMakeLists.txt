@@ -5,6 +5,8 @@ project(blurgather)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(EXTERN_PREFIX ${CMAKE_SOURCE_DIR}/extern)
+file(MAKE_DIRECTORY ${EXTERN_PREFIX})
 
 if(ANDROID)
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/msgpack-c/include)
@@ -19,13 +21,11 @@ else()
 endif()
 
 #includes
+include_directories(${EXTERN_PREFIX}/include)
 include_directories(include)
-include_directories(include/kiki)
-include_directories(include/blurgather)
 
 #install paths
 install(DIRECTORY include/blurgather DESTINATION include)
-install(DIRECTORY include/kiki DESTINATION include)
 
 #do not compile tests by default
 option(WITH_TESTS "compile tests" OFF)

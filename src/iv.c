@@ -1,5 +1,5 @@
 #include <string.h>
-#include "iv.h"
+#include "blurgather/iv.h"
 
 int bg_iv_copy(IV_t *self, const IV_t *iv) {
   if(iv->length != self->length) {

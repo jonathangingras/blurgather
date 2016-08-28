@@ -95,7 +95,7 @@ int bg_persistence_msgpack_deserialize_password_array(bg_password_msgpack_persis
 	int i, error_value;
 	msgpack_object* ptr = deserialized.via.array.ptr;
 	for(i = 0; i < deserialized.via.array.size; ++i) {
-		bg_password* password = factory->new_password(factory);
+		bg_password* password = bg_password_factory_new_password(factory);
 		error_value = bg_persistence_msgpack_deserialize_password(ptr + i, password);
 		if(error_value) { return error_value; }
 		error_value = bg_password_save(password);

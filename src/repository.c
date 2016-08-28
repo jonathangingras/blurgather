@@ -1,4 +1,4 @@
-#include "password_repository.h"
+#include "blurgather/password_repository.h"
 
 void bg_pwd_repository_destroy(bg_password_repository* self) {
   self->vtable->destroy(self);
