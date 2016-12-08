@@ -78,7 +78,7 @@ int create_password_from_user(bg_password_factory* password_factory) {
 	init_char_array(description, BLURGATHER_PWD_MAX_DESCRIPTION_LEN);
 	blur_getdescriptionfield(description, "description: ", BLURGATHER_PWD_MAX_DESCRIPTION_LEN);
 
-        bg_password_update_name(password, name);
+	bg_password_update_name(password, name);
 	bg_password_update_description(password, description);
 
 	init_char_array(value1, BLURGATHER_PWD_MAX_VALUE_LEN);

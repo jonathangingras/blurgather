@@ -28,7 +28,7 @@ include_directories(include)
 install(DIRECTORY include/blurgather DESTINATION include)
 
 #do not compile tests by default
-option(WITH_TESTS "compile tests" OFF)
+option(WITH_TESTS "compile tests" ON)
 
 #subdirectories
 add_subdirectory(src)

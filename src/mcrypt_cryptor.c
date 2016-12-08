@@ -1,113 +1,60 @@
 #include <stdio.h>
+#include <mcrypt.h>
+#include <blurgather/iv.h>
+#include <blurgather/string.h>
+#include <blurgather/secret_key.h>
+#include <blurgather/cryptor.h>
+#include <blurgather/urandom_iv.h>
 
-#include "blurgather/utilities.h"
-#include "blurgather/mcrypt_cryptor.h"
+int bg_mcrypt_aes256_encrypt(void *memory, size_t memlen, const bg_secret_key_t *secret_key, const bg_iv_t *iv) {
+  int error_code = 0;
+  MCRYPT td = mcrypt_module_open("rijndael-256", NULL, "cfb", NULL);
 
-static void bg_mcrypt_cryptor_destroy(bg_mcrypt_cryptor* self);
-static int bg_mcrypt_cryptor_crypt(bg_encryptor* _self, void *memory, size_t memlen, size_t max_length, size_t *writelen);
-static int bg_mcrypt_cryptor_decrypt(bg_decryptor* _self, void *memory, size_t memlen, size_t max_length, size_t *writelen);
-static void bg_mcrypt_cryptor_set_iv(bg_encryptor* _self, IV_t*);
-static int bg_mcrypt_cryptor_set_secret_key(bg_encryptor* _self, bg_secret_key_t*);
+  mcrypt_generic_init(td,
+                      (void*)bg_secret_key_data(secret_key),
+                      bg_secret_key_length(secret_key),
+                      (void *)bg_iv_data(iv));
 
-bg_mcrypt_cryptor* bg_mcrypt_cryptor_init(bg_mcrypt_cryptor* _self) {
-	bg_mcrypt_cryptor* self = _self;
-	if(!_self) { self = (bg_mcrypt_cryptor*) malloc(sizeof(bg_mcrypt_cryptor)); }
+  error_code = mcrypt_generic(td, memory, memlen);
 
-	self->secret_key = bg_secret_key_new(NULL, 0);
-	self->iv = NULL;
+  mcrypt_generic_deinit(td);
+  mcrypt_module_close(td);
 
-	self->destroy = &bg_mcrypt_cryptor_destroy;
-
-	self->encryptor.object = (void*) self;
-	self->encryptor.crypt = &bg_mcrypt_cryptor_crypt;
-	self->encryptor.set_iv = &bg_mcrypt_cryptor_set_iv;
-	self->encryptor.set_secret_key = &bg_mcrypt_cryptor_set_secret_key;
-
-	self->decryptor.object = (void*) self;
-	self->decryptor.decrypt = &bg_mcrypt_cryptor_decrypt;
-	self->decryptor.set_iv = (void (*)(bg_decryptor*,IV_t*))&bg_mcrypt_cryptor_set_iv;
-	self->decryptor.set_secret_key = (int (*)(bg_decryptor*,bg_secret_key_t*))&bg_mcrypt_cryptor_set_secret_key;
-
-	return self;
+  return error_code;
 }
 
-void bg_mcrypt_cryptor_free(bg_mcrypt_cryptor* self) {
-	self->destroy(self);
-	free(self);
+int bg_mcrypt_aes256_decrypt(void *memory, size_t memlen, const bg_secret_key_t *secret_key, const bg_iv_t *iv) {
+  int error_code = 0;
+  MCRYPT td = mcrypt_module_open("rijndael-256", NULL, "cfb", NULL);
+
+  mcrypt_generic_init(td,
+                      (void*)bg_secret_key_data(secret_key),
+                      bg_secret_key_length(secret_key),
+                      (void *)bg_iv_data(iv));
+
+  error_code = mdecrypt_generic(td, memory, memlen);
+
+  mcrypt_generic_deinit(td);
+  mcrypt_module_close(td);
+
+  return error_code;
 }
 
-//methods
-
-void bg_mcrypt_cryptor_destroy(bg_mcrypt_cryptor* self) {
-	bg_secret_key_destroy(self->secret_key);
+size_t bg_mcrypt_iv32_iv_length() {
+  return 32;
 }
 
-int bg_mcrypt_cryptor_crypt(bg_encryptor* _self, void *memory, size_t memlen, size_t max_length, size_t *writelen) {
-	bg_mcrypt_cryptor* self = (bg_mcrypt_cryptor*) _self->object;
-	if(!bg_secret_key_length(self->secret_key)) { return -1; }
-	if(!self->iv) { return -2; }
-
-        size_t input_length = memlen;
-
-	MCRYPT mcrypt_thread_descriptor = mcrypt_module_open("rijndael-256", NULL, "cbc", NULL);
-
-	int block_size = mcrypt_enc_get_block_size(mcrypt_thread_descriptor);
-
-	while(input_length % block_size) { ++input_length; }
-
-  if(writelen) { *writelen = input_length; }
-
-  if(input_length > max_length) {
-    mcrypt_module_close(mcrypt_thread_descriptor);
-    return -3;
-  }
-
-	mcrypt_generic_init(mcrypt_thread_descriptor, bg_secret_key_data(self->secret_key),
-						bg_secret_key_length(self->secret_key), self->iv->value);
-	mcrypt_generic(mcrypt_thread_descriptor, memory, input_length);
-	mcrypt_generic_deinit(mcrypt_thread_descriptor);
-	mcrypt_module_close(mcrypt_thread_descriptor);
-
-	return 0;
+int bg_mcrypt_iv32_generate_iv(bg_iv_t **output) {
+  return bg_get_devurandom_iv((unsigned char *)bg_iv_data(*output), 32);
 }
 
-int bg_mcrypt_cryptor_decrypt(bg_decryptor* _self, void *memory, size_t memlen, size_t max_length, size_t *writelen) {
-	bg_mcrypt_cryptor* self = (bg_mcrypt_cryptor*) _self->object;
-	if(!bg_secret_key_length(self->secret_key)) return -1;
-	if(!self->iv) return -2;
+const static bg_cryptor_t bg_mcrypt_aes256 = {
+  .encrypt = &bg_mcrypt_aes256_encrypt,
+  .decrypt = &bg_mcrypt_aes256_decrypt,
+  .iv_length = &bg_mcrypt_iv32_iv_length,
+  .generate_iv = &bg_mcrypt_iv32_generate_iv
+};
 
-        size_t input_length = memlen;
-
-	MCRYPT mcrypt_thread_descriptor = mcrypt_module_open("rijndael-256", NULL, "cbc", NULL);
-	int block_size = mcrypt_enc_get_block_size(mcrypt_thread_descriptor);
-	if(input_length % block_size != 0 || input_length > max_length) {
-    mcrypt_module_close(mcrypt_thread_descriptor);
-    return -3;
-  }
-
-	mcrypt_generic_init(mcrypt_thread_descriptor, bg_secret_key_data(self->secret_key),
-                        bg_secret_key_length(self->secret_key), self->iv->value);
-	mdecrypt_generic(mcrypt_thread_descriptor, memory, input_length);
-	mcrypt_generic_deinit(mcrypt_thread_descriptor);
-	mcrypt_module_close(mcrypt_thread_descriptor);
-
-	if(writelen) { *writelen = bg_reverse_memlen(memory, input_length); }
-
-	return 0;
-}
-
-void bg_mcrypt_cryptor_set_iv(bg_encryptor* _self, IV_t* iv) {
-	bg_mcrypt_cryptor* self = (bg_mcrypt_cryptor*) _self->object;
-	self->iv = iv;
-}
-
-int bg_mcrypt_cryptor_set_secret_key(bg_encryptor* _self,
-                                                          bg_secret_key_t* secret_key) {
-	bg_mcrypt_cryptor* self = (bg_mcrypt_cryptor*) _self->object;
-
-	if(self->secret_key == secret_key) { return -1; }
-
-	bg_secret_key_destroy(self->secret_key);
-	self->secret_key = secret_key;
-	return 0;
+const bg_cryptor_t *bg_mcrypt_cryptor() {
+  return &bg_mcrypt_aes256;
 }

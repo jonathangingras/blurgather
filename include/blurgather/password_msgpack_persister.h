@@ -1,13 +1,11 @@
 #ifndef BLURGATHER_PASSWORD_MSGPACK_PERSISTER_H
 #define BLURGATHER_PASSWORD_MSGPACK_PERSISTER_H
 
-#include <msgpack.h>
-
 #include <stdlib.h>
-
+#include "context.h"
 #include "password.h"
-#include "password_repository.h"
-#include "password_factory.h"
+#include "repository.h"
+#include "string.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,10 +17,10 @@ struct bg_password_msgpack_persister;
 typedef struct bg_password_msgpack_persister bg_password_msgpack_persister;
 
 struct bg_password_msgpack_persister {
-	bg_password_repository repository;
-	bg_password_factory* password_factory;
+	bg_repository_t repository;
+  bg_context *ctx;
 
-	char* persistence_filename;
+  bg_string *persistence_filename;
 
 	size_t number_passwords;
 	bg_password_array password_array;
@@ -30,8 +28,8 @@ struct bg_password_msgpack_persister {
 };
 
 bg_password_msgpack_persister* bg_password_msgpack_persister_init(bg_password_msgpack_persister* msgpack_persister,
-                                                                         const char* fileName,
-                                                                         bg_password_factory* password_factory);
+                                                                  bg_context *ctx,
+                                                                  const bg_string *filename);
 
 void bg_password_msgpack_persister_free(bg_password_msgpack_persister* msgpack_persister);
 
@@ -39,4 +37,4 @@ void bg_password_msgpack_persister_free(bg_password_msgpack_persister* msgpack_p
 }
 #endif
 
-#endif //BLURGATHER_PASSWORD_MSGPACK_PERSISTER_H
+#endif /* BLURGATHER_PASSWORD_MSGPACK_PERSISTER_H */

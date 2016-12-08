@@ -2,9 +2,7 @@
 #define _KIKI_MSGPACK_SERIALIZE_H_
 
 #include <msgpack.h>
-#include "blurgather/utilities.h"
 #include "blurgather/password.h"
-#include "blurgather/password_factory.h"
 #include "blurgather/password_msgpack_persister.h"
 
 #ifdef __cplusplus
@@ -17,7 +15,6 @@ int bg_persistence_msgpack_deserialize_password(msgpack_object* object, bg_passw
 void bg_persistence_msgpack_serialize_password_array(bg_password_msgpack_persister* self,
                                                                 msgpack_sbuffer* buffer);
 int bg_persistence_msgpack_deserialize_password_array(bg_password_msgpack_persister* self,
-                                                                 bg_password_factory* factory,
                                                                  unsigned char* data, size_t length);
 
 #ifdef __cplusplus

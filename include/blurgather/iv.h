@@ -2,29 +2,22 @@
 #define BLURGATHER_IV_H
 
 #include <stdlib.h>
+#include <blurgather/context.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct IV_t;
-typedef struct IV_t IV_t;
+struct bg_iv;
+typedef struct bg_iv bg_iv_t;
 
-struct IV_t {
-  void (* destroy)(IV_t* self);
-  
-  unsigned char* value;
-  size_t length;
-  
-  int (* randomize)(IV_t* self);
-};
-
-typedef IV_t* (*IV_init_callback)(IV_t* iv);
-
-int bg_iv_copy(IV_t *dst, const IV_t *src);
+bg_iv_t *bg_iv_new(bg_context *ctx, const void *data, size_t length);
+const void *bg_iv_data(const bg_iv_t *iv);
+size_t bg_iv_length(const bg_iv_t *iv);
+void bg_iv_free(bg_iv_t *iv);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //BLURGATHER_IV_H
+#endif /* BLURGATHER_IV_H */
