@@ -8,9 +8,9 @@ struct bg_password {
   bg_string *description;
   bg_string *value;
 
-  int crypted;
-
   bg_context *ctx;
+
+  int crypted;
 };
 
 size_t bg_password_size() {
@@ -136,6 +136,8 @@ int bg_password_update_value(bg_password *password, const bg_string *value) {
   bg_cryptor_generate_iv(cryptor, &password->iv);
   bg_string_clean_replace(password->value, bg_string_copy(value));
 
+  password->crypted = 0;
+
   return 0;
 }
 
@@ -149,13 +151,13 @@ bg_context *bg_password_ctx(bg_password *password) {
 
 int bg_password_fill_raw(bg_password *password, const bg_iv_t *iv, const void *crypted_value, size_t crypted_value_size) {
   if(crypted_value_size < 1) {
-  return -3;
+    return -3;
   }
   if(bg_string_length(password->value)) {
-  return -1;
+    return -1;
   }
-  if(!iv || password->value) {
-  return -2;
+  if(!iv) {
+    return -2;
   }
 
   *((bg_iv_t**)&password->iv) = (bg_iv_t*)iv;

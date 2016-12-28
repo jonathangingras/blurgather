@@ -45,7 +45,7 @@ void *bgctx_reallocate(bg_context *ctx, void *object, size_t size) {
   return ctx->allocator->reallocate(object, size);
 }
 
-int bgctx_finalise(bg_context *ctx) {
+int bgctx_finalize(bg_context *ctx) {
   /*TODO: actually implement*/
   return 0;
 }

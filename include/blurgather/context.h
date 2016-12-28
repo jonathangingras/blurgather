@@ -16,7 +16,7 @@ struct bg_allocator_t {
   void *(* const reallocate)(void *mem, size_t size);
 };
 
-/* manual initialisation */
+/* manual initialization */
 int bgctx_init(bg_context **ctx);
 int bgctx_register_repository(bg_context *ctx, bg_repository_t *repository);
 int bgctx_register_cryptor(bg_context *ctx, bg_cryptor_t *cryptor);
@@ -27,8 +27,8 @@ void *bgctx_allocate(bg_context *ctx, size_t size);
 void bgctx_deallocate(bg_context *ctx, void *object);
 void *bgctx_reallocate(bg_context *ctx, void *object, size_t size);
 
-/* deinitialisation */
-int bgctx_finalise(bg_context *ctx);
+/* finalization */
+int bgctx_finalize(bg_context *ctx);
 
 /* runtime password library lock/unlock */
 int bgctx_unlock(bg_context *ctx, bg_secret_key_t *secret_key);

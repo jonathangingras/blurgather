@@ -1,7 +1,9 @@
 
+add_library(bg_tests mocks.c)
+
 function(add_test_case test_case)
   add_executable(${test_case}_test ${test_case}_test.c)
-  target_link_libraries(${test_case}_test blurgather)
+  target_link_libraries(${test_case}_test blurgather bg_tests)
 endfunction()
 
 add_test_case(password)
