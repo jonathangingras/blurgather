@@ -10,7 +10,7 @@ before_install:
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   - sudo apt-get update -qq
 
-install: 
+install:
   - sudo apt-get install -y libmcrypt-dev gcc-5 g++-5
   - |
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
@@ -22,8 +22,7 @@ install:
 
 before_script:
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 60 --slave /usr/bin/g++ g++ /usr/bin/g++-5
-  - (mkdir build && cd build && /usr/local/build_env/cmake/bin/cmake -DWITH_TESTS=ON ..)
+  - (mkdir build && cd build && /usr/local/build_env/cmake/bin/cmake -DBUILD_TESTING=ON ..)
 
 script:
-  - (cd build && make)
-  - sh ./run_tests.sh
+  - (cd build && make && make test)
