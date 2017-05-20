@@ -12,6 +12,7 @@ typedef struct bg_string bg_string;
 
 bg_string *bg_string_new();
 bg_string *bg_string_from_char_array(const char *array, size_t length);
+bg_string *bg_string_from_str(const char *array);
 bg_string *bg_string_copy(const bg_string*);
 
 #define bg_string_free free
@@ -19,6 +20,7 @@ bg_string *bg_string_copy(const bg_string*);
 
 const char *bg_string_data(const bg_string *str);
 size_t bg_string_length(const bg_string *str);
+int bg_string_empty(const bg_string *str);
 
 void bg_string_clean(bg_string *str);
 bg_string *bg_string_cat(bg_string **str, const bg_string *catted);

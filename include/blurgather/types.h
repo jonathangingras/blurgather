@@ -14,6 +14,9 @@ typedef struct bg_secret_key_t bg_secret_key_t;
 struct bg_repository_t;
 typedef struct bg_repository_t bg_repository_t;
 
+struct bg_persister_t;
+typedef struct bg_persister_t bg_persister_t;
+
 struct bg_cryptor_t;
 typedef struct bg_cryptor_t bg_cryptor_t;
 

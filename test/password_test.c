@@ -1,6 +1,6 @@
 #include <sweetgreen/sweetgreen.h>
 
-#include "blurgather/password.h"
+#include <blurgather/password.h>
 #include "mocks.h"
 
 sweetgreen_setup(password) {
@@ -22,7 +22,14 @@ sweetgreen_setup(password) {
 
 
 sweetgreen_test_define(password, cannot_instantiate_password_with_a_cryptorless_ctx) {
-  bgctx_register_cryptor(ctx, NULL);
+  turnoff_debug();
+  reset_context();
+  reset_allocator();
+  bgctx_register_allocator(ctx, &mock_allocator);
+  reset_mock_cryptor();
+  reset_mock_repository();
+  bgctx_register_repository(ctx, &mock_repository);
+  reset_debug();
 
   bg_password *pwd = bg_password_new(ctx);
 
@@ -64,15 +71,8 @@ sweetgreen_test_define(password, crypt_returns_non_zero_when_already_crypted) {
   sweetgreen_expect_non_zero(bg_password_crypt(pwd));
 }
 
-sweetgreen_test_define(password, cannot_encrypt_when_NULL_cryptor) {
-  bg_password *pwd = bg_password_new(ctx);
-
-  bgctx_register_cryptor(ctx, NULL);
-
-  sweetgreen_expect_non_zero(bg_password_crypt(pwd));
-}
-
 sweetgreen_test_define(password, password_is_not_flagged_crypted_when_not_succesfully_crypted) {
+  mock_encrypt_return_value = 1;
   bg_password *pwd = bg_password_new(ctx);
 
   bgctx_register_cryptor(ctx, NULL);
@@ -96,6 +96,14 @@ sweetgreen_test_define(password, decrypt_returns_0_when_ok) {
   bg_password_crypt(pwd);
 
   sweetgreen_expect_zero(bg_password_decrypt(pwd));
+}
+
+sweetgreen_test_define(password, cannot_encrypt_when_NULL_cryptor) {
+  bg_password *pwd = bg_password_new(ctx);
+
+  bgctx_register_cryptor(ctx, NULL);
+
+  sweetgreen_expect_non_zero(bg_password_crypt(pwd));
 }
 
 sweetgreen_test_define(password, cannot_decrypt_when_NULL_cryptor) {
@@ -180,7 +188,7 @@ sweetgreen_test_define(password, repository_persist_not_called_when_update_value
   bg_string *new_value = bg_string_from_char_array(new_value_raw, strlen(new_value_raw));
   bg_password_update_value(pwd, new_value);
 
-  sweetgreen_expect_false(mock_repository_persist_called);
+  sweetgreen_expect_false(mock_persister_persist_called);
 }
 
 sweetgreen_test_define(password, password_is_flagged_not_crypted_when_update_value) {

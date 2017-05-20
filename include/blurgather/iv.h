@@ -12,6 +12,7 @@ struct bg_iv;
 typedef struct bg_iv bg_iv_t;
 
 bg_iv_t *bg_iv_new(bg_context *ctx, const void *data, size_t length);
+bg_iv_t *bg_iv_copy(bg_iv_t *iv);
 const void *bg_iv_data(const bg_iv_t *iv);
 size_t bg_iv_length(const bg_iv_t *iv);
 void bg_iv_free(bg_iv_t *iv);

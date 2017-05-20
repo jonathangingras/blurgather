@@ -26,6 +26,10 @@ bg_string *bg_string_from_char_array(const char *array, size_t length) {
   return str;
 }
 
+bg_string *bg_string_from_str(const char *array) {
+  return bg_string_from_char_array(array, strlen(array));
+}
+
 bg_string *bg_string_copy(const bg_string *copied) {
   return bg_string_from_char_array(bg_string_data(copied), bg_string_length(copied));
 }
@@ -36,6 +40,10 @@ void bg_string_clean(bg_string *str) {
 
 size_t bg_string_length(const bg_string *str) {
   return str->length;
+}
+
+int bg_string_empty(const bg_string *str) {
+  return str->length == 0;
 }
 
 const char *bg_string_data(const bg_string *str) {

@@ -16,7 +16,7 @@ extern "C" {
 bg_password *bg_password_new(bg_context *ctx);
 
 /* deserialize */
-int bg_password_fill_raw(bg_password *password, const bg_iv_t *iv, const void* crypted_value, size_t crypted_value_size);
+int bg_password_fill_raw(bg_password *password, bg_iv_t *iv, const void* crypted_value, size_t crypted_value_size);
 
 /* get context */
 bg_context *bg_password_ctx(bg_password *password);

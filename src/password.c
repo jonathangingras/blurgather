@@ -37,10 +37,10 @@ bg_password *bg_password_new(bg_context *ctx) {
 
 void bg_password_free(bg_password *self) {
   bg_iv_free(self->iv);
-  bg_string_free(self->name);
-  bg_string_free(self->description);
-  bg_string_free(self->value);
-  free(self);
+  bg_string_clean_free(self->name);
+  bg_string_clean_free(self->description);
+  bg_string_clean_free(self->value);
+  bgctx_deallocate(self->ctx, self);
 }
 
 
@@ -149,7 +149,7 @@ bg_context *bg_password_ctx(bg_password *password) {
   return password->ctx;
 }
 
-int bg_password_fill_raw(bg_password *password, const bg_iv_t *iv, const void *crypted_value, size_t crypted_value_size) {
+int bg_password_fill_raw(bg_password *password, bg_iv_t *iv, const void *crypted_value, size_t crypted_value_size) {
   if(crypted_value_size < 1) {
     return -3;
   }

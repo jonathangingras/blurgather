@@ -18,9 +18,12 @@ struct bg_allocator_t {
 
 /* manual initialization */
 int bgctx_init(bg_context **ctx);
-int bgctx_register_repository(bg_context *ctx, bg_repository_t *repository);
-int bgctx_register_cryptor(bg_context *ctx, bg_cryptor_t *cryptor);
 int bgctx_register_allocator(bg_context *ctx, bg_allocator_t *allocator);
+int bgctx_register_repository(bg_context *ctx, bg_repository_t *repository);
+int bgctx_register_persister(bg_context *ctx, bg_persister_t *persister);
+int bgctx_register_cryptor(bg_context *ctx, bg_cryptor_t *cryptor);
+int bgctx_seal(bg_context *ctx);
+int bgctx_sealed(bg_context *ctx);
 
 /* memory manipulation */
 void *bgctx_allocate(bg_context *ctx, size_t size);

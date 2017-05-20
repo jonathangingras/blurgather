@@ -5,6 +5,8 @@ FILE *logstream = NULL;
 
 int mock_encrypt_called = 0;
 int mock_decrypt_called = 0;
+int mock_encrypt_return_value = 0;
+int mock_decrypt_return_value = 0;
 int mock_cryptor_generate_iv_called = 0;
 bg_iv_t *mock_iv = NULL;
 char mock_iv_data[32] = "1111111111111111111111111111111";
@@ -44,22 +46,18 @@ void mock_repository_destroy(bg_repository_t *self);
 int mock_repository_add(bg_repository_t *self, bg_password *password);
 int mock_repository_get(bg_repository_t *self, const bg_string *name, bg_password **password);
 int mock_repository_remove(bg_repository_t *self, const bg_string *name);
-void mock_repository_sort(bg_repository_t *self);
+size_t mock_repository_count(bg_repository_t *self);
 bg_password_iterator mock_repository_begin(bg_repository_t *self);
 bg_password_iterator mock_repository_end(bg_repository_t *self);
-int mock_repository_load(bg_repository_t *self);
-int mock_repository_persist(bg_repository_t *self);
 
 struct bg_repository_vtable mock_repository_vtable = {
   .destroy = &mock_repository_destroy,
   .add = &mock_repository_add,
   .get = &mock_repository_get,
   .remove = &mock_repository_remove,
-  .sort = &mock_repository_sort,
+  .count = &mock_repository_count,
   .begin = &mock_repository_begin,
   .end = &mock_repository_end,
-  .load = &mock_repository_load,
-  .persist = &mock_repository_persist,
 };
 
 bg_repository_t mock_repository = {
@@ -67,6 +65,21 @@ bg_repository_t mock_repository = {
   .vtable = &mock_repository_vtable,
 };
 
+
+void mock_persister_destroy(bg_persister_t *self);
+int mock_persister_load(bg_persister_t *self);
+int mock_persister_persist(bg_persister_t *self);
+
+struct bg_persister_vtable mock_persister_vtable = {
+  .destroy = &mock_persister_destroy,
+  .load = &mock_persister_load,
+  .persist = &mock_persister_persist,
+};
+
+bg_persister_t mock_persister = {
+  .object = &mock_persister,
+  .vtable = &mock_persister_vtable,
+};
 
 /* implementation */
 
@@ -98,6 +111,8 @@ void reset_allocator() {
 void reset_mock_cryptor() {
   mock_encrypt_called = 0;
   mock_decrypt_called = 0;
+  mock_encrypt_return_value = 0;
+  mock_decrypt_return_value = 0;
   if(mock_iv) {
     bg_iv_free(mock_iv);
   }
@@ -109,9 +124,9 @@ void reset_mock_repository() {
   mock_repository_add_called = 0;
   mock_repository_get_called = 0;
   mock_repository_remove_called = 0;
-  mock_repository_sort_called = 0;
-  mock_repository_load_called = 0;
-  mock_repository_persist_called = 0;
+  mock_repository_count_called = 0;
+  mock_persister_load_called = 0;
+  mock_persister_persist_called = 0;
 }
 
 
@@ -131,6 +146,11 @@ void *mock_allocate(size_t size) {
 void mock_deallocate(void *object) {
   fprintf(logstream, "[Memory DEALLOCATION requested, address: %p] -->> ", object);
   fflush(logstream);
+
+  if(object == mock_iv) {
+    fprintf(logstream, "was mock memory\n");
+    return;
+  }
 
   free(object);
 
@@ -156,7 +176,8 @@ int mock_encrypt(void *memory,
                  const bg_secret_key_t *secret_key,
                  const bg_iv_t *iv) {
   mock_encrypt_called = 1;
-  return 0;
+
+  return mock_encrypt_return_value;
 }
 
 int mock_decrypt(void *memory,
@@ -164,7 +185,8 @@ int mock_decrypt(void *memory,
                  const bg_secret_key_t *secret_key,
                  const bg_iv_t *iv) {
   mock_decrypt_called = 1;
-  return 0;
+
+  return mock_decrypt_return_value;
 }
 
 size_t mock_iv_length() {
@@ -173,7 +195,7 @@ size_t mock_iv_length() {
 
 int mock_generate_iv(bg_iv_t **output) {
   mock_cryptor_generate_iv_called = 1;
-  *output = mock_iv;
+  *output = bg_iv_copy(mock_iv);
   return 0;
 }
 
@@ -184,9 +206,7 @@ int mock_repository_destroy_called = 0;
 int mock_repository_add_called = 0;
 int mock_repository_get_called = 0;
 int mock_repository_remove_called = 0;
-int mock_repository_sort_called = 0;
-int mock_repository_load_called = 0;
-int mock_repository_persist_called = 0;
+int mock_repository_count_called = 0;
 
 void mock_repository_destroy(bg_repository_t *self) {
   mock_repository_destroy_called = 1;
@@ -207,8 +227,9 @@ int mock_repository_remove(bg_repository_t *self, const bg_string *name) {
   return 0;
 }
 
-void mock_repository_sort(bg_repository_t *self) {
-  mock_repository_sort_called = 1;
+size_t mock_repository_count(bg_repository_t *self) {
+  mock_repository_count_called = 1;
+  return 0;
 }
 
 bg_password_iterator mock_repository_begin(bg_repository_t *self) {
@@ -221,12 +242,22 @@ bg_password_iterator mock_repository_end(bg_repository_t *self) {
   return it;
 }
 
-int mock_repository_load(bg_repository_t *self) {
-  mock_repository_load_called = 1;
+
+/* persister */
+
+int mock_persister_load_called = 0;
+int mock_persister_persist_called = 0;
+
+void mock_persister_destroy(bg_persister_t *self) {
+
+}
+
+int mock_persister_load(bg_persister_t *self) {
+  mock_persister_load_called = 1;
   return 0;
 }
 
-int mock_repository_persist(bg_repository_t *self) {
-  mock_repository_persist_called = 1;
+int mock_persister_persist(bg_persister_t *self) {
+  mock_persister_persist_called = 1;
   return 0;
 }

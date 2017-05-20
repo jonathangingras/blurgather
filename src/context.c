@@ -5,11 +5,15 @@
 #include "blurgather/password.h"
 #include "blurgather/repository.h"
 
+#define BGCTX_SEALED 0x1
+
 struct bg_context {
   bg_repository_t *repository;
   bg_cryptor_t *cryptor;
   bg_allocator_t *allocator;
+  bg_persister_t *persister;
   bg_secret_key_t *secret_key;
+  int flags;
 };
 
 int bgctx_init(bg_context **ctx) {
@@ -18,18 +22,44 @@ int bgctx_init(bg_context **ctx) {
   return 0;
 }
 
+int bgctx_seal(bg_context *ctx) {
+  ctx->flags |= ctx->flags & BGCTX_SEALED;
+  return 0;
+}
+
+int bgctx_sealed(bg_context *ctx) {
+  return ctx->flags & BGCTX_SEALED;
+}
+
+int bgctx_register_allocator(bg_context *ctx, bg_allocator_t *allocator) {
+  if(!ctx) { return -1; }
+  if(!allocator && (ctx->flags & BGCTX_SEALED)) { return -2; }
+
+  ctx->allocator = allocator;
+  return 0;
+}
+
 int bgctx_register_repository(bg_context *ctx, bg_repository_t *repository) {
+  if(!ctx) { return -1; }
+  if(!repository && (ctx->flags & BGCTX_SEALED)) { return -2; }
+
   ctx->repository = repository;
   return 0;
 }
 
-int bgctx_register_cryptor(bg_context *ctx, bg_cryptor_t *cryptor) {
-  ctx->cryptor = cryptor;
+int bgctx_register_persister(bg_context *ctx, bg_persister_t *persister) {
+  if(!ctx) { return -1; }
+  if(!persister && (ctx->flags & BGCTX_SEALED)) { return -2; }
+
+  ctx->persister = persister;
   return 0;
 }
 
-int bgctx_register_allocator(bg_context *ctx, bg_allocator_t *allocator) {
-  ctx->allocator = allocator;
+int bgctx_register_cryptor(bg_context *ctx, bg_cryptor_t *cryptor) {
+  if(!ctx) { return -1; }
+  if(!cryptor && (ctx->flags & BGCTX_SEALED)) { return -2; }
+
+  ctx->cryptor = cryptor;
   return 0;
 }
 

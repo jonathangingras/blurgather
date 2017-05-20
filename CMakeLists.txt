@@ -20,6 +20,8 @@ else()
   include(locate-sweetgreen.cmake)
 endif()
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
+
 #includes
 #include_directories(${EXTERN_PREFIX}/include)
 include_directories(include)

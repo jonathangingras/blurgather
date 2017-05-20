@@ -15,12 +15,10 @@ struct bg_repository_vtable {
   int (* const get)(bg_repository_t *self, const bg_string *name, bg_password **password);
   int (* const remove)(bg_repository_t *self, const bg_string *name);
 
-  void (* const sort)(bg_repository_t *self);
+  size_t (* const count)(bg_repository_t *self);
+
   bg_password_iterator (* const begin)(bg_repository_t *self);
   bg_password_iterator (* const end)(bg_repository_t *self);
-
-  int (* const load)(bg_repository_t *self);
-  int (* const persist)(bg_repository_t *self);
 };
 
 struct bg_repository_t {
@@ -29,18 +27,16 @@ struct bg_repository_t {
 };
 
 void bg_repository_destroy(bg_repository_t *self);
+void bg_repository_free(bg_repository_t *self);
 
 int bg_repository_add(bg_repository_t *self, bg_password *password);
 int bg_repository_get(bg_repository_t *self, const bg_string *name, bg_password **password);
 
 int bg_repository_remove(bg_repository_t *self, const bg_string *name);
-void bg_repository_sort(bg_repository_t *self);
+size_t bg_repository_count(bg_repository_t *self);
 
 bg_password_iterator bg_repository_begin(bg_repository_t *self);
 bg_password_iterator bg_repository_end(bg_repository_t *self);
-
-int bg_repository_load(bg_repository_t *self);
-int bg_repository_persist(bg_repository_t *self);
 
 int bg_repository_foreach(bg_repository_t *self, int (* callback)(bg_password *, void *), void *output);
 

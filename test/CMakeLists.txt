@@ -7,7 +7,7 @@ function(add_test_case test_case)
 endfunction()
 
 add_test_case(password)
-#add_test_case(password_msgpack_persister)
+add_test_case(array_repository)
 #add_test_case(password_msgpack_persister_integration)
 #add_test_case(mcrypt_cryptor)
 add_test_case(mem_stream)
