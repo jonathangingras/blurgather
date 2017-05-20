@@ -178,7 +178,7 @@ sweetgreen_test_define(password, cryptor_generate_iv_called_when_update_value) {
   bg_password_update_value(pwd, new_value);
 
   sweetgreen_expect_true(mock_cryptor_generate_iv_called);
-  sweetgreen_expect_same_address(mock_iv, bg_password_iv(pwd));
+  sweetgreen_expect_equal_memory(bg_iv_data(mock_iv), bg_iv_data(bg_password_iv(pwd)), bg_iv_length(mock_iv));
 }
 
 sweetgreen_test_define(password, repository_persist_not_called_when_update_value) {

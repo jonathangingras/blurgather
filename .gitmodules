@@ -1,0 +1,3 @@
+[submodule "CMakeShortcuts"]
+	path = CMakeShortcuts
+	url = git@github.com:jonathangingras/CMakeShortcuts.git

@@ -34,7 +34,7 @@ void bg_msgpack_persister_destroy(bg_persister_t *_self) {
 }
 
 void bg_msgpack_persister_free(bg_msgpack_persister *self) {
-  bg_msgpack_persister_destroy(self->persister);
+  bg_msgpack_persister_destroy(&self->persister);
   bgctx_deallocate(self->ctx, self);
 }
 
