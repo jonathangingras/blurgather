@@ -6,12 +6,27 @@
 #include <blurgather/cryptor.h>
 #include <blurgather/urandom_iv.h>
 
+static int check_args(const bg_secret_key_t *secret_key, const bg_iv_t *iv) {
+  if(!secret_key) {
+    return -1;
+  }
+  if(!iv) {
+    return -2;
+  }
+  return 0;
+}
+
 int bg_mcrypt_aes256_encrypt(void *memory, size_t memlen, const bg_secret_key_t *secret_key, const bg_iv_t *iv) {
   int error_code = 0;
+
+  if((error_code = check_args(secret_key, iv))) {
+    return error_code;
+  }
+
   MCRYPT td = mcrypt_module_open("rijndael-256", NULL, "cfb", NULL);
 
   mcrypt_generic_init(td,
-                      (void*)bg_secret_key_data(secret_key),
+                      (void *)bg_secret_key_data(secret_key),
                       bg_secret_key_length(secret_key),
                       (void *)bg_iv_data(iv));
 
@@ -25,10 +40,15 @@ int bg_mcrypt_aes256_encrypt(void *memory, size_t memlen, const bg_secret_key_t 
 
 int bg_mcrypt_aes256_decrypt(void *memory, size_t memlen, const bg_secret_key_t *secret_key, const bg_iv_t *iv) {
   int error_code = 0;
+
+  if((error_code = check_args(secret_key, iv))) {
+    return error_code;
+  }
+
   MCRYPT td = mcrypt_module_open("rijndael-256", NULL, "cfb", NULL);
 
   mcrypt_generic_init(td,
-                      (void*)bg_secret_key_data(secret_key),
+                      (void *)bg_secret_key_data(secret_key),
                       bg_secret_key_length(secret_key),
                       (void *)bg_iv_data(iv));
 
