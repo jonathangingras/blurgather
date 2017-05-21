@@ -47,8 +47,7 @@ int mock_repository_add(bg_repository_t *self, bg_password *password);
 int mock_repository_get(bg_repository_t *self, const bg_string *name, bg_password **password);
 int mock_repository_remove(bg_repository_t *self, const bg_string *name);
 size_t mock_repository_count(bg_repository_t *self);
-bg_password_iterator mock_repository_begin(bg_repository_t *self);
-bg_password_iterator mock_repository_end(bg_repository_t *self);
+int mock_repository_foreach(bg_repository_t *self, int (* callback)(bg_password *, void *), void *output);
 
 struct bg_repository_vtable mock_repository_vtable = {
   .destroy = &mock_repository_destroy,
@@ -56,8 +55,7 @@ struct bg_repository_vtable mock_repository_vtable = {
   .get = &mock_repository_get,
   .remove = &mock_repository_remove,
   .count = &mock_repository_count,
-  .begin = &mock_repository_begin,
-  .end = &mock_repository_end,
+  .foreach = &mock_repository_foreach,
 };
 
 bg_repository_t mock_repository = {
@@ -207,6 +205,7 @@ int mock_repository_add_called = 0;
 int mock_repository_get_called = 0;
 int mock_repository_remove_called = 0;
 int mock_repository_count_called = 0;
+int mock_repository_foreach_called = 0;
 
 void mock_repository_destroy(bg_repository_t *self) {
   mock_repository_destroy_called = 1;
@@ -232,14 +231,9 @@ size_t mock_repository_count(bg_repository_t *self) {
   return 0;
 }
 
-bg_password_iterator mock_repository_begin(bg_repository_t *self) {
-  bg_password_iterator it = {};
-  return it;
-}
-
-bg_password_iterator mock_repository_end(bg_repository_t *self) {
-  bg_password_iterator it = {};
-  return it;
+int mock_repository_foreach(bg_repository_t *self, int (* callback)(bg_password *, void *), void *output) {
+  mock_repository_foreach_called = 1;
+  return 0;
 }
 
 

@@ -214,6 +214,15 @@ sweetgreen_test_define(array_repository, can_get_non_removed_when_remove_passwor
   sweetgreen_expect_same_address(pwd, res);
 }
 
+
+int times_called = 0;
+bg_password *pwds[3];
+int iterator_callback(bg_password *pwd, void *output) {
+  pwds[times_called] = pwd;
+  ++times_called;
+  return 0;
+}
+
 sweetgreen_test_define(array_repository, can_iterate_over_repository_given_3_stored_passwords) {
   bg_password *pwd = bg_password_new(ctx);
   bg_string *name = bg_string_from_str("somepassname");
@@ -228,15 +237,9 @@ sweetgreen_test_define(array_repository, can_iterate_over_repository_given_3_sto
   bg_repository_add(repo, pwd2);
   bg_repository_add(repo, pwd3);
 
-  bg_password_iterator it = bg_repository_begin(repo);
-  sweetgreen_expect_equal_string("somepassname", bg_string_data(bg_password_name(*it.value)));
+  bg_repository_foreach(repo, &iterator_callback, NULL);
 
-  it.next(&it);
-
-  sweetgreen_expect_equal_string("somepassname2", bg_string_data(bg_password_name(*it.value)));
-
-  it.next(&it);
-
-  sweetgreen_expect_equal_string("somepassname3", bg_string_data(bg_password_name(*it.value)));
-
+  sweetgreen_expect_equal_string("somepassname", bg_string_data(bg_password_name(pwds[0])));
+  sweetgreen_expect_equal_string("somepassname2", bg_string_data(bg_password_name(pwds[1])));
+  sweetgreen_expect_equal_string("somepassname3", bg_string_data(bg_password_name(pwds[2])));
 }

@@ -1,17 +1,11 @@
 #include <blurgather/array_repository.h>
 
-static void bg_password_array_repository_destroy(bg_repository_t * _self);
-static int bg_password_array_repository_add(bg_repository_t * self, bg_password* password);
+static void bg_password_array_repository_destroy(bg_repository_t *self);
+static int bg_password_array_repository_add(bg_repository_t *self, bg_password* password);
 static int bg_password_array_repository_get(bg_repository_t *self, const bg_string *name, bg_password **password);
-static int bg_password_array_repository_remove(bg_repository_t * self, const bg_string *name);
-
-static size_t bg_password_array_repository_count(bg_repository_t * _self);
-
-static bg_password_iterator bg_password_array_repository_begin(bg_repository_t * _self);
-static bg_password_iterator bg_password_array_repository_end(bg_repository_t * _self);
-
-static bg_password** bg_password_array_repository_password_iterator_previous(bg_password_iterator* _self);
-static bg_password** bg_password_array_repository_password_iterator_next(bg_password_iterator* _self);
+static int bg_password_array_repository_remove(bg_repository_t *self, const bg_string *name);
+static size_t bg_password_array_repository_count(bg_repository_t *self);
+static int bg_password_array_repository_foreach(bg_repository_t *self, int (* callback)(bg_password *, void *), void *output);
 
 static struct bg_repository_vtable bg_password_array_repository_vtable = {
   .destroy = &bg_password_array_repository_destroy,
@@ -19,8 +13,7 @@ static struct bg_repository_vtable bg_password_array_repository_vtable = {
   .get     = &bg_password_array_repository_get,
   .remove  = &bg_password_array_repository_remove,
   .count   = &bg_password_array_repository_count,
-  .begin   = &bg_password_array_repository_begin,
-  .end     = &bg_password_array_repository_end,
+  .foreach = &bg_password_array_repository_foreach,
 };
 
 
@@ -32,44 +25,10 @@ bg_password_array_repository* bg_password_array_repository_init(bg_password_arra
 	self->repository.vtable = &bg_password_array_repository_vtable;
 
 	self->number_passwords = 0;
-	self->password_array = (bg_password_array) calloc(25, sizeof(bg_password*));
+	self->password_array = calloc(25, sizeof(bg_password*));
 	self->allocated_length = 25;
 
 	return self;
-}
-
-static void bg_password_array_repositoryIterator_init(bg_password_array_repository* self, bg_password_iterator* iterator) {
-	iterator->container = self;
-	iterator->previous = &bg_password_array_repository_password_iterator_previous;
-	iterator->next = &bg_password_array_repository_password_iterator_next;
-}
-
-bg_password_iterator bg_password_array_repository_begin(bg_repository_t * _self) {
-	bg_password_array_repository* self = (bg_password_array_repository*) _self->object;
-
-	bg_password_iterator iterator;
-	bg_password_array_repositoryIterator_init(self, &iterator);
-	iterator.value = &self->password_array[0];
-
-	return iterator;
-}
-
-bg_password_iterator bg_password_array_repository_end(bg_repository_t * _self) {
-	bg_password_array_repository* self = (bg_password_array_repository*) _self->object;
-
-	bg_password_iterator iterator;
-	bg_password_array_repositoryIterator_init(self, &iterator);
-	iterator.value = &self->password_array[self->number_passwords];
-
-	return iterator;
-}
-
-bg_password** bg_password_array_repository_password_iterator_previous(bg_password_iterator* self) {
-	return --self->value;
-}
-
-bg_password** bg_password_array_repository_password_iterator_next(bg_password_iterator* self) {
-	return ++self->value;
 }
 
 void bg_password_array_repository_free(bg_password_array_repository* self) {
@@ -100,7 +59,7 @@ static bg_password* find_password_by_name(bg_password_array_repository* self, co
 			if(index_found) {
 				*index_found = i;
 			}
-      break;
+            break;
 		}
 	}
 
@@ -185,4 +144,18 @@ size_t bg_password_array_repository_count(bg_repository_t * _self) {
 
 bg_repository_t *bg_password_array_repository_repository(bg_password_array_repository *msgpack_persister) {
   return &msgpack_persister->repository;
+}
+
+int bg_password_array_repository_foreach(bg_repository_t *_self, int (* callback)(bg_password *, void *), void *output) {
+  bg_password_array_repository *self = (bg_password_array_repository *)_self->object;
+
+  size_t i;
+  for(i = 0; i < self->number_passwords; ++i) {
+    int err = 0;
+    if((err = callback(self->password_array[i], output))) {
+      return err;
+    }
+  }
+
+  return 0;
 }

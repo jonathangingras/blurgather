@@ -4,6 +4,7 @@ add_library(blurgather
   stream.c
   password.c
   repository.c
+  persister.c
   array_repository.c
   msgpack_persister.c
   msgpack_serialize.c
@@ -17,7 +18,7 @@ add_library(blurgather
 
 target_link_libraries(blurgather
     mcrypt
-    ${msgpack-static}
+    msgpack
 )
 
 install(TARGETS blurgather DESTINATION lib)

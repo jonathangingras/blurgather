@@ -6,6 +6,7 @@
 
 bg_persister_t *persister = NULL;
 
+
 sweetgreen_setup(msgpack_persister) {
   turnoff_debug();
 
@@ -31,6 +32,17 @@ sweetgreen_setup(msgpack_persister) {
 }
 
 sweetgreen_teardown(msgpack_persister) {
-  if(persister) { bg_persister_free(persister); }
-  if(!access(TEST_FILE_PATH, F_OK)) { remove(TEST_FILE_PATH); }
+  if(persister) {
+    bg_persister_free(persister);
+    persister = NULL;
+  }
+  if(!access(TEST_FILE_PATH, F_OK)) {
+    remove(TEST_FILE_PATH);
+  }
+}
+
+sweetgreen_test_define(persister, can_serialize_contained_password) {
+  //bg_password *pwd = bg_password_new(ctx);
+
+
 }

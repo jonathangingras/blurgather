@@ -21,8 +21,6 @@ struct bg_msgpack_persister {
 
 bg_msgpack_persister *bg_msgpack_persister_new(bg_context *ctx, const bg_string *filename);
 
-void bg_msgpack_persister_free(bg_msgpack_persister *persister);
-
 bg_persister_t *bg_msgpack_persister_persister(bg_msgpack_persister *persister);
 
 #ifdef __cplusplus

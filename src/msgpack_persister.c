@@ -33,11 +33,6 @@ void bg_msgpack_persister_destroy(bg_persister_t *_self) {
   bg_string_free(self->persistence_filename);
 }
 
-void bg_msgpack_persister_free(bg_msgpack_persister *self) {
-  bg_msgpack_persister_destroy(&self->persister);
-  bgctx_deallocate(self->ctx, self);
-}
-
 int bg_msgpack_persister_persist(bg_persister_t * _self) {
 	bg_msgpack_persister* self = (bg_msgpack_persister*) _self->object;
 

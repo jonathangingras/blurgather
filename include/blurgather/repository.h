@@ -2,7 +2,6 @@
 #define BLURGATHER_PASSWORD_REPOSITORY_H
 
 #include "password.h"
-#include "password_iterator.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,9 +15,7 @@ struct bg_repository_vtable {
   int (* const remove)(bg_repository_t *self, const bg_string *name);
 
   size_t (* const count)(bg_repository_t *self);
-
-  bg_password_iterator (* const begin)(bg_repository_t *self);
-  bg_password_iterator (* const end)(bg_repository_t *self);
+  int (* const foreach)(bg_repository_t *self, int (* callback)(bg_password *, void *), void *output);
 };
 
 struct bg_repository_t {
@@ -34,9 +31,6 @@ int bg_repository_get(bg_repository_t *self, const bg_string *name, bg_password 
 
 int bg_repository_remove(bg_repository_t *self, const bg_string *name);
 size_t bg_repository_count(bg_repository_t *self);
-
-bg_password_iterator bg_repository_begin(bg_repository_t *self);
-bg_password_iterator bg_repository_end(bg_repository_t *self);
 
 int bg_repository_foreach(bg_repository_t *self, int (* callback)(bg_password *, void *), void *output);
 
