@@ -31,33 +31,41 @@ int bgctx_sealed(bg_context *ctx) {
   return ctx->flags & BGCTX_SEALED;
 }
 
-int bgctx_register_allocator(bg_context *ctx, bg_allocator_t *allocator) {
+static int check_ctx(bg_context *ctx) {
   if(!ctx) { return -1; }
-  if(!allocator && (ctx->flags & BGCTX_SEALED)) { return -2; }
+  if(ctx->flags & BGCTX_SEALED) { return -2; }
+
+  return 0;
+}
+
+
+int bgctx_register_allocator(bg_context *ctx, bg_allocator_t *allocator) {
+  int error_code = 0;
+  if((error_code = check_ctx(ctx))) { return error_code; }
 
   ctx->allocator = allocator;
   return 0;
 }
 
 int bgctx_register_repository(bg_context *ctx, bg_repository_t *repository) {
-  if(!ctx) { return -1; }
-  if(!repository && (ctx->flags & BGCTX_SEALED)) { return -2; }
+  int error_code = 0;
+  if((error_code = check_ctx(ctx))) { return error_code; }
 
   ctx->repository = repository;
   return 0;
 }
 
 int bgctx_register_persister(bg_context *ctx, bg_persister_t *persister) {
-  if(!ctx) { return -1; }
-  if(!persister && (ctx->flags & BGCTX_SEALED)) { return -2; }
+  int error_code = 0;
+  if((error_code = check_ctx(ctx))) { return error_code; }
 
   ctx->persister = persister;
   return 0;
 }
 
 int bgctx_register_cryptor(bg_context *ctx, bg_cryptor_t *cryptor) {
-  if(!ctx) { return -1; }
-  if(!cryptor && (ctx->flags & BGCTX_SEALED)) { return -2; }
+  int error_code = 0;
+  if((error_code = check_ctx(ctx))) { return error_code; }
 
   ctx->cryptor = cryptor;
   return 0;
