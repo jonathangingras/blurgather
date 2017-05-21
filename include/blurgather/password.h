@@ -30,16 +30,16 @@ void bg_password_free(bg_password *password);
 
 /* name */
 const bg_string *bg_password_name(bg_password *password);
-int bg_password_update_name(bg_password *password, const bg_string *name);
+int bg_password_update_name(bg_password *password, bg_string *name);
 
 /* description */
 const bg_string *bg_password_description(bg_password *password);
-int bg_password_update_description(bg_password *password, const bg_string *description);
+int bg_password_update_description(bg_password *password, bg_string *description);
 
 /* value */
 const bg_string *bg_password_value(bg_password *password);
 size_t bg_password_value_length(bg_password *password);
-int bg_password_update_value(bg_password *password, const bg_string *value);
+int bg_password_update_value(bg_password *password, bg_string *value);
 
 /* crypted flag */
 int bg_password_crypted(bg_password *password);

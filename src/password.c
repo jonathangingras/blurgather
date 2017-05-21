@@ -117,24 +117,34 @@ const bg_string *bg_password_value(bg_password *password) {
   return password->value;
 }
 
-int bg_password_update_name(bg_password *password, const bg_string *name) {
-  bg_string_clean_replace(password->name, bg_string_copy(name));
+static int check_str_non_empty(const bg_string *str) {
+  return bg_string_length(str) == 0;
+}
+
+int bg_password_update_name(bg_password *password, bg_string *name) {
+  int error_code = 0;
+  if((error_code = check_str_non_empty(name))) { return error_code; }
+
+  bg_string_clean_replace(password->name, name);
 
   return 0;
 }
 
-int bg_password_update_description(bg_password *password, const bg_string *description) {
-  bg_string_clean_replace(password->name, bg_string_copy(description));
+int bg_password_update_description(bg_password *password, bg_string *description) {
+  int error_code = 0;
+  if((error_code = check_str_non_empty(description))) { return error_code; }
+
+  bg_string_clean_replace(password->description, description);
 
   return 0;
 }
 
-int bg_password_update_value(bg_password *password, const bg_string *value) {
+int bg_password_update_value(bg_password *password, bg_string *value) {
   bg_cryptor_t *cryptor = bgctx_cryptor(password->ctx);
   if(!cryptor) { return -1; }
 
   bg_cryptor_generate_iv(cryptor, &password->iv);
-  bg_string_clean_replace(password->value, bg_string_copy(value));
+  bg_string_clean_replace(password->value, value);
 
   password->crypted = 0;
 

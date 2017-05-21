@@ -61,7 +61,7 @@ int bg_msgpack_persister_load(bg_persister_t * _self) {
 	if(!shadow_file) return -4;
 
 	size_t data_length;
-	if(fread(&data_length, sizeof(size_t), 1, shadow_file) != 1) { return -1; }
+	if(fread(&data_length, sizeof(size_t), 1, shadow_file) != sizeof(size_t)*1) { return -1; }
 	unsigned char* data = (unsigned char*) bgctx_allocate(self->ctx, data_length * (sizeof(unsigned char)));
 	if(!data) { return -3; }
 

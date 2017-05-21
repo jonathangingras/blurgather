@@ -191,6 +191,36 @@ sweetgreen_test_define(password, repository_persist_not_called_when_update_value
   sweetgreen_expect_false(mock_persister_persist_called);
 }
 
+sweetgreen_test_define(password, update_value_takes_memory_acquisition_of_string_passed) {
+  bg_password *pwd = bg_password_new(ctx);
+
+  char new_value_raw[] = "somepassvalue";
+  bg_string *new_value = bg_string_from_char_array(new_value_raw, strlen(new_value_raw));
+  bg_password_update_value(pwd, new_value);
+
+  sweetgreen_expect_same_address(new_value, bg_password_value(pwd));
+}
+
+sweetgreen_test_define(password, update_name_takes_memory_acquisition_of_string_passed) {
+  bg_password *pwd = bg_password_new(ctx);
+
+  char new_value_raw[] = "somepassname";
+  bg_string *new_value = bg_string_from_char_array(new_value_raw, strlen(new_value_raw));
+  bg_password_update_name(pwd, new_value);
+
+  sweetgreen_expect_same_address(new_value, bg_password_name(pwd));
+}
+
+sweetgreen_test_define(password, update_description_takes_memory_acquisition_of_string_passed) {
+  bg_password *pwd = bg_password_new(ctx);
+
+  char new_value_raw[] = "somepassdesc";
+  bg_string *new_value = bg_string_from_char_array(new_value_raw, strlen(new_value_raw));
+  bg_password_update_description(pwd, new_value);
+
+  sweetgreen_expect_same_address(new_value, bg_password_description(pwd));
+}
+
 sweetgreen_test_define(password, password_is_flagged_not_crypted_when_update_value) {
   bg_password *pwd = bg_password_new(ctx);
 

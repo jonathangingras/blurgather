@@ -66,11 +66,9 @@ int bg_persistence_msgpack_deserialize_password(msgpack_object* object, bg_passw
 
   bg_string *name_buffer = bg_string_from_char_array(name_iterator, name_size);
   bg_password_update_name(password, name_buffer);
-  bg_string_free(name_buffer);
 
   bg_string *desc_buffer = bg_string_from_char_array(description_iterator, description_size);
   bg_password_update_description(password, desc_buffer);
-  bg_string_free(desc_buffer);
 
   return error_value;
 }

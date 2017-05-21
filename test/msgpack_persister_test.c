@@ -23,6 +23,7 @@ sweetgreen_setup(msgpack_persister) {
   bg_string *filename = bg_string_from_str(TEST_FILE_PATH);
   bg_msgpack_persister *_persister = bg_msgpack_persister_new(ctx, filename);
   bg_string_free(filename);
+
   persister = bg_msgpack_persister_persister(_persister);
   bgctx_register_persister(ctx, persister);
 
