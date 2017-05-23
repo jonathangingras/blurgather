@@ -33,6 +33,7 @@ extern int mock_repository_get_called;
 extern int mock_repository_remove_called;
 extern int mock_repository_count_called;
 extern int mock_repository_foreach_called;
+extern size_t mock_repository_count_return_value;
 
 /* persister */
 extern struct bg_persister_vtable mock_persister_vtable;

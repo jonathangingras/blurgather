@@ -10,9 +10,12 @@ int mock_decrypt_return_value = 0;
 int mock_cryptor_generate_iv_called = 0;
 bg_iv_t *mock_iv = NULL;
 char mock_iv_data[32] = "1111111111111111111111111111111";
+size_t mock_repository_count_return_value = 0;
+
 
 size_t allocated = 0;
 size_t reallocated = 0;
+
 
 void *mock_allocate(size_t size);
 void mock_deallocate(void *object);
@@ -208,31 +211,31 @@ int mock_repository_count_called = 0;
 int mock_repository_foreach_called = 0;
 
 void mock_repository_destroy(bg_repository_t *self) {
-  mock_repository_destroy_called = 1;
+  mock_repository_destroy_called += 1;
 }
 
 int mock_repository_add(bg_repository_t *self, bg_password *password) {
-  mock_repository_add_called = 1;
+  mock_repository_add_called += 1;
   return 0;
 }
 
 int mock_repository_get(bg_repository_t *self, const bg_string *name, bg_password **password) {
-  mock_repository_get_called = 1;
+  mock_repository_get_called += 1;
   return 0;
 }
 
 int mock_repository_remove(bg_repository_t *self, const bg_string *name) {
-  mock_repository_remove_called = 1;
+  mock_repository_remove_called += 1;
   return 0;
 }
 
 size_t mock_repository_count(bg_repository_t *self) {
-  mock_repository_count_called = 1;
-  return 0;
+  mock_repository_count_called += 1;
+  return mock_repository_count_return_value;
 }
 
 int mock_repository_foreach(bg_repository_t *self, int (* callback)(bg_password *, void *), void *output) {
-  mock_repository_foreach_called = 1;
+  mock_repository_foreach_called += 1;
   return 0;
 }
 

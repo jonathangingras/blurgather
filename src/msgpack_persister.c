@@ -11,14 +11,14 @@ static struct bg_persister_vtable bg_msgpack_persister_vtable = {
   .persist = &bg_msgpack_persister_persist,
 };
 
-bg_msgpack_persister *bg_msgpack_persister_new(bg_context *ctx, const bg_string *filename) {
+bg_msgpack_persister *bg_msgpack_persister_new(bg_context *ctx, bg_string *filename) {
   bg_msgpack_persister *self = bgctx_allocate(ctx, sizeof(bg_msgpack_persister));
 
   self->ctx = ctx;
   self->persister.object = (void *) self;
   self->persister.vtable = &bg_msgpack_persister_vtable;
 
-  self->persistence_filename = bg_string_copy(filename);
+  self->persistence_filename = filename;
 
   return self;
 }
@@ -42,7 +42,7 @@ int bg_msgpack_persister_persist(bg_persister_t * _self) {
 
 	FILE* shadow_file = fopen(bg_string_data(self->persistence_filename), "wb");
 	fwrite(&buffer.size, sizeof(size_t), 1, shadow_file);
-	fwrite(buffer.data, sizeof(unsigned char), buffer.size, shadow_file);
+	fwrite(buffer.data, sizeof(char), buffer.size, shadow_file);
 	fclose(shadow_file);
 
 	msgpack_sbuffer_destroy(&buffer);
@@ -56,8 +56,9 @@ int bg_msgpack_persister_load(bg_persister_t * _self) {
 	if(!shadow_file) return -4;
 
 	size_t data_length;
-	if(fread(&data_length, sizeof(size_t), 1, shadow_file) != sizeof(size_t)*1) { return -1; }
-	unsigned char* data = (unsigned char*) bgctx_allocate(self->ctx, data_length * (sizeof(unsigned char)));
+	if(fread(&data_length, sizeof(size_t), 1, shadow_file) != 1) { return -1; }
+
+	unsigned char* data = (unsigned char*) bgctx_allocate(self->ctx, data_length);
 	if(!data) { return -3; }
 
 	if(fread(data, sizeof(char), data_length, shadow_file) != data_length) { return -2; }
@@ -65,6 +66,6 @@ int bg_msgpack_persister_load(bg_persister_t * _self) {
 
 	int error_value = bg_persistence_msgpack_deserialize_password_array(self, data, data_length);
 
-	free(data);
+	bgctx_deallocate(self->ctx, data);
 	return error_value;
 }

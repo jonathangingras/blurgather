@@ -19,7 +19,7 @@ struct bg_msgpack_persister {
   bg_string *persistence_filename;
 };
 
-bg_msgpack_persister *bg_msgpack_persister_new(bg_context *ctx, const bg_string *filename);
+bg_msgpack_persister *bg_msgpack_persister_new(bg_context *ctx, bg_string *filename);
 
 bg_persister_t *bg_msgpack_persister_persister(bg_msgpack_persister *persister);
 
