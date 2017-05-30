@@ -13,8 +13,8 @@ include(CMakeShortcuts/CTestShortcuts.cmake)
 
 ExternalProject_Add_Local(msgpack-c
   GIT_REPOSITORY https://github.com/msgpack/msgpack-c.git
-  GIT_TAG "cpp-1.3.0"
-  CMAKE_ARGS ${CMAKE_ARGS} -DMSGPACK_BUILD_EXAMPLES=OFF -DMSGPACK_ENABLE_CXX=OFF -DMSGPACK_ENABLE_SHARED=OFF
+  GIT_TAG "cpp-2.1.1"
+  CMAKE_ARGS ${CMAKE_ARGS} -DMSGPACK_BUILD_EXAMPLES=OFF -DMSGPACK_ENABLE_CXX=OFF -DMSGPACK_ENABLE_SHARED=OFF -DCMAKE_C_FLAGS=-w
 )
 ExternalProject_Add_Local(sweetgreen
   GIT_REPOSITORY https://github.com/jonathangingras/sweetgreen

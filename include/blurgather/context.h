@@ -16,12 +16,17 @@ struct bg_allocator_t {
   void *(* const reallocate)(void *mem, size_t size);
 };
 
+#define BGCTX_ACQUIRE_ALLOCATOR 0x2
+#define BGCTX_ACQUIRE_REPOSITORY 0x4
+#define BGCTX_ACQUIRE_PERSISTER 0x8
+
 /* manual initialization */
 int bgctx_init(bg_context **ctx);
 int bgctx_register_allocator(bg_context *ctx, bg_allocator_t *allocator);
 int bgctx_register_repository(bg_context *ctx, bg_repository_t *repository);
 int bgctx_register_persister(bg_context *ctx, bg_persister_t *persister);
 int bgctx_register_cryptor(bg_context *ctx, bg_cryptor_t *cryptor);
+int bgctx_config(bg_context *ctx, int flags);
 int bgctx_seal(bg_context *ctx);
 int bgctx_sealed(bg_context *ctx);
 

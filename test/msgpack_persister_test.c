@@ -5,6 +5,7 @@
 
 #define TEST_FILE_PATH "/tmp/bg.shadow.bin.test"
 bg_persister_t *persister = NULL;
+bg_msgpack_persister *_persister = NULL;
 bg_password *pwd1;
 bg_password *pwd2;
 bg_password *pwd3;
@@ -48,7 +49,7 @@ sweetgreen_setup(persister) {
   bgctx_register_repository(ctx, &mock_repository);
 
   bg_string *filename = bg_string_from_str(TEST_FILE_PATH);
-  bg_msgpack_persister *_persister = bg_msgpack_persister_new(ctx, filename);
+  _persister = bg_msgpack_persister_new(ctx, filename);
 
   persister = bg_msgpack_persister_persister(_persister);
   bgctx_register_persister(ctx, persister);
@@ -74,9 +75,9 @@ sweetgreen_setup(persister) {
 }
 
 sweetgreen_teardown(persister) {
-  if(persister) {
-    bg_persister_free(persister);
-    persister = NULL;
+  if(_persister) {
+    bg_persister_destroy(persister);
+    free(_persister);
   }
   if(!access(TEST_FILE_PATH, F_OK)) {
     remove(TEST_FILE_PATH);

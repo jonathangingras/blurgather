@@ -99,7 +99,7 @@ void turnoff_debug() {
 
 void reset_context() {
   if(ctx) {
-    bgctx_finalize(ctx);
+    free(ctx);
   }
   bgctx_init(&ctx);
 }

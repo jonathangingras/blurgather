@@ -12,9 +12,9 @@ struct bg_msgpack_persister;
 typedef struct bg_msgpack_persister bg_msgpack_persister;
 
 struct bg_msgpack_persister {
-  bg_context *ctx;
-
   bg_persister_t persister;
+
+  bg_context *ctx;
 
   bg_string *persistence_filename;
 };

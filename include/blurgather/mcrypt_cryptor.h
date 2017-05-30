@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-const bg_cryptor_t *bg_mcrypt_cryptor();
+bg_cryptor_t *bg_mcrypt_cryptor();
 
 #ifdef __cplusplus
 }

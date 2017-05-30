@@ -14,12 +14,11 @@ struct bg_persister_vtable {
 };
 
 struct bg_persister_t {
-  const void *object;
   const struct bg_persister_vtable *vtable;
+  const void *object;
 };
 
 void bg_persister_destroy(bg_persister_t *self);
-void bg_persister_free(bg_persister_t *self);
 int bg_persister_load(bg_persister_t *self);
 int bg_persister_persist(bg_persister_t *self);
 

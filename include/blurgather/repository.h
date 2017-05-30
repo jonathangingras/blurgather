@@ -19,12 +19,11 @@ struct bg_repository_vtable {
 };
 
 struct bg_repository_t {
-  const void *object;
   const struct bg_repository_vtable *vtable;
+  const void *object;
 };
 
 void bg_repository_destroy(bg_repository_t *self);
-void bg_repository_free(bg_repository_t *self);
 
 int bg_repository_add(bg_repository_t *self, bg_password *password);
 int bg_repository_get(bg_repository_t *self, const bg_string *name, bg_password **password);

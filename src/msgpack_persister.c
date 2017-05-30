@@ -14,10 +14,10 @@ static struct bg_persister_vtable bg_msgpack_persister_vtable = {
 bg_msgpack_persister *bg_msgpack_persister_new(bg_context *ctx, bg_string *filename) {
   bg_msgpack_persister *self = bgctx_allocate(ctx, sizeof(bg_msgpack_persister));
 
-  self->ctx = ctx;
   self->persister.object = (void *) self;
   self->persister.vtable = &bg_msgpack_persister_vtable;
 
+  self->ctx = ctx;
   self->persistence_filename = filename;
 
   return self;
