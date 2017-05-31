@@ -36,7 +36,7 @@ sweetgreen_setup(default_blur_setup) {
 sweetgreen_teardown(default_blur_setup) {
   bgctx_finalize(ctx);
 
-  //remove(TEST_FILE_PATH);
+  remove(TEST_FILE_PATH);
 }
 
 
