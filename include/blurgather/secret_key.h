@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-bg_secret_key_t *bg_secret_key_new(bg_context *ctx, const void *value, size_t length);
+bg_secret_key_t *bg_secret_key_new(const void *value, size_t length);
 void bg_secret_key_free(bg_secret_key_t *self);
 
 int bg_secret_key_update(bg_secret_key_t *self, const void *value, size_t length);

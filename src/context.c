@@ -99,6 +99,8 @@ void *bgctx_reallocate(bg_context *ctx, void *object, size_t size) {
 }
 
 int bgctx_finalize(bg_context *ctx) {
+  bgctx_lock(ctx);
+
   if(ctx->repository && (ctx->flags & BGCTX_ACQUIRE_REPOSITORY)) {
     bg_repository_destroy(ctx->repository);
     bgctx_deallocate(ctx, (void*)ctx->repository->object);
@@ -119,7 +121,10 @@ int bgctx_unlock(bg_context *ctx, bg_secret_key_t *secret_key) {
 }
 
 int bgctx_lock(bg_context *ctx) {
-  ctx->secret_key = NULL;
+  if(ctx->secret_key) {
+    bg_secret_key_free(ctx->secret_key);
+    ctx->secret_key = NULL;
+  }
   return 0;
 }
 

@@ -65,7 +65,18 @@ size_t bg_mcrypt_iv32_iv_length() {
 }
 
 int bg_mcrypt_iv32_generate_iv(bg_iv_t **output) {
-  return bg_get_devurandom_iv((unsigned char *)bg_iv_data(*output), 32);
+  unsigned char buffer[32];
+  int error_code = 0;
+  if((error_code = bg_get_devurandom_iv(buffer, 32))) {
+    return error_code;
+  }
+  bg_iv_t *iv = bg_iv_new(buffer, 32);
+  if(iv) {
+    *output = iv;
+  } else {
+    error_code = -2;
+  }
+  return error_code;
 }
 
 const static bg_cryptor_t bg_mcrypt_aes256 = {

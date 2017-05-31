@@ -35,8 +35,8 @@ sweetgreen_setup(cryptor) {
   strcat(buffer, PLAIN_TEXT_PWD);
   buffer_length = strlen(buffer);
 
-  iv = bg_iv_new(ctx, PLAIN_IV, strlen(PLAIN_IV) + 1);
-  secret_key = bg_secret_key_new(ctx, PLAIN_SECRET_KEY, strlen(PLAIN_SECRET_KEY));
+  iv = bg_iv_new(PLAIN_IV, strlen(PLAIN_IV) + 1);
+  secret_key = bg_secret_key_new(PLAIN_SECRET_KEY, strlen(PLAIN_SECRET_KEY));
 
   memset(buffer, 0, BUFFER_SIZE);
   memcpy(buffer, PLAIN_TEXT_PWD, strlen(PLAIN_TEXT_PWD));
@@ -46,8 +46,8 @@ sweetgreen_setup(cryptor) {
 }
 
 sweetgreen_teardown(cryptor) {
-  bg_iv_free(iv);
   bg_secret_key_free(secret_key);
+  bg_iv_free(iv);
 }
 
 
@@ -85,4 +85,12 @@ sweetgreen_test_define(cryptor, bufferValueGetsBackToInitialValueWhenCallingDecr
   bg_cryptor_decrypt(cryptor, buffer, buffer_length, secret_key, iv);
 
   sweetgreen_expect_equal_memory(buffer_copy, buffer, BUFFER_SIZE);
+}
+
+sweetgreen_test_define(cryptor, generates_a_valid_random_iv) {
+  bg_iv_t *output_iv;
+
+  sweetgreen_expect_zero(bg_cryptor_generate_iv(cryptor, &output_iv));
+  sweetgreen_expect_not_null(bg_iv_data(output_iv));
+  sweetgreen_expect_equal(32, bg_iv_length(output_iv));
 }

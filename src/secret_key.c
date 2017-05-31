@@ -1,20 +1,21 @@
 #include <blurgather/string.h>
 #include <blurgather/secret_key.h>
-#include <blurgather/context.h>
 
 struct bg_secret_key_t {
-	bg_string *str;
+  bg_string *str;
 };
 
-bg_secret_key_t* bg_secret_key_new(bg_context *ctx, const void *value, size_t length) {
-	bg_secret_key_t *self = bgctx_allocate(ctx, sizeof(bg_secret_key_t));
+bg_secret_key_t* bg_secret_key_new(const void *value, size_t length) {
+	bg_secret_key_t *self = malloc(sizeof(bg_secret_key_t));
+
 	self->str = bg_string_from_char_array((char *)value, length);
-	return self;
+
+    return self;
 }
 
 void bg_secret_key_free(bg_secret_key_t *self) {
   bg_string_clean_free(self->str);
-	free(self);
+  free(self);
 }
 
 /* methods */

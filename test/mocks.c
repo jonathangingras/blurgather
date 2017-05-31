@@ -102,6 +102,7 @@ void reset_context() {
     free(ctx);
   }
   bgctx_init(&ctx);
+  bgctx_unlock(ctx, bg_secret_key_new("secret", 6));
 }
 
 void reset_allocator() {
@@ -117,7 +118,7 @@ void reset_mock_cryptor() {
   if(mock_iv) {
     bg_iv_free(mock_iv);
   }
-  mock_iv = bg_iv_new(ctx, mock_iv_data, 32);
+  mock_iv = bg_iv_new(mock_iv_data, 32);
 }
 
 void reset_mock_repository() {
@@ -196,7 +197,7 @@ size_t mock_iv_length() {
 
 int mock_generate_iv(bg_iv_t **output) {
   mock_cryptor_generate_iv_called = 1;
-  *output = bg_iv_copy(mock_iv);
+  *output = bg_iv_new(mock_iv_data, 32);
   return 0;
 }
 

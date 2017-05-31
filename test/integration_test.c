@@ -36,10 +36,20 @@ sweetgreen_setup(default_blur_setup) {
 sweetgreen_teardown(default_blur_setup) {
   bgctx_finalize(ctx);
 
-  remove(TEST_FILE_PATH);
+  //remove(TEST_FILE_PATH);
 }
 
 
 sweetgreen_test_define(default_blur_setup, can_instantiate_a_password_and_save_it) {
+  bg_password *pwd = bg_password_new(ctx);
+  bg_password_update_name(pwd, bg_string_from_str("somepass"));
+  bg_password_update_value(pwd, bg_string_from_str("somevalue"));
+  bg_password_update_description(pwd, bg_string_from_str("somedesc"));
 
+  bgctx_unlock(ctx, bg_secret_key_new("secret", 6));
+  bg_password_crypt(pwd);
+  bgctx_lock(ctx);
+
+  bg_password_save(pwd);
+  bg_persister_persist(bg_msgpack_persister_persister(persister));
 }

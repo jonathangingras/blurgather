@@ -59,7 +59,7 @@ int bg_persistence_msgpack_deserialize_password(msgpack_object* object, bg_passw
                                           -5))) { return error_value; }
 
 
-  bg_iv_t *iv = bg_iv_new(bg_password_ctx(password), iv_iterator, iv_size);
+  bg_iv_t *iv = bg_iv_new(iv_iterator, iv_size);
   if(bg_password_fill_raw(password, iv, value_iterator, value_size)) {
     return -1;
   }

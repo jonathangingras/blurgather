@@ -81,6 +81,16 @@ sweetgreen_test_define(password, password_is_not_flagged_crypted_when_not_succes
   sweetgreen_expect_false(bg_password_crypted(pwd));
 }
 
+sweetgreen_test_define(password, password_is_not_flagged_crypted_when_context_locked) {
+  mock_encrypt_return_value = 1;
+  bg_password *pwd = bg_password_new(ctx);
+
+  bgctx_lock(ctx);
+
+  sweetgreen_expect_non_zero(bg_password_crypt(pwd));
+  sweetgreen_expect_false(bg_password_crypted(pwd));
+}
+
 sweetgreen_test_define(password, decrypt_is_called_when_called_from_password) {
   bg_password *pwd = bg_password_new(ctx);
 
