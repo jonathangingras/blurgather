@@ -17,7 +17,7 @@ add_library(blurgather
 )
 
 target_link_libraries(blurgather
-  c
+  m
   mcrypt
   msgpackc
 )
