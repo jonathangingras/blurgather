@@ -1,5 +1,8 @@
 #include <string.h>
 #include <stdlib.h>
+#include <limits.h>
+#include <stdio.h>
+#include <math.h>
 #include <blurgather/string.h>
 
 struct bg_string {
@@ -67,4 +70,19 @@ bg_string *bg_string_cat_char_array(bg_string **str, const char *catted, size_t 
   (*str)->length += length;
   STR_APPEND_NUL(*str);
   return *str;
+}
+
+bg_string *bg_string_plus(bg_string *str1, bg_string *str2) {
+  bg_string *res = str1;
+  bg_string_cat(&res, str2);
+  bg_string_free(str2);
+  return res;
+}
+
+bg_string *bg_string_from_decimal(long decimal) {
+  unsigned int max_strlen = ((unsigned int)ceil(log10(LONG_MAX))) + 1 + 1; /* possible minus sign + NUL */
+  char array[max_strlen];
+  memset(array, 0, max_strlen);
+  sprintf(array, "%ld", decimal);
+  return bg_string_from_str(array);
 }

@@ -17,8 +17,9 @@ add_library(blurgather
 )
 
 target_link_libraries(blurgather
-    mcrypt
-    msgpackc
+  c
+  mcrypt
+  msgpackc
 )
 
 install(TARGETS blurgather DESTINATION lib)

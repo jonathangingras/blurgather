@@ -42,25 +42,6 @@ sweetgreen_teardown(default_blur_setup) {
   remove(TEST_FILE_PATH);
 }
 
-
-bg_string *bg_string_plus(bg_string *str1, bg_string *str2) {
-  bg_string *res = str1;
-  bg_string_cat(&res, str2);
-  bg_string_free(str2);
-  return res;
-}
-
-#include <limits.h>
-#include <math.h>
-
-bg_string *bg_string_from_decimal(long decimal) {
-  unsigned int max_strlen = ((unsigned int)ceil(log10(LONG_MAX))) + 1 + 1; /* possible minus sign + NUL */
-  char array[max_strlen];
-  memset(array, 0, max_strlen);
-  sprintf(array, "%ld", decimal);
-  return bg_string_from_str(array);
-}
-
 #define NB_PASS 500
 
 int create_password_db(void) {

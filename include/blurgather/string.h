@@ -26,6 +26,10 @@ void bg_string_clean(bg_string *str);
 bg_string *bg_string_cat(bg_string **str, const bg_string *catted);
 bg_string *bg_string_cat_char_array(bg_string **str, const char *catted, size_t length);
 
+bg_string *bg_string_plus(bg_string *str1, bg_string *str2);
+
+bg_string *bg_string_from_decimal(long decimal);
+
 int bg_string_compare(const bg_string *str1, const bg_string *str2);
 
 #define bg_string_replace(old, new) bg_string_free(old); old = new
