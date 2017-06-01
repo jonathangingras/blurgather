@@ -25,7 +25,7 @@ bg_password_array_repository* bg_password_array_repository_init(bg_password_arra
   self->repository.vtable = &bg_password_array_repository_vtable;
 
   self->number_passwords = 0;
-  self->password_array = calloc(25, sizeof(bg_password*));
+  self->password_array = bgctx_allocate(self->ctx, sizeof(void*)*25);
   self->allocated_length = 25;
 
   return self;
@@ -67,8 +67,8 @@ static int add_new_password(bg_password_array_repository* self, bg_password* pas
     return -2;
   }
 
-  if(self->allocated_length <= self->number_passwords + 1) {
-    self->password_array = (bg_password_array)bgctx_reallocate(self->ctx, self->password_array, self->allocated_length + 25);
+  if(self->number_passwords + 1 >= self->allocated_length) {
+    self->password_array = bgctx_reallocate(self->ctx, self->password_array, (self->allocated_length + 25)*sizeof(void*));
     self->allocated_length += 25;
   }
 

@@ -112,6 +112,8 @@ int bgctx_finalize(bg_context *ctx) {
     ctx->repository = NULL;
   }
 
+  free(ctx);
+
   return 0;
 }
 
