@@ -48,7 +48,6 @@ bg_repository_t *bgctx_repository(bg_context *ctx);
 bg_cryptor_t *bgctx_cryptor(bg_context *ctx);
 
 /* runtime password library manipulation shortcuts */
-int bgctx_new_password(bg_context *ctx, bg_password **password);
 int bgctx_find_password(bg_context *ctx, const bg_string *name, bg_password **password);
 int bgctx_each_password(bg_context *ctx, int (* callback)(bg_password *password, void *), void *out);
 

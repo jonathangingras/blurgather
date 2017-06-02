@@ -86,12 +86,12 @@ static int serialize_password(bg_password *pwd, void *_serialize_data) {
   return 0;
 }
 
-void bg_persistence_msgpack_serialize_password_array(bg_msgpack_persister* self, msgpack_sbuffer* buffer) {
+void bg_persistence_msgpack_serialize_password_array(bg_msgpack_persister* self, msgpack_sbuffer* buffer, bg_repository_t *repo) {
   msgpack_packer pk;
   msgpack_packer_init(&pk, buffer, msgpack_sbuffer_write);
 
-  bg_repository_t *repo = bgctx_repository(self->ctx);
-  if(!repo) { return; }
+  /*bg_repository_t *repo = bgctx_repository(self->ctx);
+  if(!repo) { return; }*/
 
   struct serialize_data data = {
     .packer = &pk,
@@ -102,7 +102,7 @@ void bg_persistence_msgpack_serialize_password_array(bg_msgpack_persister* self,
   bg_repository_foreach(repo, &serialize_password, &data);
 }
 
-int bg_persistence_msgpack_deserialize_password_array(bg_msgpack_persister* self, unsigned char* data, size_t data_length) {
+int bg_persistence_msgpack_deserialize_password_array(bg_msgpack_persister* self, unsigned char* data, size_t data_length, bg_repository_t *repo) {
   msgpack_zone mempool;
   msgpack_zone_init(&mempool, 2048);
   msgpack_object deserialized;
@@ -111,12 +111,12 @@ int bg_persistence_msgpack_deserialize_password_array(bg_msgpack_persister* self
   int i, error_value;
   msgpack_object* ptr = deserialized.via.array.ptr;
   for(i = 0; i < deserialized.via.array.size; ++i) {
-    bg_password* password = bg_password_new(self->ctx);
+    bg_password* password = bg_password_new();
 
     error_value = bg_persistence_msgpack_deserialize_password(ptr + i, password);
     if(error_value) { return error_value; }
 
-    error_value = bg_password_save(password);
+    error_value = bg_repository_add(/*bgctx_repository(self->ctx), password);*/ repo, password);
     if(error_value) { return error_value; }
   }
 

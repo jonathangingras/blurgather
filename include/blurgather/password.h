@@ -13,13 +13,10 @@ extern "C" {
 #endif
 
 /* constructor */
-bg_password *bg_password_new(bg_context *ctx);
+bg_password *bg_password_new(void);
 
 /* deserialize */
 int bg_password_fill_raw(bg_password *password, bg_iv_t *iv, const void *crypted_value, size_t crypted_value_size);
-
-/* get context */
-bg_context *bg_password_ctx(bg_password *password);
 
 /* structure size */
 size_t bg_password_size();
@@ -39,7 +36,7 @@ int bg_password_update_description(bg_password *password, bg_string *description
 /* value */
 const bg_string *bg_password_value(bg_password *password);
 size_t bg_password_value_length(bg_password *password);
-int bg_password_update_value(bg_password *password, bg_string *value);
+int bg_password_update_value(bg_password *password, bg_string *value, bg_cryptor_t *cryptor);
 
 /* crypted flag */
 int bg_password_crypted(bg_password *password);
@@ -48,9 +45,8 @@ int bg_password_crypted(bg_password *password);
 const bg_iv_t *bg_password_iv(bg_password *password);
 
 /* methods */
-int bg_password_crypt(bg_password* password);
-int bg_password_decrypt(bg_password* password);
-int bg_password_save(bg_password* password);
+int bg_password_crypt(bg_password* password, bg_cryptor_t *cryptor, bg_secret_key_t *key);
+int bg_password_decrypt(bg_password* password, bg_cryptor_t *cryptor, bg_secret_key_t *key);
 
 
 #ifdef __cplusplus

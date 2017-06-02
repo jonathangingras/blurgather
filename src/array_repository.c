@@ -17,18 +17,17 @@ static struct bg_repository_vtable bg_password_array_repository_vtable = {
 };
 
 
-bg_password_array_repository* bg_password_array_repository_init(bg_password_array_repository* _self, bg_context *ctx) {
-  bg_password_array_repository* self = _self ? _self : (bg_password_array_repository*) bgctx_allocate(ctx, sizeof(bg_password_array_repository));
+bg_repository_t *bg_password_array_repository_new() {
+  bg_password_array_repository* self = malloc(sizeof(bg_password_array_repository));
 
-  self->ctx = ctx;
   self->repository.object = (void *) self;
   self->repository.vtable = &bg_password_array_repository_vtable;
 
   self->number_passwords = 0;
-  self->password_array = bgctx_allocate(self->ctx, sizeof(void*)*25);
+  self->password_array = malloc(sizeof(void*)*25);
   self->allocated_length = 25;
 
-  return self;
+  return &self->repository;
 }
 
 
@@ -42,7 +41,7 @@ void bg_password_array_repository_destroy(bg_repository_t *_self) {
     bg_password_free(self->password_array[i]);
   }
 
-  bgctx_deallocate(self->ctx, self->password_array);
+  free(self->password_array);
 }
 
 static bg_password* find_password_by_name(bg_password_array_repository* self, const bg_string *name, size_t *index_found) {
@@ -68,7 +67,7 @@ static int add_new_password(bg_password_array_repository* self, bg_password* pas
   }
 
   if(self->number_passwords + 1 >= self->allocated_length) {
-    self->password_array = bgctx_reallocate(self->ctx, self->password_array, (self->allocated_length + 25)*sizeof(void*));
+    self->password_array = realloc(self->password_array, (self->allocated_length + 25)*sizeof(void*));
     self->allocated_length += 25;
   }
 

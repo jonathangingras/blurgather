@@ -8,8 +8,6 @@ struct bg_password {
   bg_string *description;
   bg_string *value;
 
-  bg_context *ctx;
-
   int crypted;
 };
 
@@ -17,15 +15,10 @@ size_t bg_password_size() {
   return sizeof(bg_password);
 }
 
-bg_password *bg_password_new(bg_context *ctx) {
-  bg_cryptor_t *cryptor = bgctx_cryptor(ctx);
-  if(!cryptor) { return NULL; }
+bg_password *bg_password_new(void) {
+  bg_password *self = malloc(sizeof(bg_password));
 
-  bg_password *self = bgctx_allocate(ctx, sizeof(bg_password));
-  self->ctx = ctx;
-
-  bg_cryptor_generate_iv(cryptor, &self->iv);
-
+  self->iv = NULL;
   self->name = bg_string_new();
   self->description = bg_string_new();
   self->value = bg_string_new();
@@ -36,19 +29,17 @@ bg_password *bg_password_new(bg_context *ctx) {
 }
 
 void bg_password_free(bg_password *self) {
-  bg_iv_free(self->iv);
+  if(self->iv) { bg_iv_free(self->iv); }
   bg_string_clean_free(self->name);
   bg_string_clean_free(self->description);
   bg_string_clean_free(self->value);
-  bgctx_deallocate(self->ctx, self);
+  free(self);
 }
 
 
 /* methods */
 
-int bg_password_crypt(bg_password *self) {
-  bg_cryptor_t *cryptor = bgctx_cryptor(self->ctx);
-  bg_secret_key_t *key = bgctx_access_key(self->ctx);
+int bg_password_crypt(bg_password *self, bg_cryptor_t *cryptor, bg_secret_key_t *key) {
   if(!cryptor) { return -1; }
   if(self->crypted)  { return -2; }
   if(!key) { return -3; }
@@ -71,9 +62,7 @@ int bg_password_crypt(bg_password *self) {
   return 0;
 }
 
-int bg_password_decrypt(bg_password *self) {
-  bg_cryptor_t *cryptor = bgctx_cryptor(self->ctx);
-  bg_secret_key_t *key = bgctx_access_key(self->ctx);
+int bg_password_decrypt(bg_password *self, bg_cryptor_t *cryptor, bg_secret_key_t *key) {
   if(!cryptor) { return -1; }
   if(!self->crypted) { return 1; }
   if(!key) { return -3; }
@@ -94,12 +83,6 @@ int bg_password_decrypt(bg_password *self) {
   bg_string_clean_replace(self->value, buffer);
 
   return 0;
-}
-
-int bg_password_save(bg_password *self) {
-  bg_repository_t *repo = bgctx_repository(self->ctx);
-  if(!repo) { return -1; }
-  return bg_repository_add(repo, self);
 }
 
 const bg_string *bg_password_name(bg_password *password) {
@@ -144,8 +127,7 @@ int bg_password_update_description(bg_password *password, bg_string *description
   return 0;
 }
 
-int bg_password_update_value(bg_password *password, bg_string *value) {
-  bg_cryptor_t *cryptor = bgctx_cryptor(password->ctx);
+int bg_password_update_value(bg_password *password, bg_string *value, bg_cryptor_t *cryptor) {
   if(!cryptor) { return -1; }
 
   bg_cryptor_generate_iv(cryptor, &password->iv);
@@ -158,10 +140,6 @@ int bg_password_update_value(bg_password *password, bg_string *value) {
 
 size_t bg_password_value_length(bg_password *password) {
   return bg_string_length(password->value);
-}
-
-bg_context *bg_password_ctx(bg_password *password) {
-  return password->ctx;
 }
 
 int bg_password_fill_raw(bg_password *password, bg_iv_t *iv, const void *crypted_value, size_t crypted_value_size) {

@@ -19,14 +19,12 @@ typedef struct bg_password_array_repository bg_password_array_repository;
 struct bg_password_array_repository {
   bg_repository_t repository;
 
-  bg_context *ctx;
-
   size_t number_passwords;
   bg_password_array password_array;
   size_t allocated_length;
 };
 
-bg_password_array_repository* bg_password_array_repository_init(bg_password_array_repository* persister, bg_context *ctx);
+bg_repository_t *bg_password_array_repository_new();
 
 bg_repository_t *bg_password_array_repository_repository(bg_password_array_repository *msgpack_persister);
 

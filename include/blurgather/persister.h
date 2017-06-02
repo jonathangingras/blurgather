@@ -9,8 +9,8 @@ extern "C" {
 
 struct bg_persister_vtable {
   void (* const destroy)(bg_persister_t *self);
-  int (* const load)(bg_persister_t *self);
-  int (* const persist)(bg_persister_t *self);
+  int (* const load)(bg_persister_t *self, bg_repository_t *repo);
+  int (* const persist)(bg_persister_t *self, bg_repository_t *repo);
 };
 
 struct bg_persister_t {
@@ -19,8 +19,8 @@ struct bg_persister_t {
 };
 
 void bg_persister_destroy(bg_persister_t *self);
-int bg_persister_load(bg_persister_t *self);
-int bg_persister_persist(bg_persister_t *self);
+int bg_persister_load(bg_persister_t *self, bg_repository_t *repo);
+int bg_persister_persist(bg_persister_t *self, bg_repository_t *repo);
 
 #ifdef __cplusplus
 }

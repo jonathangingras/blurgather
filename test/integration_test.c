@@ -15,7 +15,6 @@ bg_allocator_t bg_default_allocator = {
   .reallocate = realloc,
 };
 bg_msgpack_persister *persister;
-bg_password_array_repository *repository;
 
 void setup_context(void) {
   bgctx_init(&ctx);
@@ -26,8 +25,7 @@ void setup_context(void) {
   persister = bg_msgpack_persister_new(ctx, bg_string_from_str(TEST_FILE_PATH));
   bgctx_register_persister(ctx, bg_msgpack_persister_persister(persister));
 
-  repository = bg_password_array_repository_init(NULL, ctx);
-  bgctx_register_repository(ctx, bg_password_array_repository_repository(repository));
+  bgctx_register_repository(ctx, bg_password_array_repository_new());
 
   bgctx_config(ctx, BGCTX_ACQUIRE_PERSISTER | BGCTX_ACQUIRE_REPOSITORY);
   bgctx_seal(ctx);
@@ -47,18 +45,18 @@ sweetgreen_teardown(default_blur_setup) {
 int create_password_db(void) {
   int i;
   for(i = 0; i < NB_PASS; ++i) {
-    bg_password *pwd = bg_password_new(ctx);
+    bg_password *pwd = bg_password_new();
     bg_password_update_name(pwd, bg_string_plus(bg_string_from_str("somepass"), bg_string_from_decimal(i)));
-    bg_password_update_value(pwd, bg_string_plus(bg_string_from_str("somevalue"), bg_string_from_decimal(i)));
+    bg_password_update_value(pwd, bg_string_plus(bg_string_from_str("somevalue"), bg_string_from_decimal(i)), bgctx_cryptor(ctx));
     bg_password_update_description(pwd, bg_string_plus(bg_string_from_str("somedesc"), bg_string_from_decimal(i)));
 
     bgctx_unlock(ctx, bg_secret_key_new("secret", 6));
-    bg_password_crypt(pwd);
+    bg_password_crypt(pwd, bgctx_cryptor(ctx), bgctx_access_key(ctx));
     bgctx_lock(ctx);
 
-    bg_password_save(pwd);
+    bg_repository_add(bgctx_repository(ctx), pwd);
   }
-  return bg_persister_persist(bg_msgpack_persister_persister(persister));
+  return bg_persister_persist(bg_msgpack_persister_persister(persister), bgctx_repository(ctx));
 }
 
 
@@ -80,7 +78,7 @@ sweetgreen_test_define(default_blur_setup, can_read_saved_passwords) {
   create_password_db();
   bgctx_finalize(ctx);
   setup_context();
-  bg_persister_load(bg_msgpack_persister_persister(persister));
+  bg_persister_load(bg_msgpack_persister_persister(persister), bgctx_repository(ctx));
 
   nbpass = 0;
   bg_repository_foreach(bgctx_repository(ctx), &store_pass, NULL);
@@ -93,11 +91,11 @@ sweetgreen_test_define(default_blur_setup, can_read_saved_passwords) {
 
     bgctx_unlock(ctx, bg_secret_key_new("secret", 6));
 
-    bg_password_decrypt(pwds[i]);
+    bg_password_decrypt(pwds[i], bgctx_cryptor(ctx), bgctx_access_key(ctx));
     sweetgreen_expect_equal_string(bg_string_data(name), bg_string_data(bg_password_name(pwds[i])));
     sweetgreen_expect_equal_string(bg_string_data(value), bg_string_data(bg_password_value(pwds[i])));
     sweetgreen_expect_equal_string(bg_string_data(desc), bg_string_data(bg_password_description(pwds[i])));
-    bg_password_crypt(pwds[i]);
+    bg_password_crypt(pwds[i], bgctx_cryptor(ctx), bgctx_access_key(ctx));
 
     bgctx_lock(ctx);
 

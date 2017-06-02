@@ -1,10 +1,9 @@
 #include <stdio.h>
 #include <mcrypt.h>
-#include <blurgather/iv.h>
-#include <blurgather/string.h>
-#include <blurgather/secret_key.h>
+
 #include <blurgather/cryptor.h>
 #include <blurgather/urandom_iv.h>
+
 
 static int check_args(const bg_secret_key_t *secret_key, const bg_iv_t *iv) {
   if(!secret_key) {

@@ -142,11 +142,6 @@ bg_cryptor_t *bgctx_cryptor(bg_context *ctx) {
   return ctx->cryptor;
 }
 
-int bgctx_new_password(bg_context *ctx, bg_password **password) {
-  *password = bg_password_new(ctx);
-  return *password == NULL;
-}
-
 int bgctx_find_password(bg_context *ctx, const bg_string *name, bg_password **password) {
   return bg_repository_get(ctx->repository, name, password);
 }
