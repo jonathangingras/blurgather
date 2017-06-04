@@ -16,8 +16,13 @@ extern int mock_decrypt_called;
 extern int mock_encrypt_return_value;
 extern int mock_decrypt_return_value;
 extern int mock_cryptor_generate_iv_called;
+
+/* iv */
 extern bg_iv_t *mock_iv;
 extern char mock_iv_data[32];
+
+/* secret key */
+extern bg_secret_key_t *mock_secret_key;
 
 /* allocator */
 extern bg_allocator_t mock_allocator;
@@ -46,5 +51,7 @@ void turnoff_debug();
 void reset_debug();
 void reset_context();
 void reset_allocator();
+void reset_mock_secret_key();
+void reset_mock_iv();
 void reset_mock_cryptor();
 void reset_mock_repository();

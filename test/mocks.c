@@ -8,6 +8,7 @@ int mock_decrypt_called = 0;
 int mock_encrypt_return_value = 0;
 int mock_decrypt_return_value = 0;
 int mock_cryptor_generate_iv_called = 0;
+bg_secret_key_t *mock_secret_key = NULL;
 bg_iv_t *mock_iv = NULL;
 char mock_iv_data[32] = "1111111111111111111111111111111";
 size_t mock_repository_count_return_value = 0;
@@ -97,12 +98,21 @@ void turnoff_debug() {
   logstream = fopen("/dev/null", "w");
 }
 
+void reset_mock_secret_key() {
+  if(mock_secret_key) {
+    bg_secret_key_free(mock_secret_key);
+  }
+  mock_secret_key = bg_secret_key_new("secret", 6);
+}
+
 void reset_context() {
   if(ctx) {
     free(ctx);
   }
   bgctx_init(&ctx);
-  bgctx_unlock(ctx, bg_secret_key_new("secret", 6));
+  reset_mock_secret_key();
+  bgctx_unlock(ctx, mock_secret_key);
+  mock_secret_key = NULL;
 }
 
 void reset_allocator() {
@@ -110,15 +120,20 @@ void reset_allocator() {
   reallocated = 0;
 }
 
+void reset_mock_iv() {
+  if(mock_iv) {
+    bg_iv_free(mock_iv);
+  }
+  mock_iv = bg_iv_new(mock_iv_data, 32);
+}
+
 void reset_mock_cryptor() {
   mock_encrypt_called = 0;
   mock_decrypt_called = 0;
   mock_encrypt_return_value = 0;
   mock_decrypt_return_value = 0;
-  if(mock_iv) {
-    bg_iv_free(mock_iv);
-  }
-  mock_iv = bg_iv_new(mock_iv_data, 32);
+
+  reset_mock_iv();
 }
 
 void reset_mock_repository() {
