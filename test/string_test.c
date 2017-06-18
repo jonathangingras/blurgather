@@ -12,6 +12,30 @@ sweetgreen_test_define(string, can_instantiate_empty_string) {
   sweetgreen_expect_zero(bg_string_length(str));
 }
 
+sweetgreen_test_define(string, can_instantiate_filled_string_0_char) {
+  bg_string *str = bg_string_filled_with_length('1', 0);
+
+  sweetgreen_expect_not_same_address(NULL, str);
+  sweetgreen_expect_equal(0, bg_string_length(str));
+  sweetgreen_expect_equal_memory("", bg_string_data(str), 1);
+}
+
+sweetgreen_test_define(string, can_instantiate_filled_string_one_char) {
+  bg_string *str = bg_string_filled_with_length('1', 1);
+
+  sweetgreen_expect_not_same_address(NULL, str);
+  sweetgreen_expect_equal(1, bg_string_length(str));
+  sweetgreen_expect_equal_memory("1", bg_string_data(str), 2);
+}
+
+sweetgreen_test_define(string, can_instantiate_filled_string_multiple_chars) {
+  bg_string *str = bg_string_filled_with_length('1', 10);
+
+  sweetgreen_expect_not_same_address(NULL, str);
+  sweetgreen_expect_equal(10, bg_string_length(str));
+  sweetgreen_expect_equal_memory("1111111111", bg_string_data(str), 11);
+}
+
 sweetgreen_test_define(string, can_instantiate_string_from_char_array) {
   char array[] = VALID_STRING;
 
@@ -83,4 +107,71 @@ sweetgreen_test_define(string, can_concatenate_a_char_array) {
   sweetgreen_expect_not_null(bg_string_cat_char_array(&str, catted, strlen(catted)));
   sweetgreen_expect_equal_memory(comparer, bg_string_data(str), strlen(comparer) + 1);
   sweetgreen_expect_equal(strlen(comparer), bg_string_length(str));
+}
+
+sweetgreen_test_define(string, can_strip_nul_characters_at_end_when_empty_string) {
+  bg_string *str = bg_string_new();
+
+  bg_string_strip_nuls(&str);
+
+  sweetgreen_expect_equal(0, bg_string_length(str));
+  sweetgreen_expect_equal_memory("", bg_string_data(str), 1);
+}
+
+sweetgreen_test_define(string, can_strip_nul_characters_at_end_when_0_nul_character) {
+  char array[] = {'1', '1', '1'};
+  bg_string *str = bg_string_from_char_array(array, 3);
+
+  bg_string_strip_nuls(&str);
+
+  sweetgreen_expect_equal(3, bg_string_length(str));
+  sweetgreen_expect_equal_memory("111", bg_string_data(str), 4);
+}
+
+sweetgreen_test_define(string, can_strip_nul_characters_at_end_when_1_nul_character_and_rest_is_empty) {
+  char array[] = {0};
+  bg_string *str = bg_string_from_char_array(array, 1);
+
+  sweetgreen_expect_equal(1, bg_string_length(str));
+
+  bg_string_strip_nuls(&str);
+
+  sweetgreen_expect_equal(0, bg_string_length(str));
+  sweetgreen_expect_equal_memory("", bg_string_data(str), 1);
+}
+
+sweetgreen_test_define(string, can_strip_nul_characters_at_end_when_1_nul_character) {
+  char array[] = {'1', '1', '1', 0};
+  bg_string *str = bg_string_from_char_array(array, 4);
+
+  sweetgreen_expect_equal(4, bg_string_length(str));
+
+  bg_string_strip_nuls(&str);
+
+  sweetgreen_expect_equal(3, bg_string_length(str));
+  sweetgreen_expect_equal_memory("111", bg_string_data(str), 4);
+}
+
+sweetgreen_test_define(string, can_strip_nul_characters_at_end_when_2_nul_characters) {
+  char array[] = {'1', '1', '1', 0, 0};
+  bg_string *str = bg_string_from_char_array(array, 5);
+
+  sweetgreen_expect_equal(5, bg_string_length(str));
+
+  bg_string_strip_nuls(&str);
+
+  sweetgreen_expect_equal(3, bg_string_length(str));
+  sweetgreen_expect_equal_memory("111", bg_string_data(str), 4);
+}
+
+sweetgreen_test_define(string, can_strip_nul_characters_at_end_when_multiple_nul_characters) {
+  char array[] = {'1', '1', '1', 0, 0, 0, 0, 0, 0};
+  bg_string *str = bg_string_from_char_array(array, 9);
+
+  sweetgreen_expect_equal(9, bg_string_length(str));
+
+  bg_string_strip_nuls(&str);
+
+  sweetgreen_expect_equal(3, bg_string_length(str));
+  sweetgreen_expect_equal_memory("111", bg_string_data(str), 4);
 }

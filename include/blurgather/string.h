@@ -11,6 +11,7 @@ struct bg_string;
 typedef struct bg_string bg_string;
 
 bg_string *bg_string_new();
+bg_string *bg_string_filled_with_length(char character, size_t length);
 bg_string *bg_string_from_char_array(const char *array, size_t length);
 bg_string *bg_string_from_str(const char *array);
 bg_string *bg_string_copy(const bg_string*);
@@ -23,6 +24,7 @@ size_t bg_string_length(const bg_string *str);
 int bg_string_empty(const bg_string *str);
 
 void bg_string_clean(bg_string *str);
+bg_string *bg_string_strip_nuls(bg_string **str);
 bg_string *bg_string_cat(bg_string **str, const bg_string *catted);
 bg_string *bg_string_cat_char_array(bg_string **str, const char *catted, size_t length);
 

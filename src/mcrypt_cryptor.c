@@ -78,11 +78,16 @@ int bg_mcrypt_iv32_generate_iv(bg_iv_t **output) {
   return error_code;
 }
 
+size_t bg_mcrypt_cfb_encrypted_length(size_t input_memlen) {
+  return input_memlen; /* cfb mode encryption */
+}
+
 const static bg_cryptor_t bg_mcrypt_aes256 = {
   .encrypt = &bg_mcrypt_aes256_encrypt,
   .decrypt = &bg_mcrypt_aes256_decrypt,
   .iv_length = &bg_mcrypt_iv32_iv_length,
-  .generate_iv = &bg_mcrypt_iv32_generate_iv
+  .generate_iv = &bg_mcrypt_iv32_generate_iv,
+  .encrypted_length = &bg_mcrypt_cfb_encrypted_length,
 };
 
 const bg_cryptor_t *bg_mcrypt_cryptor() {

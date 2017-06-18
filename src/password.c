@@ -44,7 +44,9 @@ int bg_password_crypt(bg_password *self, bg_cryptor_t *cryptor, bg_secret_key_t 
   if(self->crypted)  { return -2; }
   if(!key) { return -3; }
 
-  bg_string *buffer = bg_string_copy(bg_password_value(self));
+  size_t needed_length = bg_cryptor_encrypted_length(cryptor, bg_string_length(bg_password_value(self)));
+  bg_string *buffer = bg_string_filled_with_length(0, needed_length);
+  memcpy((void*)bg_string_data(buffer), bg_string_data(bg_password_value(self)), bg_string_length(bg_password_value(self)));
 
   int error_value = 0;
   if((error_value = bg_cryptor_encrypt(cryptor,
@@ -78,6 +80,8 @@ int bg_password_decrypt(bg_password *self, bg_cryptor_t *cryptor, bg_secret_key_
     bg_string_clean_free(buffer);
     return error_value;
   }
+
+  bg_string_strip_nuls(&buffer);
 
   self->crypted = 0;
   bg_string_clean_replace(self->value, buffer);

@@ -8,6 +8,7 @@ int mock_decrypt_called = 0;
 int mock_encrypt_return_value = 0;
 int mock_decrypt_return_value = 0;
 int mock_cryptor_generate_iv_called = 0;
+int mock_encrypted_length_called = 0;
 bg_secret_key_t *mock_secret_key = NULL;
 bg_iv_t *mock_iv = NULL;
 char mock_iv_data[32] = "1111111111111111111111111111111";
@@ -38,12 +39,14 @@ int mock_decrypt(void *memory,
                  const bg_iv_t *iv);
 size_t mock_iv_length();
 int mock_generate_iv(bg_iv_t **output);
+size_t mock_encrypted_length(size_t input_memlen);
 
 bg_cryptor_t mock_cryptor = {
   .encrypt = &mock_encrypt,
   .decrypt = &mock_decrypt,
   .iv_length = &mock_iv_length,
   .generate_iv = &mock_generate_iv,
+  .encrypted_length = &mock_encrypted_length,
 };
 
 void mock_repository_destroy(bg_repository_t *self);
@@ -128,15 +131,29 @@ void reset_mock_iv() {
 }
 
 void reset_mock_cryptor() {
+  *(void**)&mock_cryptor.encrypt = &mock_encrypt;
+  *(void**)&mock_cryptor.decrypt = &mock_decrypt;
+  *(void**)&mock_cryptor.iv_length = &mock_iv_length;
+  *(void**)&mock_cryptor.generate_iv = &mock_generate_iv;
+  *(void**)&mock_cryptor.encrypted_length = &mock_encrypted_length;
+
   mock_encrypt_called = 0;
   mock_decrypt_called = 0;
   mock_encrypt_return_value = 0;
   mock_decrypt_return_value = 0;
+  mock_encrypted_length_called = 0;
 
   reset_mock_iv();
 }
 
 void reset_mock_repository() {
+  *(void**)&mock_repository_vtable.destroy = &mock_repository_destroy;
+  *(void**)&mock_repository_vtable.add = &mock_repository_add;
+  *(void**)&mock_repository_vtable.get = &mock_repository_get;
+  *(void**)&mock_repository_vtable.remove = &mock_repository_remove;
+  *(void**)&mock_repository_vtable.count = &mock_repository_count;
+  *(void**)&mock_repository_vtable.foreach = &mock_repository_foreach;
+
   mock_repository_destroy_called = 0;
   mock_repository_add_called = 0;
   mock_repository_get_called = 0;
@@ -214,6 +231,11 @@ int mock_generate_iv(bg_iv_t **output) {
   mock_cryptor_generate_iv_called = 1;
   *output = bg_iv_new(mock_iv_data, 32);
   return 0;
+}
+
+size_t mock_encrypted_length(size_t input_memlen) {
+  mock_encrypted_length_called = 1;
+  return input_memlen;
 }
 
 

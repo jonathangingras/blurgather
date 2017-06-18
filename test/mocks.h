@@ -16,6 +16,7 @@ extern int mock_decrypt_called;
 extern int mock_encrypt_return_value;
 extern int mock_decrypt_return_value;
 extern int mock_cryptor_generate_iv_called;
+extern int mock_encrypted_length_called;
 
 /* iv */
 extern bg_iv_t *mock_iv;

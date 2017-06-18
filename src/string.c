@@ -10,12 +10,21 @@ struct bg_string {
 };
 
 #define STR_DATA(str) ((const char *)((str)+1))
-#define STR_APPEND_NUL(str) *(((char *)((str)+1)) + ((str)->length)) = 0
+#define STR_NUL(str) ( ((char *)((str)+1)) + ((str)->length) )
+#define STR_APPEND_NUL(str) *STR_NUL(str) = 0
 
 bg_string *bg_string_new() {
   bg_string *str = malloc(sizeof(bg_string) + 1);
   str->length = 0;
   STR_APPEND_NUL(str);
+  return str;
+}
+
+bg_string *bg_string_filled_with_length(char character, size_t length) {
+  bg_string *str = malloc(sizeof(bg_string) + length + 1);
+  str->length = length;
+  STR_APPEND_NUL(str);
+  memset((void*)STR_DATA(str), character, length);
   return str;
 }
 
@@ -39,6 +48,28 @@ bg_string *bg_string_copy(const bg_string *copied) {
 
 void bg_string_clean(bg_string *str) {
   memset((void*)STR_DATA(str), 0, str->length);
+}
+
+bg_string *bg_string_strip_nuls(bg_string **str) {
+  if((*str)->length == 0) { return; }
+
+  size_t to_remove = 0;
+  char *last = ((char*)(STR_NUL(*str))) - 1;
+  while(1) {
+    if(*last == 0) { ++to_remove; }
+    else { break; }
+    --last;
+    if(to_remove == (*str)->length) { break; }
+  }
+
+  if(to_remove == 0) { return; }
+
+  bg_string *stripped = bg_string_filled_with_length(0, (*str)->length - to_remove);
+  memcpy((void*)STR_DATA(stripped), STR_DATA(*str), stripped->length);
+
+  bg_string_clean_free(*str);
+  *str = stripped;
+  return stripped;
 }
 
 size_t bg_string_length(const bg_string *str) {
