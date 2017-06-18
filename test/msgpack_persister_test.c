@@ -39,9 +39,6 @@ sweetgreen_setup(persister) {
 
   reset_context();
 
-  reset_allocator();
-  bgctx_register_allocator(ctx, &mock_allocator);
-
   reset_mock_cryptor();
   bgctx_register_cryptor(ctx, &mock_cryptor);
 
@@ -49,7 +46,7 @@ sweetgreen_setup(persister) {
   bgctx_register_repository(ctx, &mock_repository);
 
   bg_string *filename = bg_string_from_str(TEST_FILE_PATH);
-  _persister = bg_msgpack_persister_new(ctx, filename);
+  _persister = bg_msgpack_persister_new(filename);
 
   persister = bg_msgpack_persister_persister(_persister);
   bgctx_register_persister(ctx, persister);

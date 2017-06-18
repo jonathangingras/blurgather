@@ -13,12 +13,13 @@
 struct bg_context {
   bg_repository_t *repository;
   bg_cryptor_t *cryptor;
-  bg_allocator_t *allocator;
   bg_persister_t *persister;
   bg_secret_key_t *secret_key;
   int flags;
 };
 
+#define RETURN_IF_UNSEALED(ctx) if(!bgctx_sealed(ctx)) {return -1;}
+#define RETURN_IF_LOCKED(ctx) if(!(ctx)->secret_key) {return -2;}
 
 int bgctx_init(bg_context **ctx) {
   *ctx = malloc(sizeof(bg_context));
@@ -27,7 +28,10 @@ int bgctx_init(bg_context **ctx) {
 }
 
 int bgctx_seal(bg_context *ctx) {
-  ctx->flags |= ctx->flags & BGCTX_SEALED;
+  if(bgctx_sealed(ctx)) {
+    return -1;
+  }
+  ctx->flags |= BGCTX_SEALED;
   return 0;
 }
 
@@ -50,15 +54,6 @@ static int check_ctx(bg_context *ctx) {
   if(!ctx) { return -1; }
   if(ctx->flags & BGCTX_SEALED) { return -2; }
 
-  return 0;
-}
-
-
-int bgctx_register_allocator(bg_context *ctx, bg_allocator_t *allocator) {
-  int error_code = 0;
-  if((error_code = check_ctx(ctx))) { return error_code; }
-
-  ctx->allocator = allocator;
   return 0;
 }
 
@@ -86,29 +81,17 @@ int bgctx_register_cryptor(bg_context *ctx, bg_cryptor_t *cryptor) {
   return 0;
 }
 
-void *bgctx_allocate(bg_context *ctx, size_t size) {
-  return ctx->allocator->allocate(size);
-}
-
-void bgctx_deallocate(bg_context *ctx, void* object) {
-  return ctx->allocator->deallocate(object);
-}
-
-void *bgctx_reallocate(bg_context *ctx, void *object, size_t size) {
-  return ctx->allocator->reallocate(object, size);
-}
-
 int bgctx_finalize(bg_context *ctx) {
   bgctx_lock(ctx);
 
   if(ctx->repository && (ctx->flags & BGCTX_ACQUIRE_REPOSITORY)) {
     bg_repository_destroy(ctx->repository);
-    bgctx_deallocate(ctx, (void*)ctx->repository->object);
+    free((void*)ctx->repository->object);
     ctx->repository = NULL;
   }
   if(ctx->persister && (ctx->flags & BGCTX_ACQUIRE_PERSISTER)) {
     bg_persister_destroy(ctx->persister);
-    bgctx_deallocate(ctx, (void*)ctx->persister->object);
+    free((void*)ctx->persister->object);
     ctx->repository = NULL;
   }
 
@@ -143,9 +126,44 @@ bg_cryptor_t *bgctx_cryptor(bg_context *ctx) {
 }
 
 int bgctx_find_password(bg_context *ctx, const bg_string *name, bg_password **password) {
+  RETURN_IF_UNSEALED(ctx);
   return bg_repository_get(ctx->repository, name, password);
 }
 
 int bgctx_each_password(bg_context *ctx, int (* callback)(bg_password *password, void *), void *out) {
+  RETURN_IF_UNSEALED(ctx);
   return bg_repository_foreach(ctx->repository, callback, out);
+}
+
+int bgctx_load(bg_context *ctx) {
+  RETURN_IF_UNSEALED(ctx);
+  return bg_persister_load(ctx->persister, ctx->repository);
+}
+
+int bgctx_persist(bg_context *ctx) {
+  RETURN_IF_UNSEALED(ctx);
+  return bg_persister_persist(ctx->persister, ctx->repository);
+}
+
+int bgctx_add_password(bg_context *ctx, bg_password *password) {
+  RETURN_IF_UNSEALED(ctx);
+  return bg_repository_add(ctx->repository, password);
+}
+
+int bgctx_encrypt_password(bg_context *ctx, bg_password *password) {
+  RETURN_IF_UNSEALED(ctx);
+  RETURN_IF_LOCKED(ctx);
+  return bg_password_crypt(password, ctx->cryptor, ctx->secret_key);
+}
+
+int bgctx_decrypt_password(bg_context *ctx, bg_password *password) {
+  RETURN_IF_UNSEALED(ctx);
+  RETURN_IF_LOCKED(ctx);
+  return bg_password_decrypt(password, ctx->cryptor, ctx->secret_key);
+}
+
+int bgctx_remove_password(bg_context *ctx, bg_string *name) {
+  RETURN_IF_UNSEALED(ctx);
+  RETURN_IF_LOCKED(ctx);
+  return bg_repository_remove(ctx->repository, name);
 }

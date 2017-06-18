@@ -9,20 +9,14 @@
 #define TEST_FILE_PATH "/tmp/bg.shadow.bin.integration_test"
 
 bg_context *ctx;
-bg_allocator_t bg_default_allocator = {
-  .allocate = malloc,
-  .deallocate = free,
-  .reallocate = realloc,
-};
 bg_msgpack_persister *persister;
 
 void setup_context(void) {
   bgctx_init(&ctx);
-  bgctx_register_allocator(ctx, &bg_default_allocator);
 
   bgctx_register_cryptor(ctx, bg_mcrypt_cryptor());
 
-  persister = bg_msgpack_persister_new(ctx, bg_string_from_str(TEST_FILE_PATH));
+  persister = bg_msgpack_persister_new(bg_string_from_str(TEST_FILE_PATH));
   bgctx_register_persister(ctx, bg_msgpack_persister_persister(persister));
 
   bgctx_register_repository(ctx, bg_password_array_repository_new());

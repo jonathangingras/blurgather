@@ -11,7 +11,7 @@ static struct bg_persister_vtable bg_msgpack_persister_vtable = {
   .persist = &bg_msgpack_persister_persist,
 };
 
-bg_msgpack_persister *bg_msgpack_persister_new(bg_context *ctx, bg_string *filename) {
+bg_msgpack_persister *bg_msgpack_persister_new(bg_string *filename) {
   bg_msgpack_persister *self = malloc(sizeof(bg_msgpack_persister));
 
   self->persister.object = (void *) self;

@@ -28,7 +28,6 @@ sweetgreen_setup(cryptor) {
   turnoff_debug();
 
   reset_context();
-  bgctx_register_allocator(ctx, &mock_allocator);
   bgctx_register_cryptor(ctx, cryptor);
 
   memset(buffer, 0, BUFFER_SIZE);

@@ -24,4 +24,4 @@ target_link_libraries(blurgather
 
 install(TARGETS blurgather DESTINATION lib)
 
-#add_subdirectory(cli-frontend)
+add_subdirectory(cli-frontend)

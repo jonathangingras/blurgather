@@ -25,11 +25,6 @@ extern char mock_iv_data[32];
 /* secret key */
 extern bg_secret_key_t *mock_secret_key;
 
-/* allocator */
-extern bg_allocator_t mock_allocator;
-extern size_t allocated;
-extern size_t reallocated;
-
 /* repository */
 extern struct bg_repository_vtable mock_repository_vtable;
 extern bg_repository_t mock_repository;
@@ -51,7 +46,6 @@ extern int mock_persister_persist_called;
 void turnoff_debug();
 void reset_debug();
 void reset_context();
-void reset_allocator();
 void reset_mock_secret_key();
 void reset_mock_iv();
 void reset_mock_cryptor();

@@ -15,20 +15,6 @@ char mock_iv_data[32] = "1111111111111111111111111111111";
 size_t mock_repository_count_return_value = 0;
 
 
-size_t allocated = 0;
-size_t reallocated = 0;
-
-
-void *mock_allocate(size_t size);
-void mock_deallocate(void *object);
-void *mock_reallocate(void *object, size_t size);
-
-bg_allocator_t mock_allocator = {
-  .allocate = &mock_allocate,
-  .deallocate = &mock_deallocate,
-  .reallocate = &mock_reallocate,
-};
-
 int mock_encrypt(void *memory,
                  size_t memlen,
                  const bg_secret_key_t *secret_key,
@@ -118,11 +104,6 @@ void reset_context() {
   mock_secret_key = NULL;
 }
 
-void reset_allocator() {
-  allocated = 0;
-  reallocated = 0;
-}
-
 void reset_mock_iv() {
   if(mock_iv) {
     bg_iv_free(mock_iv);
@@ -162,46 +143,6 @@ void reset_mock_repository() {
   mock_persister_load_called = 0;
   mock_persister_persist_called = 0;
 }
-
-
-/* mock/inspect memory allocation */
-
-void *mock_allocate(size_t size) {
-  fprintf(logstream, "[Memory ALLOCATION of %zu bytes requested] -->> ", size);
-  fflush(logstream);
-
-  void *mem = malloc(size);
-
-  fprintf(logstream, "OK, new address: %p\n", mem);
-  allocated += size;
-  return mem;
-}
-
-void mock_deallocate(void *object) {
-  fprintf(logstream, "[Memory DEALLOCATION requested, address: %p] -->> ", object);
-  fflush(logstream);
-
-  if(object == mock_iv) {
-    fprintf(logstream, "was mock memory\n");
-    return;
-  }
-
-  free(object);
-
-  fprintf(logstream, "OK\n");
-}
-
-void *mock_reallocate(void *object, size_t size) {
-  fprintf(logstream, "[Memory REALLOCATION of %zu bytes requested, old address: %p] -->> ", size, object);
-  fflush(logstream);
-
-  void *mem = realloc(object, size);
-
-  fprintf(logstream, "OK, new address: %p\n", mem);
-  reallocated += size;
-  return mem;
-}
-
 
 /* cryptor */
 
