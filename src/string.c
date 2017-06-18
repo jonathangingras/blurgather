@@ -51,7 +51,7 @@ void bg_string_clean(bg_string *str) {
 }
 
 bg_string *bg_string_strip_nuls(bg_string **str) {
-  if((*str)->length == 0) { return; }
+  if((*str)->length == 0) { return *str; }
 
   size_t to_remove = 0;
   char *last = ((char*)(STR_NUL(*str))) - 1;
@@ -62,7 +62,7 @@ bg_string *bg_string_strip_nuls(bg_string **str) {
     if(to_remove == (*str)->length) { break; }
   }
 
-  if(to_remove == 0) { return; }
+  if(to_remove == 0) { return *str; }
 
   bg_string *stripped = bg_string_filled_with_length(0, (*str)->length - to_remove);
   memcpy((void*)STR_DATA(stripped), STR_DATA(*str), stripped->length);
