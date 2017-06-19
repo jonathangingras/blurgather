@@ -5,7 +5,7 @@ if(APPLE)
   add_library(blurpasteboard pasteboard.m)
   target_link_libraries(blurpasteboard objc)
   set(BLUR_SPECIFIC_FLAGS "-framework Foundation -framework AppKit")
-elseif(UNIX)
+elseif(GTK3)
   find_package(PkgConfig REQUIRED)
   pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
   include_directories(${GTK3_INCLUDE_DIRS})
@@ -14,6 +14,8 @@ elseif(UNIX)
 
   set(CLIPBOARD_SRC gtk3_clipboard.c)
   set(CLIPBOARD_LIBS ${GTK3_LIBRARIES})
+elseif(UNIX)
+  set(CLIPBOARD_SRC null_clipboard.c)
 endif()
 
 add_executable(blur
