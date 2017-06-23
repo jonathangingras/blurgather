@@ -57,14 +57,14 @@ int main(int argc, char **argv) {
 
   if((err = bgctx_load(ctx))) {
     if(err == -4) {
-      fprintf(stdout, "could not load repository (err %d), creating empty one.\n", err);
+      fprintf(stderr, "could not load repository (err %d), creating empty one.\n", err);
 
       if((err = bgctx_persist(ctx))) {
         fprintf(stderr, "could not persist repository!\n");
         return err;
       }
     } else {
-      fprintf(stdout, "loading repository failed (err %d)!\n", err);
+      fprintf(stderr, "loading repository failed (err %d)!\n", err);
       return err;
     }
   }
