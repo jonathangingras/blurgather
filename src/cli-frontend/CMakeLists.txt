@@ -14,30 +14,39 @@ elseif(GTK3)
 
   set(CLIPBOARD_SRC gtk3_clipboard.c)
   set(CLIPBOARD_LIBS ${GTK3_LIBRARIES})
-elseif(UNIX)
+else()
   set(CLIPBOARD_SRC null_clipboard.c)
 endif()
 
 add_executable(blur
-  blur.c
   create_context.c
   getfield.c
-  get_secret_key.c
+  ask_secret_key.c
+  find_string_index.c
+  run_options.c
+  run_command.c
+  blur.c
 
+  # clipboard support
   ${CLIPBOARD_SRC}
 
+  # commands
   cmd/add.c
   cmd/get.c
   cmd/info.c
   cmd/list.c
   cmd/remove.c
+
+  # options
+  options/unlock_from_stdin.c
 )
 
 target_link_libraries(blur
   blurgather
+
   ${CLIPBOARD_LIBS}
 )
 
-set_target_properties(blur PROPERTIES
-  LINK_FLAGS "${BLUR_SPECIFIC_FLAGS}"
+set_target_properties(blur
+  PROPERTIES LINK_FLAGS "${BLUR_SPECIFIC_FLAGS}"
 )

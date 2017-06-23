@@ -3,12 +3,9 @@
 #include <blurgather/password.h>
 #include "../blur.h"
 
+
 int blur_cmd_add(bg_context* ctx, int argc, char **argv) {
   int return_value = 0;
-
-  if((return_value = bgctx_load(ctx))) {
-    fprintf(stderr, "could not load repository, guessing it is first time blurgather is used!\n");
-  }
 
   bg_password* password = bg_password_new();
 
@@ -29,22 +26,17 @@ int blur_cmd_add(bg_context* ctx, int argc, char **argv) {
   bg_password_update_description(password, desc);
   bg_password_update_value(password, value1, bgctx_cryptor(ctx));
 
-  if((return_value = bgctx_unlock(ctx, blur_get_secret_key(ctx)))) {
-    fprintf(stderr, "could not unlock context!\n");
-    bg_password_free(password);
-    return return_value;
-  }
   if((return_value = bgctx_encrypt_password(ctx, password))) {
     fprintf(stderr, "password encryption failed!\n");
     bg_password_free(password);
     return return_value;
   }
+
   if((return_value = bgctx_add_password(ctx, password))) {
     fprintf(stderr, "adding password failed!\n");
     bg_password_free(password);
     return return_value;
   }
-  bgctx_lock(ctx);
 
   if((return_value = bgctx_persist(ctx))) {
     fprintf(stderr, "persistence failed!\n");

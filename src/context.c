@@ -113,6 +113,10 @@ int bgctx_lock(bg_context *ctx) {
   return 0;
 }
 
+int bgctx_locked(bg_context *ctx) {
+  return ctx->secret_key == NULL;
+}
+
 bg_secret_key_t *bgctx_access_key(bg_context *ctx) {
   return ctx->secret_key;
 }

@@ -3,7 +3,8 @@
 #include <blurgather/password.h>
 
 static int print_password(bg_password *pwd, void *_) {
-  return printf("%s\n", bg_string_data(bg_password_name(pwd)));
+  printf("%s\n", bg_string_data(bg_password_name(pwd)));
+  return 0;
 }
 
 int blur_cmd_list(bg_context *ctx, int argc, char **argv) {

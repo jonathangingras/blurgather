@@ -33,6 +33,7 @@ bg_cryptor_t *bgctx_cryptor(bg_context *ctx);
 /* runtime password library lock/unlock */
 int bgctx_unlock(bg_context *ctx, bg_secret_key_t *secret_key);
 int bgctx_lock(bg_context *ctx);
+int bgctx_locked(bg_context *ctx);
 
 /* runtime password library manipulation shortcuts */
 int bgctx_find_password(bg_context *ctx, const bg_string *name, bg_password **password);
