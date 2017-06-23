@@ -5,6 +5,7 @@
 #include "blurgather/password.h"
 #include "blurgather/repository.h"
 #include "blurgather/persister.h"
+#include "blurgather/map.h"
 
 
 #define BGCTX_SEALED 0x1
@@ -15,6 +16,7 @@ struct bg_context {
   bg_cryptor_t *cryptor;
   bg_persister_t *persister;
   bg_secret_key_t *secret_key;
+  bg_map *map;
   int flags;
 };
 
@@ -24,6 +26,7 @@ struct bg_context {
 int bgctx_init(bg_context **ctx) {
   *ctx = malloc(sizeof(bg_context));
   memset(*ctx, 0, sizeof(bg_context));
+  (*ctx)->map = bg_map_new();
   return 0;
 }
 
@@ -94,6 +97,7 @@ int bgctx_finalize(bg_context *ctx) {
     free((void*)ctx->persister->object);
     ctx->repository = NULL;
   }
+  bg_map_free(ctx->map);
 
   free(ctx);
 
@@ -170,4 +174,12 @@ int bgctx_remove_password(bg_context *ctx, bg_string *name) {
   RETURN_IF_UNSEALED(ctx);
   RETURN_IF_LOCKED(ctx);
   return bg_repository_remove(ctx->repository, name);
+}
+
+int bgctx_register_memory(bg_context *ctx, bg_string *key, void *mem) {
+  return bg_map_register_data(ctx->map, key, mem);
+}
+
+void *bgctx_get_memory(bg_context *ctx, bg_string *key) {
+  return bg_map_get_data(ctx->map, key);
 }

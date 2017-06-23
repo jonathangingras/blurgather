@@ -4,10 +4,12 @@
 
 static const char *option_strs[] = {
   "-s",
+  "-f",
 };
 
-static blur_cmd options[] = {
+static blur_option options[] = {
   blur_unlock_from_stdin,
+  blur_persistence_filepath,
 };
 
 #define NB_OPTIONS sizeof(options)/sizeof(blur_cmd)

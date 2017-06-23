@@ -20,6 +20,7 @@ int end(bg_context *ctx, int err) {
   return err;
 }
 
+
 int main(int argc, char **argv) {
   int err = 0;
   bg_context *ctx = NULL;
@@ -29,19 +30,43 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  if((err = blur_create_context(&ctx,
-                                bg_msgpack_persister_persister(
-                                  bg_msgpack_persister_new(
-                                    default_persistence_filepath())),
-                                bg_password_array_repository_new(),
-                                bg_mcrypt_cryptor()))) {
-    fprintf(stderr, "context could not be instantiated!\n");
+  if((err = bgctx_init(&ctx))) {
+    fprintf(stderr, "could not instantiate blurgather context: %d\n", err);
     return err;
   }
+
+  bgctx_register_memory(ctx, bg_string_from_str("persistence_filepath"),
+                        default_persistence_filepath());
 
   if((err = run_options(ctx, argc, argv))) {
     fprintf(stderr, "running options failed! (err: %d)\n", err);
     return end(ctx, err);
+  }
+
+  if((err = blur_setup_context(ctx,
+                               bg_msgpack_persister_persister(
+                                 bg_msgpack_persister_new(
+                                   bgctx_get_memory(ctx,
+                                                    bg_string_from_str(
+                                                      "persistence_filepath")))),
+                               bg_password_array_repository_new(),
+                               bg_mcrypt_cryptor()))) {
+    fprintf(stderr, "context could not be instantiated!\n");
+    return err;
+  }
+
+  if((err = bgctx_load(ctx))) {
+    if(err == -4) {
+      fprintf(stdout, "could not load repository (err %d), creating empty one.\n", err);
+
+      if((err = bgctx_persist(ctx))) {
+        fprintf(stderr, "could not persist repository!\n");
+        return err;
+      }
+    } else {
+      fprintf(stdout, "loading repository failed (err %d)!\n", err);
+      return err;
+    }
   }
 
   if(bgctx_locked(ctx)) {

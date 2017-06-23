@@ -2,6 +2,7 @@
 add_library(blurgather
   context.c
   stream.c
+  map.c
   password.c
   repository.c
   persister.c

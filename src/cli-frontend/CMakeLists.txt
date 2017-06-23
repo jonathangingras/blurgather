@@ -39,6 +39,7 @@ add_executable(blur
 
   # options
   options/unlock_from_stdin.c
+  options/persistence_filepath.c
 )
 
 target_link_libraries(blur
