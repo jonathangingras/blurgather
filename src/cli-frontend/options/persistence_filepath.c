@@ -14,7 +14,8 @@ int blur_persistence_filepath(bg_context *ctx, int argc, char **argv) {
     if(argv[f_idx + 1][0] != '-') {
       if((err = bgctx_register_memory(ctx,
                                       bg_string_from_str("persistence_filepath"),
-                                      bg_string_from_str(argv[f_idx + 1])))) {
+                                      bg_string_from_str(argv[f_idx + 1]),
+                                      bg_string_free))) {
         fprintf(stderr, "could not register memory to filepath!\n");
         return err;
       }

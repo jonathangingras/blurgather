@@ -46,7 +46,7 @@ int bgctx_encrypt_password(bg_context *ctx, bg_password *password);
 int bgctx_decrypt_password(bg_context *ctx, bg_password *password);
 
 /* data memorization association facility */
-int bgctx_register_memory(bg_context *ctx, bg_string *key, void *mem);
+int bgctx_register_memory(bg_context *ctx, bg_string *key, void *mem,  void (*mem_free)(void *));
 void *bgctx_get_memory(bg_context *ctx, bg_string *key);
 
 #ifdef __cplusplus

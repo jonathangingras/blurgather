@@ -176,8 +176,8 @@ int bgctx_remove_password(bg_context *ctx, bg_string *name) {
   return bg_repository_remove(ctx->repository, name);
 }
 
-int bgctx_register_memory(bg_context *ctx, bg_string *key, void *mem) {
-  return bg_map_register_data(ctx->map, key, mem);
+int bgctx_register_memory(bg_context *ctx, bg_string *key, void *mem, void (*mem_free)(void *)) {
+  return bg_map_register_data(ctx->map, key, mem, mem_free);
 }
 
 void *bgctx_get_memory(bg_context *ctx, bg_string *key) {

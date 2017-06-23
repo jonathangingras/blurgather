@@ -1,9 +1,12 @@
 #include <blurgather/map.h>
 
+typedef void (*map_free_callback)(void *);
+
 struct bg_map {
   size_t data_pair_count;
   bg_string **data_keys;
   void **data;
+  map_free_callback *frees;
 };
 
 bg_map *bg_map_new() {
@@ -11,6 +14,7 @@ bg_map *bg_map_new() {
   map->data_pair_count = 0;
   map->data_keys = NULL;
   map->data = NULL;
+  map->frees = NULL;
   return map;
 }
 
@@ -18,9 +22,13 @@ void bg_map_free(bg_map *map) {
   size_t i;
   for(i = 0; i < map->data_pair_count; ++i) {
     bg_string_free(map->data_keys[i]);
+    if(map->frees[i]) {
+      map->frees[i](map->data[i]);
+    }
   }
   free(map->data_keys);
   free(map->data);
+  free(map->frees);
 }
 
 static void get_data_index(bg_map *map, const bg_string *key, size_t *idx) {
@@ -34,21 +42,26 @@ static void get_data_index(bg_map *map, const bg_string *key, size_t *idx) {
   *idx = map->data_pair_count;
 }
 
-int bg_map_register_data(bg_map *map, bg_string *key, void *value) {
+int bg_map_register_data(bg_map *map, bg_string *key, void *value, void (*free_callback)(void *)) {
   size_t i;
   get_data_index(map, key, &i);
 
-  if(!(i < map->data_pair_count)) {
+  if(!(i < map->data_pair_count)) { /* new key */
     map->data_keys = realloc(map->data_keys, (map->data_pair_count + 1) * sizeof(void*));
     map->data = realloc(map->data, (map->data_pair_count + 1) * sizeof(void*));
+    map->frees = realloc(map->frees, (map->data_pair_count + 1) * sizeof(void*));
 
     map->data_keys[i] = key;
     map->data_pair_count++;
-  } else {
+  } else { /* key already exists */
     bg_string_free(key);
+    if(map->frees[i]) {
+      map->frees[i](map->data[i]);
+    }
   }
 
   map->data[i] = value;
+  map->frees[i] = free_callback;
 
   return 0;
 }
