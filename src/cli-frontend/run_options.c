@@ -5,11 +5,13 @@
 static const char *option_strs[] = {
   "-s",
   "-f",
+  "-n",
 };
 
 static blur_option options[] = {
   blur_unlock_from_stdin,
   blur_persistence_filepath,
+  blur_value_to_stdout,
 };
 
 #define NB_OPTIONS sizeof(options)/sizeof(blur_cmd)

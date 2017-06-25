@@ -29,6 +29,7 @@ void bg_map_free(bg_map *map) {
   free(map->data_keys);
   free(map->data);
   free(map->frees);
+  free(map);
 }
 
 static void get_data_index(bg_map *map, const bg_string *key, size_t *idx) {

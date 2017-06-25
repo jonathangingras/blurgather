@@ -5,6 +5,7 @@
 #include <blurgather/array_repository.h>
 #include <blurgather/msgpack_persister.h>
 #include "blur.h"
+#include "clipboard.h"
 
 
 bg_string *default_persistence_filepath() {
@@ -37,6 +38,7 @@ int main(int argc, char **argv) {
 
   bgctx_register_memory(ctx, bg_string_from_str("persistence_filepath"),
                         default_persistence_filepath(), bg_string_free);
+  bgctx_register_memory(ctx, bg_string_from_str("clipboard"), &send_to_clipboard, NULL);
 
   if((err = run_options(ctx, argc, argv))) {
     fprintf(stderr, "running options failed! (err: %d)\n", err);
@@ -46,9 +48,9 @@ int main(int argc, char **argv) {
   if((err = blur_setup_context(ctx,
                                bg_msgpack_persister_persister(
                                  bg_msgpack_persister_new(
-                                   bgctx_get_memory(ctx,
-                                                    bg_string_from_str(
-                                                      "persistence_filepath")))),
+                                   bg_string_copy(bgctx_get_memory(ctx,
+                                                    bg_string_from_str("persistence_filepath")
+                                     )))),
                                bg_password_array_repository_new(),
                                bg_mcrypt_cryptor()))) {
     fprintf(stderr, "context could not be instantiated!\n");

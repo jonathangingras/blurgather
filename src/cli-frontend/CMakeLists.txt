@@ -1,6 +1,8 @@
 
+set(CLIPBOARD_SRC null_clipboard.c)
+
 if(APPLE)
-  set(CLIPBOARD_SRC )
+  set(CLIPBOARD_SRC ${CLIPBOARD_SRC})
   set(CLIPBOARD_LIBS blurpasteboard)
   add_library(blurpasteboard pasteboard.m)
   target_link_libraries(blurpasteboard objc)
@@ -12,10 +14,8 @@ elseif(GTK3)
   link_directories(${GTK3_LIBRARY_DIRS})
   add_definitions(${GTK3_CFLAGS_OTHER})
 
-  set(CLIPBOARD_SRC gtk3_clipboard.c)
+  set(CLIPBOARD_SRC ${CLIPBOARD_SRC} gtk3_clipboard.c)
   set(CLIPBOARD_LIBS ${GTK3_LIBRARIES})
-else()
-  set(CLIPBOARD_SRC null_clipboard.c)
 endif()
 
 add_executable(blur
@@ -40,6 +40,7 @@ add_executable(blur
   # options
   options/unlock_from_stdin.c
   options/persistence_filepath.c
+  options/value_to_stdout.c
 )
 
 target_link_libraries(blur
