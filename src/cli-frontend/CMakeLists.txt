@@ -1,5 +1,5 @@
 
-set(CLIPBOARD_SRC null_clipboard.c)
+set(CLIPBOARD_SRC stdout_clipboard.c)
 
 if(APPLE)
   set(CLIPBOARD_SRC ${CLIPBOARD_SRC})
@@ -16,6 +16,8 @@ elseif(GTK3)
 
   set(CLIPBOARD_SRC ${CLIPBOARD_SRC} gtk3_clipboard.c)
   set(CLIPBOARD_LIBS ${GTK3_LIBRARIES})
+else()
+  set(CLIPBOARD_SRC ${CLIPBOARD_SRC} null_clipboard.c)
 endif()
 
 add_executable(blur
