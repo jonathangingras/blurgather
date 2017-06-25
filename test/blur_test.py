@@ -1,6 +1,5 @@
-#!/usr/bin/env python
-"""blur cli integration test"""
-from __future__ import print_function
+#!/usr/bin/env python3
+"""blur cli end-to-end test"""
 import subprocess as ps
 import os
 import sys

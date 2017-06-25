@@ -18,4 +18,4 @@ add_test_case(integration)
 add_test_case(map)
 
 get_filename_component(blur_test_script_path "blur_test.py" ABSOLUTE)
-add_test("blur_test" python ${blur_test_script_path})
+add_test("blur_test" python3 ${blur_test_script_path})

@@ -3,6 +3,9 @@ language: c
 dist: trusty
 sudo: true
 
+python:
+  - 3.6
+
 compiler:
   - clang
   - gcc
