@@ -41,6 +41,7 @@ int bg_persistence_msgpack_serialize_password(msgpack_packer *packer, bg_passwor
     return err;
   }
 
+  bg_map_free(map);
   return 0;
 }
 
