@@ -48,6 +48,7 @@ def main_test():
 
         if out.decode() != "somevalue" + str(i):
             sys.stderr.write("PASSWORDS DO NOT MATCH: " + str(out) + "\n")
+            print(status, out, err)
             return 1
 
         if status != 0:
