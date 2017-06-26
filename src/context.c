@@ -144,15 +144,18 @@ static int password_find(bg_password *pwd, void *data) {
   bg_password *copy = bg_password_copy(pwd);
 
   if((err = bg_password_decrypt(copy, ((struct find_data*)data)->ctx->cryptor, ((struct find_data*)data)->ctx->secret_key))) {
+    bg_password_free(copy);
     return err;
   }
 
   if(bg_string_compare(((struct find_data*)data)->name, bg_password_name(copy)) == 0) {
     ((struct find_data*)data)->output = copy;
     return 1;
+  } else {
+    bg_password_free(copy);
   }
 
-  return err;
+  return 0;
 }
 
 int bgctx_find_password(bg_context *ctx, const bg_string *name, bg_password **password) {
