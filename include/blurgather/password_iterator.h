@@ -23,4 +23,4 @@ struct bg_password_iterator {
 }
 #endif
 
-#endif //BLURGATHER_PASSWORD_ITERATOR_H
+#endif /* BLURGATHER_PASSWORD_ITERATOR_H */

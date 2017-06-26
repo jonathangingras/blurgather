@@ -1,4 +1,4 @@
-#include "utilities.h"
+#include "blurgather/utilities.h"
 
 size_t bg_reverse_memlen(const void* str, int end_index) { //like in c++ end index is out of bound
 	unsigned char* iterator = ((unsigned char*)str) + end_index;

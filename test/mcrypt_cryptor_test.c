@@ -1,115 +1,95 @@
 #include <sweetgreen/sweetgreen.h>
+#include "mocks.h"
+#include "blurgather/mcrypt_cryptor.h"
+#include "blurgather/utilities.h"
 
-#include "utilities.h"
-#include "mcrypt_cryptor.h"
-#include "password.h"
-#include "mcrypt_iv.h"
 
 #define PLAIN_TEXT_PWD "i am a very secret password"
 #define PLAIN_SECRET_KEY "some secret key"
-#define PLAIN_IV "1234567891234567"
+#define PLAIN_IV "1234567891234567891234567891234"
+#define BUFFER_SIZE 256
 
-bg_mcrypt_cryptor cryptor;
-bg_secret_key secret_key;
-IV_t iv;
-char buffer[BLURGATHER_PWD_MAX_VALUE_LEN];
+
+bg_cryptor_t *cryptor;
+bg_secret_key_t *secret_key;
+char buffer[BUFFER_SIZE];
 size_t buffer_length;
+bg_iv_t *iv;
 
-sweetgreen_setup(uninitialized_key_iv_cryptor) {
-  bg_mcrypt_cryptor_init(&cryptor);
-  
-  memset(buffer, 0, BLURGATHER_PWD_MAX_VALUE_LEN);
-  strcat(buffer, PLAIN_TEXT_PWD);
-  buffer_length = strlen(buffer);
-}
-
-sweetgreen_teardown(uninitialized_key_iv_cryptor) {
-  cryptor.destroy(&cryptor);
-}
 
 sweetgreen_setup(cryptor) {
-  bg_mcrypt_cryptor_init(&cryptor);
-  
-  memset(buffer, 0, BLURGATHER_PWD_MAX_VALUE_LEN);
+  cryptor = (bg_cryptor_t*)bg_mcrypt_cryptor();
+
+  if(strlen(PLAIN_IV) + 1 != bg_cryptor_iv_length(cryptor)) {
+    fprintf(stderr, "IV PASSED TO CRYPTOR MUST MATCH ITS ALGORITHM LENGHT");
+    exit(1);
+  }
+
+  turnoff_debug();
+
+  reset_context();
+  bgctx_register_cryptor(ctx, cryptor);
+
+  memset(buffer, 0, BUFFER_SIZE);
   strcat(buffer, PLAIN_TEXT_PWD);
   buffer_length = strlen(buffer);
-  
-  bg_secret_key_init(&secret_key);
-  secret_key.update(&secret_key, PLAIN_SECRET_KEY, strlen(PLAIN_SECRET_KEY) + 1);
-  cryptor.encryptor.set_secret_key(&cryptor.encryptor, &secret_key);
-  
-  bg_mcrypt_iv_init(&iv);
-  memcpy(iv.value, PLAIN_IV, strlen(PLAIN_IV));
-  cryptor.encryptor.set_iv(&cryptor.encryptor, &iv);
+
+  iv = bg_iv_new(PLAIN_IV, strlen(PLAIN_IV) + 1);
+  secret_key = bg_secret_key_new(PLAIN_SECRET_KEY, strlen(PLAIN_SECRET_KEY));
+
+  memset(buffer, 0, BUFFER_SIZE);
+  memcpy(buffer, PLAIN_TEXT_PWD, strlen(PLAIN_TEXT_PWD));
+  buffer_length = strlen(PLAIN_TEXT_PWD) + 1;
+
+  reset_debug();
 }
 
 sweetgreen_teardown(cryptor) {
-  cryptor.destroy(&cryptor);
-
-  iv.destroy(&iv);
+  bg_secret_key_free(secret_key);
+  bg_iv_free(iv);
 }
 
-sweetgreen_test_define(uninitialized_key_iv_cryptor, cryptReturnsErrorWhenSecretKeyNotSet) {
-  sweetgreen_expect_equal(-1, cryptor.encryptor.crypt(&cryptor.encryptor, buffer, buffer_length, BLURGATHER_PWD_MAX_VALUE_LEN, &buffer_length));
+
+sweetgreen_test_define(cryptor, cryptReturnsErrorWhenSecretKeyNull) {
+  sweetgreen_expect_equal(-1, bg_cryptor_encrypt(cryptor, buffer, buffer_length, NULL, iv));
 }
 
-sweetgreen_test_define(uninitialized_key_iv_cryptor, cryptReturnsErrorWhenIVNotSet) {
-  bg_secret_key_init(&secret_key);
-  secret_key.update(&secret_key, PLAIN_SECRET_KEY, strlen(PLAIN_SECRET_KEY) + 1);
-  cryptor.encryptor.set_secret_key(&cryptor.encryptor, &secret_key);
-
-  sweetgreen_expect_equal(-2, cryptor.encryptor.crypt(&cryptor.encryptor, buffer, buffer_length, BLURGATHER_PWD_MAX_VALUE_LEN, &buffer_length));
+sweetgreen_test_define(cryptor, cryptReturnsErrorWhenIVNotSet) {
+  sweetgreen_expect_equal(-2, bg_cryptor_encrypt(cryptor, buffer, buffer_length, secret_key, NULL));
 }
 
-sweetgreen_test_define(uninitialized_key_iv_cryptor, decryptReturnsErrorWhenSecretKeyNotSet) {
-  sweetgreen_expect_equal(-1, cryptor.decryptor.decrypt(&cryptor.decryptor, buffer, buffer_length, BLURGATHER_PWD_MAX_VALUE_LEN, &buffer_length));
+sweetgreen_test_define(cryptor, decryptReturnsErrorWhenSecretKeyNotSet) {
+  sweetgreen_expect_equal(-1, bg_cryptor_decrypt(cryptor, buffer, buffer_length, NULL, iv));
 }
 
-sweetgreen_test_define(uninitialized_key_iv_cryptor, decryptReturnsErrorWhenIVNotSet) {
-  bg_secret_key_init(&secret_key);
-  secret_key.update(&secret_key, PLAIN_SECRET_KEY, strlen(PLAIN_SECRET_KEY) + 1);
-  cryptor.decryptor.set_secret_key(&cryptor.decryptor, &secret_key);
-
-  sweetgreen_expect_equal(-2, cryptor.decryptor.decrypt(&cryptor.decryptor, buffer, buffer_length, BLURGATHER_PWD_MAX_VALUE_LEN, &buffer_length));
-}
-
-sweetgreen_test_define(cryptor, settingSecretKeyAndIVEffective) {
-  sweetgreen_expect_equal_memory(cryptor.secret_key->value, PLAIN_SECRET_KEY, strlen(PLAIN_SECRET_KEY));
-  sweetgreen_expect_equal(strlen(PLAIN_SECRET_KEY) + 1, cryptor.secret_key->length);
-  sweetgreen_expect_equal_memory(cryptor.iv->value, PLAIN_IV, 16);
+sweetgreen_test_define(cryptor, decryptReturnsErrorWhenIVNotSet) {
+  sweetgreen_expect_equal(-2, bg_cryptor_decrypt(cryptor, buffer, buffer_length, secret_key, NULL));
 }
 
 sweetgreen_test_define(cryptor, cryptReturns0WhenOK) {
-  sweetgreen_expect_zero(cryptor.encryptor.crypt(&cryptor.encryptor, buffer, buffer_length, BLURGATHER_PWD_MAX_VALUE_LEN, &buffer_length));
+  sweetgreen_expect_zero(bg_cryptor_encrypt(cryptor, buffer, buffer_length, secret_key, iv));
 }
 
 sweetgreen_test_define(cryptor, bufferValueChangesWhenCallingCrypt) {
-  cryptor.encryptor.crypt(&cryptor.encryptor, buffer, buffer_length, BLURGATHER_PWD_MAX_VALUE_LEN, &buffer_length);
+  bg_cryptor_encrypt(cryptor, buffer, buffer_length, secret_key, iv);
 
-  sweetgreen_expect_not_equal_memory(PLAIN_TEXT_PWD, buffer, strlen(PLAIN_TEXT_PWD) + 1);
-}
-
-sweetgreen_test_define(cryptor, bufferLengthIsSetToGoodValueWhenCallingCrypt) {
-  cryptor.encryptor.crypt(&cryptor.encryptor, buffer, buffer_length, BLURGATHER_PWD_MAX_VALUE_LEN, &buffer_length);
-
-  size_t effective_buffer_length = bg_reverse_memlen((unsigned char*)buffer, BLURGATHER_PWD_MAX_VALUE_LEN);
-  sweetgreen_expect_equal(effective_buffer_length, buffer_length);
-}
-
-sweetgreen_test_define(cryptor, bufferLengthIsSetToGoodValueWhenCallingDecrypt) {
-  cryptor.encryptor.crypt(&cryptor.encryptor, buffer, buffer_length, BLURGATHER_PWD_MAX_VALUE_LEN, &buffer_length);
-
-  cryptor.decryptor.decrypt(&cryptor.decryptor, buffer, buffer_length, BLURGATHER_PWD_MAX_VALUE_LEN, &buffer_length);
-
-  sweetgreen_expect_equal(strlen(PLAIN_TEXT_PWD), buffer_length);
+  sweetgreen_expect_not_equal_memory(PLAIN_TEXT_PWD, buffer, buffer_length);
 }
 
 sweetgreen_test_define(cryptor, bufferValueGetsBackToInitialValueWhenCallingDecrypt) {
-  char buffer_copy[BLURGATHER_PWD_MAX_VALUE_LEN];
-  memcpy(buffer_copy, buffer, BLURGATHER_PWD_MAX_VALUE_LEN);
+  char buffer_copy[BUFFER_SIZE];
+  memcpy(buffer_copy, buffer, BUFFER_SIZE);
 
-  cryptor.encryptor.crypt(&cryptor.encryptor, buffer, buffer_length, BLURGATHER_PWD_MAX_VALUE_LEN, &buffer_length);
-  cryptor.decryptor.decrypt(&cryptor.decryptor, buffer, buffer_length, BLURGATHER_PWD_MAX_VALUE_LEN, &buffer_length);
+  bg_cryptor_encrypt(cryptor, buffer, buffer_length, secret_key, iv);
+  bg_cryptor_decrypt(cryptor, buffer, buffer_length, secret_key, iv);
 
-  sweetgreen_expect_equal_memory(buffer_copy, buffer, BLURGATHER_PWD_MAX_VALUE_LEN);
+  sweetgreen_expect_equal_memory(buffer_copy, buffer, BUFFER_SIZE);
+}
+
+sweetgreen_test_define(cryptor, generates_a_valid_random_iv) {
+  bg_iv_t *output_iv;
+
+  sweetgreen_expect_zero(bg_cryptor_generate_iv(cryptor, &output_iv));
+  sweetgreen_expect_not_null(bg_iv_data(output_iv));
+  sweetgreen_expect_equal(32, bg_iv_length(output_iv));
 }

@@ -1,16 +1,31 @@
 #include <string.h>
-#include "iv.h"
+#include <blurgather/iv.h>
 
-int bg_iv_copy(IV_t *self, const IV_t *iv) {
-  if(iv->length != self->length) {
-    return -1;
-  }
-  if(!iv->value) {
-    return -2;
-  }
+struct bg_iv {
+  size_t length;
+  void *data;
+};
 
-  memset(self->value, 0, self->length);
-  memcpy(self->value, iv->value, self->length);
+bg_iv_t *bg_iv_new(const void *data, size_t length) {
+  bg_iv_t *iv = malloc(sizeof(bg_iv_t));
 
-  return 0;
+  iv->data = malloc(length);
+  memcpy(iv->data, data, length);
+  iv->length = length;
+
+  return iv;
+}
+
+const void *bg_iv_data(const bg_iv_t *iv) {
+  return iv->data;
+}
+
+size_t bg_iv_length(const bg_iv_t *iv) {
+  return iv->length;
+}
+
+void bg_iv_free(bg_iv_t *iv) {
+  memset(iv->data, 0, iv->length);
+  free(iv->data);
+  free(iv);
 }

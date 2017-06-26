@@ -1,8 +1,6 @@
-#include <string.h>
-
-#include "stream.h"
-
 #include <sweetgreen/sweetgreen.h>
+#include <string.h>
+#include "blurgather/stream.h"
 
 const char *filename = "file_stream.txt";
 
