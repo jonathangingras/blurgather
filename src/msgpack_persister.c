@@ -33,38 +33,42 @@ void bg_msgpack_persister_destroy(bg_persister_t *_self) {
 }
 
 int bg_msgpack_persister_persist(bg_persister_t * _self, bg_repository_t *repo) {
-	bg_msgpack_persister* self = (bg_msgpack_persister*) _self->object;
+  int err = 0;
+  bg_msgpack_persister* self = (bg_msgpack_persister*) _self->object;
 
-	msgpack_sbuffer buffer;
-	msgpack_sbuffer_init(&buffer);
-	bg_persistence_msgpack_serialize_password_array(self, &buffer, repo);
+  msgpack_sbuffer buffer;
+  msgpack_sbuffer_init(&buffer);
+  if((err = bg_persistence_msgpack_serialize_password_array(self, &buffer, repo))) {
+    msgpack_sbuffer_destroy(&buffer);
+    return err;
+  }
 
-	FILE* shadow_file = fopen(bg_string_data(self->persistence_filename), "wb");
-    fwrite(buffer.data, sizeof(char), buffer.size, shadow_file);
-	fclose(shadow_file);
+  FILE* shadow_file = fopen(bg_string_data(self->persistence_filename), "wb");
+  fwrite(buffer.data, 1, buffer.size, shadow_file);
+  fclose(shadow_file);
 
-	msgpack_sbuffer_destroy(&buffer);
-	return 0;
+  msgpack_sbuffer_destroy(&buffer);
+  return 0;
 }
 
 int bg_msgpack_persister_load(bg_persister_t * _self, bg_repository_t *repo) {
-	bg_msgpack_persister* self = (bg_msgpack_persister*) _self->object;
+  bg_msgpack_persister* self = (bg_msgpack_persister*) _self->object;
 
-	FILE* shadow_file = fopen(bg_string_data(self->persistence_filename), "rb");
-	if(!shadow_file) return -4;
+  FILE* shadow_file = fopen(bg_string_data(self->persistence_filename), "rb");
+  if(!shadow_file) return -4;
 
-    fseek(shadow_file, 0, SEEK_END);
-    size_t data_length = ftell(shadow_file);
-    fseek(shadow_file, 0, SEEK_SET);
+  fseek(shadow_file, 0, SEEK_END);
+  size_t data_length = ftell(shadow_file);
+  fseek(shadow_file, 0, SEEK_SET);
 
-	unsigned char* data = malloc(data_length);
-	if(!data) { return -3; }
+  unsigned char* data = malloc(data_length);
+  if(!data) { return -3; }
 
-	if(fread(data, sizeof(char), data_length, shadow_file) != data_length) { return -2; }
-	fclose(shadow_file);
+  if(fread(data, sizeof(char), data_length, shadow_file) != data_length) { return -2; }
+  fclose(shadow_file);
 
-	int error_value = bg_persistence_msgpack_deserialize_password_array(self, data, data_length, repo);
+  int error_value = bg_persistence_msgpack_deserialize_password_array(self, data, data_length, repo);
 
-	free(data);
-	return error_value;
+  free(data);
+  return error_value;
 }

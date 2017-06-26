@@ -28,20 +28,14 @@ int blur_cmd_get(bg_context* ctx, int argc, char **argv) {
     return -1;
   }
 
-  if((err = bgctx_find_password(ctx, name, &password))) {
+  if((err = bgctx_find_password(ctx, name, &password))) { /* returns a decrypted copy */
     fprintf(stderr, "could not find password!\n");
     bg_string_free(name);
     return err;
   }
 
-  if((err = bgctx_decrypt_password(ctx, password))) {
-    fprintf(stderr, "could not decrypt password!\n");
-    bg_string_free(name);
-    return err;
-  }
-
   send_(bg_string_data(bg_password_value(password)));
-  bgctx_encrypt_password(ctx, password);
+  bg_password_free(password); /* clean and free the copy */
 
   bg_string_free(name);
   return err;

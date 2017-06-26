@@ -133,9 +133,45 @@ bg_cryptor_t *bgctx_cryptor(bg_context *ctx) {
   return ctx->cryptor;
 }
 
+struct find_data {
+  bg_context *ctx;
+  const bg_string *name;
+  bg_password *output;
+};
+
+static int password_find(bg_password *pwd, void *data) {
+  int err = 0;
+  bg_password *copy = bg_password_copy(pwd);
+
+  if((err = bg_password_decrypt(copy, ((struct find_data*)data)->ctx->cryptor, ((struct find_data*)data)->ctx->secret_key))) {
+    return err;
+  }
+
+  if(bg_string_compare(((struct find_data*)data)->name, bg_password_name(copy)) == 0) {
+    ((struct find_data*)data)->output = copy;
+    return 1;
+  }
+
+  return err;
+}
+
 int bgctx_find_password(bg_context *ctx, const bg_string *name, bg_password **password) {
   RETURN_IF_UNSEALED(ctx);
-  return bg_repository_get(ctx->repository, name, password);
+  RETURN_IF_LOCKED(ctx);
+
+  int err = 0;
+  struct find_data data = {
+    .ctx = ctx,
+    .name = name,
+    .output = NULL
+  };
+
+  if((err = bg_repository_foreach(ctx->repository, &password_find, &data)) == 1) {
+    *password = data.output;
+    return 0;
+  } else {
+    return err;
+  }
 }
 
 int bgctx_each_password(bg_context *ctx, int (* callback)(bg_password *password, void *), void *out) {

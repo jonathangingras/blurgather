@@ -32,6 +32,8 @@ bg_string *bg_string_plus(bg_string *str1, bg_string *str2);
 
 bg_string *bg_string_from_decimal(long decimal);
 
+int bg_string_split_after(const bg_string *str, size_t index, bg_string **left, bg_string **right);
+
 int bg_string_compare(const bg_string *str1, const bg_string *str2);
 
 #define bg_string_replace(old, new) bg_string_free(old); old = new

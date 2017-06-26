@@ -55,7 +55,7 @@ int blur_cmd_add(bg_context* ctx, int argc, char **argv) {
 
   bg_password_update_name(password, name);
   bg_password_update_description(password, desc);
-  bg_password_update_value(password, value1, bgctx_cryptor(ctx));
+  bg_password_update_value(password, value1);
 
   if((return_value = bgctx_encrypt_password(ctx, password))) {
     fprintf(stderr, "password encryption failed!\n");

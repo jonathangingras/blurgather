@@ -5,7 +5,6 @@
 
 #define TEST_FILE_PATH "/tmp/bg.shadow.bin.test"
 bg_persister_t *persister = NULL;
-bg_msgpack_persister *_persister = NULL;
 bg_password *pwd1;
 bg_password *pwd2;
 bg_password *pwd3;
@@ -37,33 +36,26 @@ int test_repo_add(bg_repository_t *repo, bg_password *password) {
 sweetgreen_setup(persister) {
   turnoff_debug();
 
-  reset_context();
-
-  reset_mock_cryptor();
-  bgctx_register_cryptor(ctx, &mock_cryptor);
-
-  reset_mock_repository();
-  bgctx_register_repository(ctx, &mock_repository);
+  if(!access(TEST_FILE_PATH, F_OK)) {
+    remove(TEST_FILE_PATH);
+  }
 
   bg_string *filename = bg_string_from_str(TEST_FILE_PATH);
-  _persister = bg_msgpack_persister_new(filename);
-
-  persister = bg_msgpack_persister_persister(_persister);
-  bgctx_register_persister(ctx, persister);
+  persister = bg_msgpack_persister_persister(bg_msgpack_persister_new(filename));
 
   pwd1 = bg_password_new();
-  bg_password_update_name(pwd1,  bg_string_from_str("somename1"));
-  bg_password_update_value(pwd1,  bg_string_from_str("somevalue1"), &mock_cryptor);
+  bg_password_update_name(pwd1, bg_string_from_str("somename1"));
+  bg_password_update_value(pwd1, bg_string_from_str("somevalue1"));
   bg_password_update_description(pwd1, bg_string_from_str("somedesc1"));
 
   pwd2 = bg_password_new();
-  bg_password_update_name(pwd2,  bg_string_from_str("somename2"));
-  bg_password_update_value(pwd2,  bg_string_from_str("somevalue2"), &mock_cryptor);
+  bg_password_update_name(pwd2, bg_string_from_str("somename2"));
+  bg_password_update_value(pwd2, bg_string_from_str("somevalue2"));
   bg_password_update_description(pwd2, bg_string_from_str("somedesc2"));
 
   pwd3 = bg_password_new();
-  bg_password_update_name(pwd3,  bg_string_from_str("somename3"));
-  bg_password_update_value(pwd3,  bg_string_from_str("somevalue3"), &mock_cryptor);
+  bg_password_update_name(pwd3, bg_string_from_str("somename3"));
+  bg_password_update_value(pwd3, bg_string_from_str("somevalue3"));
   bg_password_update_description(pwd3, bg_string_from_str("somedesc3"));
 
   times_add_called = 0;
@@ -72,9 +64,9 @@ sweetgreen_setup(persister) {
 }
 
 sweetgreen_teardown(persister) {
-  if(_persister) {
+  if(persister) {
     bg_persister_destroy(persister);
-    free(_persister);
+    free((void*)persister->object);
   }
   if(!access(TEST_FILE_PATH, F_OK)) {
     remove(TEST_FILE_PATH);
@@ -96,7 +88,7 @@ sweetgreen_test_define(persister, can_serialize_one_password) {
   mock_repository_count_return_value = 1;
 
   sweetgreen_expect_equal(0, bg_persister_persist(persister, &mock_repository));
-  sweetgreen_expect_true(!access(TEST_FILE_PATH, F_OK));
+  sweetgreen_expect_equal(0, access(TEST_FILE_PATH, F_OK));
 }
 
 sweetgreen_test_define(persister, can_deserialize_one_password) {
@@ -154,7 +146,6 @@ sweetgreen_test_define(persister, deserializing_one_password_calls_repository_ad
   sweetgreen_expect_equal_string("somename1", bg_string_data(bg_password_name(pwds[0])));
   sweetgreen_expect_equal_string("somedesc1", bg_string_data(bg_password_description(pwds[0])));
   sweetgreen_expect_equal_string("somevalue1", bg_string_data(bg_password_value(pwds[0])));
-  sweetgreen_expect_equal_string(mock_iv_data, bg_iv_data(bg_password_iv(pwds[0])));
 }
 
 sweetgreen_test_define(persister, deserializing_three_passwords_calls_repository_add_with_good_passwords) {
@@ -170,15 +161,12 @@ sweetgreen_test_define(persister, deserializing_three_passwords_calls_repository
   sweetgreen_expect_equal_string("somename1", bg_string_data(bg_password_name(pwds[0])));
   sweetgreen_expect_equal_string("somedesc1", bg_string_data(bg_password_description(pwds[0])));
   sweetgreen_expect_equal_string("somevalue1", bg_string_data(bg_password_value(pwds[0])));
-  sweetgreen_expect_equal_string(mock_iv_data, bg_iv_data(bg_password_iv(pwds[0])));
 
   sweetgreen_expect_equal_string("somename2", bg_string_data(bg_password_name(pwds[1])));
   sweetgreen_expect_equal_string("somedesc2", bg_string_data(bg_password_description(pwds[1])));
   sweetgreen_expect_equal_string("somevalue2", bg_string_data(bg_password_value(pwds[1])));
-  sweetgreen_expect_equal_string(mock_iv_data, bg_iv_data(bg_password_iv(pwds[1])));
 
   sweetgreen_expect_equal_string("somename3", bg_string_data(bg_password_name(pwds[2])));
   sweetgreen_expect_equal_string("somedesc3", bg_string_data(bg_password_description(pwds[2])));
   sweetgreen_expect_equal_string("somevalue3", bg_string_data(bg_password_value(pwds[2])));
-  sweetgreen_expect_equal_string(mock_iv_data, bg_iv_data(bg_password_iv(pwds[2])));
 }

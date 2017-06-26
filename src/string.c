@@ -106,7 +106,7 @@ bg_string *bg_string_cat_char_array(bg_string **str, const char *catted, size_t 
 bg_string *bg_string_plus(bg_string *str1, bg_string *str2) {
   bg_string *res = str1;
   bg_string_cat(&res, str2);
-  bg_string_free(str2);
+  bg_string_clean_free(str2);
   return res;
 }
 
@@ -116,4 +116,15 @@ bg_string *bg_string_from_decimal(long decimal) {
   memset(array, 0, max_strlen);
   sprintf(array, "%ld", decimal);
   return bg_string_from_str(array);
+}
+
+int bg_string_split_after(const bg_string *str, size_t index, bg_string **left, bg_string **right) {
+  if(index > str->length) {
+    return -1;
+  }
+
+  *left = bg_string_from_char_array(STR_DATA(str), index);
+  *right = bg_string_from_char_array(STR_DATA(str) + index, str->length - index);
+
+  return 0;
 }

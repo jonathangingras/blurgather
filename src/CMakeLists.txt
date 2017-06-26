@@ -14,6 +14,7 @@ add_library(blurgather
   iv.c
   string.c
   cryptor.c
+  encryption.c
   urandom_iv.c
 )
 

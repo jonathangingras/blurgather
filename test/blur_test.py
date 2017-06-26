@@ -53,6 +53,10 @@ def main_test():
         if status != 0:
             return status
 
+    status, out, err = call_blur("info")
+    if out.decode() != "number of passwords: 50\n":
+        return 1
+
     return 0
 
 

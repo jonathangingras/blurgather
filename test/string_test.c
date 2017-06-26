@@ -175,3 +175,42 @@ sweetgreen_test_define(string, can_strip_nul_characters_at_end_when_multiple_nul
   sweetgreen_expect_equal(3, bg_string_length(str));
   sweetgreen_expect_equal_memory("111", bg_string_data(str), 4);
 }
+
+sweetgreen_test_define(string, can_split_in_middle) {
+  char *array = "hello, i am some string";
+  bg_string *str = bg_string_from_str(array);
+
+  bg_string *lhs, *rhs;
+  bg_string_split_after(str, 8, &lhs, &rhs);
+
+  sweetgreen_expect_equal_string("hello, i", bg_string_data(lhs));
+  sweetgreen_expect_equal(8, bg_string_length(lhs));
+  sweetgreen_expect_equal_string(" am some string", bg_string_data(rhs));
+  sweetgreen_expect_equal(15, bg_string_length(rhs));
+}
+
+sweetgreen_test_define(string, can_split_at_beginning) {
+  char *array = "hello, i am some string";
+  bg_string *str = bg_string_from_str(array);
+
+  bg_string *lhs, *rhs;
+  bg_string_split_after(str, 0, &lhs, &rhs);
+
+  sweetgreen_expect_equal_string("", bg_string_data(lhs));
+  sweetgreen_expect_equal(0, bg_string_length(lhs));
+  sweetgreen_expect_equal_string(array, bg_string_data(rhs));
+  sweetgreen_expect_equal(strlen(array), bg_string_length(rhs));
+}
+
+sweetgreen_test_define(string, can_split_at_end) {
+  char *array = "hello, i am some string";
+  bg_string *str = bg_string_from_str(array);
+
+  bg_string *lhs, *rhs;
+  bg_string_split_after(str, strlen(array), &lhs, &rhs);
+
+  sweetgreen_expect_equal_string(array, bg_string_data(lhs));
+  sweetgreen_expect_equal(strlen(array), bg_string_length(lhs));
+  sweetgreen_expect_equal_string("", bg_string_data(rhs));
+  sweetgreen_expect_equal(0, bg_string_length(rhs));
+}

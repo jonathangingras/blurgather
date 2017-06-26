@@ -1,7 +1,7 @@
 #include "msgpack_serialize.h"
 #include <blurgather/repository.h>
 
-static int get_keyvalue_iterator(const char* field, msgpack_object_kv** keyvalue_iterator_ptr, char** iterator, size_t* size, int error_value) {
+static int get_keyvalue_iterator(const char *field, msgpack_object_kv **keyvalue_iterator_ptr, char **iterator, size_t *size, int error_value) {
   if(memcmp(field, (*keyvalue_iterator_ptr)->key.via.str.ptr, (*keyvalue_iterator_ptr)->key.via.str.size)) {
     return error_value;
   }
@@ -11,46 +11,39 @@ static int get_keyvalue_iterator(const char* field, msgpack_object_kv** keyvalue
   return 0;
 }
 
-void bg_persistence_msgpack_serialize_password(msgpack_packer* packer, bg_password* password) {
-  msgpack_pack_map(packer, 4);
+int bg_persistence_msgpack_serialize_password(msgpack_packer* packer, bg_password* password) {
+  msgpack_pack_map(packer, 3);
 
   msgpack_pack_str(packer, 4);
   msgpack_pack_str_body(packer, "name", 4);
   size_t name_len = bg_string_length(bg_password_name(password));
-  msgpack_pack_str(packer, name_len);
-  msgpack_pack_str_body(packer, bg_string_data(bg_password_name(password)), name_len);
-
-  const bg_iv_t *iv = bg_password_iv(password);
-  msgpack_pack_str(packer, 2);
-  msgpack_pack_str_body(packer, "iv", 2);
-  msgpack_pack_bin(packer, bg_iv_length(iv));
-  msgpack_pack_bin_body(packer, bg_iv_data(iv), bg_iv_length(iv));
+  msgpack_pack_bin(packer, name_len);
+  msgpack_pack_bin_body(packer, bg_string_data(bg_password_name(password)), name_len);
 
   msgpack_pack_str(packer, 11);
   msgpack_pack_str_body(packer, "description", 11);
   size_t description_len = bg_string_length(bg_password_description(password));
-  msgpack_pack_str(packer, description_len);
-  msgpack_pack_str_body(packer, bg_string_data(bg_password_description(password)), description_len);
+  msgpack_pack_bin(packer, description_len);
+  msgpack_pack_bin_body(packer, bg_string_data(bg_password_description(password)), description_len);
 
   msgpack_pack_str(packer, 5);
   msgpack_pack_str_body(packer, "value", 5);
-  size_t value_len = bg_password_value_length(password);
+  size_t value_len = bg_string_length(bg_password_value(password));
   msgpack_pack_bin(packer, value_len);
   msgpack_pack_bin_body(packer, bg_string_data(bg_password_value(password)), value_len);
+
+  return 0;
 }
 
 int bg_persistence_msgpack_deserialize_password(msgpack_object* object, bg_password* password) {
   msgpack_object_kv* keyvalue_iterator = object->via.map.ptr;
   int error_value = 0;
-  char * name_iterator, * description_iterator;
-  unsigned char * iv_iterator, * value_iterator;
-  size_t iv_size, name_size, description_size, value_size;
+  char *name_iterator, *description_iterator;
+  char *value_iterator;
+  size_t name_size, description_size, value_size;
 
   if((error_value = get_keyvalue_iterator("name", &keyvalue_iterator, &name_iterator, &name_size,
                                           -3))) { return error_value; }
-  ++keyvalue_iterator;
-  if((error_value = get_keyvalue_iterator("iv", &keyvalue_iterator, (char **)&iv_iterator, &iv_size,
-                                          -2))) { return error_value; }
   ++keyvalue_iterator;
   if((error_value = get_keyvalue_iterator("description", &keyvalue_iterator, &description_iterator,
                                           &description_size, -4))) { return error_value; }
@@ -58,10 +51,8 @@ int bg_persistence_msgpack_deserialize_password(msgpack_object* object, bg_passw
   if((error_value = get_keyvalue_iterator("value", &keyvalue_iterator, (char **)&value_iterator, &value_size,
                                           -5))) { return error_value; }
 
-
-  bg_iv_t *iv = bg_iv_new(iv_iterator, iv_size);
-  if(bg_password_fill_raw(password, iv, value_iterator, value_size)) {
-    return -1;
+  if((error_value = bg_password_fill_raw(password, value_iterator, value_size))) {
+    return error_value;
   }
 
   bg_string *name_buffer = bg_string_from_char_array(name_iterator, name_size);
@@ -86,12 +77,9 @@ static int serialize_password(bg_password *pwd, void *_serialize_data) {
   return 0;
 }
 
-void bg_persistence_msgpack_serialize_password_array(bg_msgpack_persister* self, msgpack_sbuffer* buffer, bg_repository_t *repo) {
+int bg_persistence_msgpack_serialize_password_array(bg_msgpack_persister* self, msgpack_sbuffer* buffer, bg_repository_t *repo) {
   msgpack_packer pk;
   msgpack_packer_init(&pk, buffer, msgpack_sbuffer_write);
-
-  /*bg_repository_t *repo = bgctx_repository(self->ctx);
-  if(!repo) { return; }*/
 
   struct serialize_data data = {
     .packer = &pk,
@@ -99,7 +87,7 @@ void bg_persistence_msgpack_serialize_password_array(bg_msgpack_persister* self,
   };
 
   msgpack_pack_array(&pk, bg_repository_count(repo));
-  bg_repository_foreach(repo, &serialize_password, &data);
+  return bg_repository_foreach(repo, &serialize_password, &data);
 }
 
 int bg_persistence_msgpack_deserialize_password_array(bg_msgpack_persister* self, unsigned char* data, size_t data_length, bg_repository_t *repo) {
@@ -108,16 +96,16 @@ int bg_persistence_msgpack_deserialize_password_array(bg_msgpack_persister* self
   msgpack_object deserialized;
   msgpack_unpack((char*)data, data_length, NULL, &mempool, &deserialized);
 
-  int i, error_value;
+  int i, err;
   msgpack_object* ptr = deserialized.via.array.ptr;
   for(i = 0; i < deserialized.via.array.size; ++i) {
     bg_password* password = bg_password_new();
 
-    error_value = bg_persistence_msgpack_deserialize_password(ptr + i, password);
-    if(error_value) { return error_value; }
+    err = bg_persistence_msgpack_deserialize_password(ptr + i, password);
+    if(err) { return err; }
 
-    error_value = bg_repository_add(/*bgctx_repository(self->ctx), password);*/ repo, password);
-    if(error_value) { return error_value; }
+    err = bg_repository_add(repo, password);
+    if(err) { return err; }
   }
 
   msgpack_zone_destroy(&mempool);

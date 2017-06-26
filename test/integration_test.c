@@ -41,7 +41,7 @@ int create_password_db(void) {
   for(i = 0; i < NB_PASS; ++i) {
     bg_password *pwd = bg_password_new();
     bg_password_update_name(pwd, bg_string_plus(bg_string_from_str("somepass"), bg_string_from_decimal(i)));
-    bg_password_update_value(pwd, bg_string_plus(bg_string_from_str("somevalue"), bg_string_from_decimal(i)), bgctx_cryptor(ctx));
+    bg_password_update_value(pwd, bg_string_plus(bg_string_from_str("somevalue"), bg_string_from_decimal(i)));
     bg_password_update_description(pwd, bg_string_plus(bg_string_from_str("somedesc"), bg_string_from_decimal(i)));
 
     bgctx_unlock(ctx, bg_secret_key_new("secret", 6));
