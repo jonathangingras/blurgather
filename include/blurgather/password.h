@@ -18,9 +18,6 @@ bg_password *bg_password_new(void);
 /* deserialize */
 int bg_password_fill_raw(bg_password *password, const void *crypted_value, size_t crypted_value_size);
 
-/* structure size */
-size_t bg_password_size();
-
 /* destroy and free */
 void bg_password_destroy(bg_password *password);
 void bg_password_free(bg_password *password);
@@ -29,16 +26,16 @@ void bg_password_free(bg_password *password);
 bg_password *bg_password_copy(const bg_password *password);
 
 /* name */
-const bg_string *bg_password_name(bg_password *password);
+const bg_string *bg_password_name(const bg_password *password);
 int bg_password_update_name(bg_password *password, bg_string *name);
 
 /* description */
-const bg_string *bg_password_description(bg_password *password);
+const bg_string *bg_password_description(const bg_password *password);
 int bg_password_update_description(bg_password *password, bg_string *description);
 
 /* value */
-const bg_string *bg_password_value(bg_password *password);
-size_t bg_password_value_length(bg_password *password);
+const bg_string *bg_password_value(const bg_password *password);
+size_t bg_password_value_length(const bg_password *password);
 int bg_password_update_value(bg_password *password, bg_string *value);
 
 /* crypted flag */

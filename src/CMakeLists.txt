@@ -16,6 +16,7 @@ add_library(blurgather
   cryptor.c
   encryption.c
   urandom_iv.c
+  password_to_map.c
 )
 
 target_link_libraries(blurgather

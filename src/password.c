@@ -85,7 +85,7 @@ int bg_password_decrypt(bg_password *self, bg_cryptor_t *cryptor, bg_secret_key_
   return 0;
 }
 
-const bg_string *bg_password_name(bg_password *password) {
+const bg_string *bg_password_name(const bg_password *password) {
   return password->name;
 }
 
@@ -93,11 +93,11 @@ int bg_password_crypted(bg_password *password) {
   return password->crypted;
 }
 
-const bg_string *bg_password_description(bg_password *password) {
+const bg_string *bg_password_description(const bg_password *password) {
   return password->description;
 }
 
-const bg_string *bg_password_value(bg_password *password) {
+const bg_string *bg_password_value(const bg_password *password) {
   return password->value;
 }
 
@@ -132,7 +132,7 @@ int bg_password_update_value(bg_password *password, bg_string *value) {
   return 0;
 }
 
-size_t bg_password_value_length(bg_password *password) {
+size_t bg_password_value_length(const bg_password *password) {
   return bg_string_length(password->value);
 }
 

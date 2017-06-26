@@ -1,5 +1,7 @@
 #include "msgpack_serialize.h"
 #include <blurgather/repository.h>
+#include <blurgather/map.h>
+#include <blurgather/password_to_map.h>
 
 static int get_keyvalue_iterator(const char *field, msgpack_object_kv **keyvalue_iterator_ptr, char **iterator, size_t *size, int error_value) {
   if(memcmp(field, (*keyvalue_iterator_ptr)->key.via.str.ptr, (*keyvalue_iterator_ptr)->key.via.str.size)) {
@@ -11,26 +13,33 @@ static int get_keyvalue_iterator(const char *field, msgpack_object_kv **keyvalue
   return 0;
 }
 
-int bg_persistence_msgpack_serialize_password(msgpack_packer* packer, bg_password* password) {
-  msgpack_pack_map(packer, 3);
+static int serialize_field(const bg_string *field_key,
+                           const bg_string *field_value,
+                           msgpack_packer *packer) {
+  /* key */
+  msgpack_pack_str(packer, bg_string_length(field_key));
+  msgpack_pack_str_body(packer, bg_string_data(field_key), bg_string_length(field_key));
 
-  msgpack_pack_str(packer, 4);
-  msgpack_pack_str_body(packer, "name", 4);
-  size_t name_len = bg_string_length(bg_password_name(password));
-  msgpack_pack_bin(packer, name_len);
-  msgpack_pack_bin_body(packer, bg_string_data(bg_password_name(password)), name_len);
+  /* value */
+  msgpack_pack_bin(packer, bg_string_length(field_value));
+  msgpack_pack_bin_body(packer, bg_string_data(field_value), bg_string_length(field_value));
 
-  msgpack_pack_str(packer, 11);
-  msgpack_pack_str_body(packer, "description", 11);
-  size_t description_len = bg_string_length(bg_password_description(password));
-  msgpack_pack_bin(packer, description_len);
-  msgpack_pack_bin_body(packer, bg_string_data(bg_password_description(password)), description_len);
+  return 0;
+}
 
-  msgpack_pack_str(packer, 5);
-  msgpack_pack_str_body(packer, "value", 5);
-  size_t value_len = bg_string_length(bg_password_value(password));
-  msgpack_pack_bin(packer, value_len);
-  msgpack_pack_bin_body(packer, bg_string_data(bg_password_value(password)), value_len);
+int bg_persistence_msgpack_serialize_password(msgpack_packer *packer, bg_password* password) {
+  bg_map *map = NULL;
+  map = bg_password_to_map(password);
+  if(!map) {return -1;}
+
+  msgpack_pack_map(packer, bg_map_length(map));
+
+  int err;
+  if((err = bg_map_foreach(map,
+                           (int (*)(const bg_string*, void*, void*))&serialize_field,
+                           packer))) {
+    return err;
+  }
 
   return 0;
 }

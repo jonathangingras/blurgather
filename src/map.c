@@ -67,9 +67,9 @@ int bg_map_register_data(bg_map *map, bg_string *key, void *value, void (*free_c
   return 0;
 }
 
-void *bg_map_get_data(bg_map *map, bg_string *key) {
+void *bg_map_get_data(const bg_map *map, bg_string *key) {
   size_t i;
-  get_data_index(map, key, &i);
+  get_data_index((bg_map*)map, key, &i);
   bg_string_free(key);
 
   if(!(i < map->data_pair_count)) {
@@ -90,4 +90,8 @@ int bg_map_foreach(bg_map *map, int (*callback)(const bg_string*, void*, void*),
   }
 
   return 0;
+}
+
+size_t bg_map_length(const bg_map *map) {
+  return map->data_pair_count;
 }
