@@ -143,13 +143,13 @@ static int password_find(bg_password *pwd, void *data) {
   bg_password *copy = bg_password_copy(pwd);
 
   int err = 0;
-  if((err = bg_password_decrypt(copy, ((struct find_data*)data)->ctx->cryptor, ((struct find_data*)data)->ctx->secret_key))) {
+  if((err = bg_password_decrypt(copy, ((struct find_data*)data)->ctx->cryptor, ((struct find_data*)data)->ctx->secret_key))) { /* only decrypt copy */
     bg_password_free(copy);
     return err;
   }
 
   if(bg_string_compare(((struct find_data*)data)->name, bg_password_name(copy)) == 0) {
-    ((struct find_data*)data)->output = pwd;
+    ((struct find_data*)data)->output = pwd; /* original version contained in repository */
     bg_password_free(copy);
     return 1;
   }
