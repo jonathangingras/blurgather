@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.1)
 project(blurgather)
 
 #common hierarchy output structure
-set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-g")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -11,13 +10,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 include(CMakeShortcuts/ExternalProjectLocal.cmake)
 include(CMakeShortcuts/CTestShortcuts.cmake)
 
-ExternalProject_Add_Local(msgpack-c
+ExternalProject_Add_Local(msgpackc-target
   GIT_REPOSITORY https://github.com/msgpack/msgpack-c.git
   GIT_TAG "cpp-2.1.1"
   CMAKE_ARGS ${CMAKE_ARGS} -DMSGPACK_BUILD_EXAMPLES=OFF -DMSGPACK_ENABLE_CXX=OFF -DMSGPACK_ENABLE_SHARED=OFF -DCMAKE_C_FLAGS=-w
-)
-ExternalProject_Add_Local(sweetgreen
-  GIT_REPOSITORY https://github.com/jonathangingras/sweetgreen
 )
 
 #includes
@@ -34,5 +30,11 @@ add_subdirectory(src)
 option(BUILD_TESTING "compile tests" OFF)
 
 if(BUILD_TESTING)
+  enable_testing()
+
+  ExternalProject_Add_Local(sweetgreen-target
+    GIT_REPOSITORY https://github.com/jonathangingras/sweetgreen
+  )
+
   add_subdirectory(test)
 endif()

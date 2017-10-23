@@ -19,6 +19,8 @@ add_library(blurgather
   password_to_map.c
 )
 
+add_dependencies(blurgather msgpackc-target)
+
 target_link_libraries(blurgather
   m
   mcrypt
