@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <string.h>
-#include "blur.h"
 #include <blurgather/mcrypt_cryptor.h>
 #include <blurgather/array_repository.h>
 #include <blurgather/msgpack_persister.h>

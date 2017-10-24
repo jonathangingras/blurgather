@@ -26,10 +26,10 @@ static int command_not_found(bg_context *ctx, int argc, char **argv) {
 }
 
 int run_command(bg_context *ctx, int argc, char **argv) {
-  if(argc < 2) { return command_not_found; }
+  if(argc < 2) { return command_not_found(ctx, argc, argv); }
 
   size_t idx = NB_CMDS;
-  size_t i = 1;
+  int i = 1;
   while(idx >= NB_CMDS && i < argc) {
     idx = find_string_index(NB_CMDS, cmd_strs, argv[i]);
     ++i;
