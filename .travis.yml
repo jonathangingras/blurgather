@@ -21,4 +21,4 @@ before_script:
   - (mkdir build && cd build && cmake -DBUILD_TESTING=ON ..)
 
 script:
-  - (cd build && make && make test)
+  - (cd build && make && ctest --verbose)
