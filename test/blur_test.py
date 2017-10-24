@@ -22,7 +22,8 @@ def create_master_password_file():
 def __call_blur(arg_list, stdin):
     process = ps.Popen(arg_list, stdin=stdin, stdout=ps.PIPE, stderr=ps.PIPE)
     rstatus = process.wait()
-    return [rstatus, *process.communicate()]
+    out, err = process.communicate()
+    return rstatus, out, err
 
 
 def call_blur(*args):
