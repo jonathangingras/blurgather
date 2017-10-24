@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """blur cli end-to-end test"""
 import subprocess as ps
 import os
@@ -22,8 +21,8 @@ def create_master_password_file():
 
 def __call_blur(arg_list, stdin):
     process = ps.Popen(arg_list, stdin=stdin, stdout=ps.PIPE, stderr=ps.PIPE)
-    status = process.wait()
-    return (status, *process.communicate())
+    rstatus = process.wait()
+    return [rstatus, *process.communicate()]
 
 
 def call_blur(*args):
@@ -35,26 +34,26 @@ def call_blur(*args):
 
 def main_test():
     for i in range(50):
-        status, out, err = call_blur("add",
+        rstatus, out, err = call_blur("add",
                                      "--name", "somepass" + str(i),
                                      "--description", "some description " + str(i),
                                      "--value", "somevalue" + str(i))
 
-        if status != 0:
-            return status, out, err
+        if rstatus != 0:
+            return rstatus, out, err
 
     for i in range(50 - 1, 0 - 1, -1):
-        status, out, err = call_blur("get", "somepass" + str(i))
+        rstatus, out, err = call_blur("get", "somepass" + str(i))
 
         if out.decode() != "somevalue" + str(i):
             sys.stderr.write("PASSWORDS DO NOT MATCH: " + str(out) + "\n")
-            print(status, out, err)
+            print(rstatus, out, err)
             return 1
 
-        if status != 0:
-            return status
+        if rstatus != 0:
+            return rstatus
 
-    status, out, err = call_blur("info")
+    rstatus, out, err = call_blur("info")
     if out.decode() != "number of passwords: 50\n":
         return 1
 
@@ -63,7 +62,7 @@ def main_test():
 
 if __name__ == "__main__":
     create_master_password_file()
-    status = main_test()
+    rstatus_ = main_test()
     os.remove(MASTER_PASSWD_FILE)
     os.remove(TEST_RC_FILE)
-    exit(status)
+    exit(rstatus_)

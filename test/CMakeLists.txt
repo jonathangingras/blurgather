@@ -21,4 +21,4 @@ add_test_case(encryption)
 
 get_filename_component(blur_test_script_path "blur_test.py" ABSOLUTE)
 message("end-to-end test absolute path: " ${blur_test_script_path})
-add_test("blur_test" python ${blur_test_script_path})
+add_test("blur_test" python3 ${blur_test_script_path})
