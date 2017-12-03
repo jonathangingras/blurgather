@@ -159,10 +159,11 @@ static int password_find(bg_password *pwd, void *data) {
 }
 
 int bgctx_find_password(bg_context *ctx, const bg_string *name, bg_password **password) {
+  int err;
+
   RETURN_IF_UNSEALED(ctx);
   RETURN_IF_LOCKED(ctx);
 
-  int err = 0;
   struct find_data data = {
     .ctx = ctx,
     .name = name,
@@ -173,7 +174,7 @@ int bgctx_find_password(bg_context *ctx, const bg_string *name, bg_password **pa
     *password = data.output;
     return 0;
   } else {
-    return err;
+    return 1;
   }
 }
 
