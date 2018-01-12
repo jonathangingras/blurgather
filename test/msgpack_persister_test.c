@@ -41,7 +41,7 @@ sweetgreen_setup(persister) {
   }
 
   bg_string *filename = bg_string_from_str(TEST_FILE_PATH);
-  persister = bg_msgpack_persister_persister(bg_msgpack_persister_new(filename));
+  persister = bg_msgpack_persister_persister(bg_msgpack_persister_new(filename, &mock_cryptor));
 
   pwd1 = bg_password_new();
   bg_password_update_name(pwd1, bg_string_from_str("somename1"));

@@ -9,7 +9,7 @@
 
 bg_string *default_persistence_filepath() {
   char *home = getenv("HOME");
-  char *rest =  "/.blrgthrc";
+  char *rest =  "/blrgthrc_test";
   bg_string *repo_filepath = bg_string_from_str(home);
   bg_string_cat_char_array(&repo_filepath, rest, strlen(rest));
   return repo_filepath;
@@ -44,16 +44,28 @@ int main(int argc, char **argv) {
     return end(ctx, err);
   }
 
+  bg_cryptor_t *cryptor = bg_mcrypt_cryptor();
+  bg_persister_t *persister = bg_msgpack_persister_persister(bg_msgpack_persister_new(
+                                                               bg_string_copy(bgctx_get_memory(ctx, bg_string_from_str("persistence_filepath"))),
+                                                               cryptor));
   if((err = blur_setup_context(ctx,
-                               bg_msgpack_persister_persister(
-                                 bg_msgpack_persister_new(
-                                   bg_string_copy(bgctx_get_memory(ctx,
-                                                    bg_string_from_str("persistence_filepath")
-                                     )))),
+                               persister,
                                bg_password_array_repository_new(),
-                               bg_mcrypt_cryptor()))) {
+                               cryptor))) {
     fprintf(stderr, "context could not be instantiated!\n");
     return err;
+  }
+
+  if(bgctx_locked(ctx)) {
+    if((err = bgctx_unlock(ctx, blur_ask_secret_key(ctx)))) {
+      fprintf(stderr, "could not unlock context!\n");
+      return end(ctx, err);
+    }
+  }
+
+  if(bg_msgpack_persister_register_key(persister, bgctx_access_key(ctx))) {
+    fprintf(stderr, "could not register secret key to persister!\n");
+    return end(ctx, err);
   }
 
   if((err = bgctx_load(ctx))) {
@@ -67,13 +79,6 @@ int main(int argc, char **argv) {
     } else {
       fprintf(stderr, "loading repository failed (err %d)!\n", err);
       return err;
-    }
-  }
-
-  if(bgctx_locked(ctx)) {
-    if((err = bgctx_unlock(ctx, blur_ask_secret_key(ctx)))) {
-      fprintf(stderr, "could not unlock context!\n");
-      return end(ctx, err);
     }
   }
 

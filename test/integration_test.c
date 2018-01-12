@@ -14,9 +14,11 @@ bg_msgpack_persister *persister;
 void setup_context(void) {
   bgctx_init(&ctx);
 
-  bgctx_register_cryptor(ctx, bg_mcrypt_cryptor());
+  bg_cryptor_t *cryptor = bg_mcrypt_cryptor();
 
-  persister = bg_msgpack_persister_new(bg_string_from_str(TEST_FILE_PATH));
+  bgctx_register_cryptor(ctx, cryptor);
+
+  persister = bg_msgpack_persister_new(bg_string_from_str(TEST_FILE_PATH), cryptor);
   bgctx_register_persister(ctx, bg_msgpack_persister_persister(persister));
 
   bgctx_register_repository(ctx, bg_password_array_repository_new());

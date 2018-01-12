@@ -1,4 +1,17 @@
 
+if(BSD OR APPLE)
+  message(STATUS "fmemopen is not available on current platform: will download a wrapper for funopen")
+  set(FMEMOPEN_LIBRARY fmemopen)
+
+  add_custom_command(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/fmemopen/src/fmemopen.c"
+    COMMAND rm -rf "${CMAKE_CURRENT_BINARY_DIR}/fmemopen"
+    COMMAND git clone "https://github.com/NimbusKit/memorymapping" "${CMAKE_CURRENT_BINARY_DIR}/fmemopen")
+
+  add_library(fmemopen
+    "${CMAKE_CURRENT_BINARY_DIR}/fmemopen/src/fmemopen.c")
+endif()
+
 add_library(blurgather
   context.c
   stream.c
@@ -25,6 +38,7 @@ target_link_libraries(blurgather
   m
   mcrypt
   msgpackc
+  ${FMEMOPEN_LIBRARY}
 )
 
 install(TARGETS blurgather DESTINATION lib)
