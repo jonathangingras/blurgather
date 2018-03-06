@@ -9,7 +9,7 @@
 
 bg_string *default_persistence_filepath() {
   char *home = getenv("HOME");
-  char *rest =  "/blrgthrc_test";
+  char *rest =  "/.blurdb";
   bg_string *repo_filepath = bg_string_from_str(home);
   bg_string_cat_char_array(&repo_filepath, rest, strlen(rest));
   return repo_filepath;

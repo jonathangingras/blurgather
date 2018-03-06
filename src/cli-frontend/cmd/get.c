@@ -10,6 +10,8 @@ int blur_cmd_get(bg_context* ctx, int argc, char **argv) {
   bg_string *name = NULL;
   bg_password *password, *password_copy;
   void (*send_)(const char*) = NULL;
+  size_t n_passwords_to_get = 1;
+
   send_ = bgctx_get_memory(ctx, bg_string_from_str("clipboard"));
 
   if(!send_) {
@@ -18,33 +20,46 @@ int blur_cmd_get(bg_context* ctx, int argc, char **argv) {
   }
 
   size_t get_idx = find_string_index(argc, (const char **)argv, "get");
+  size_t arg_idx = get_idx + 1;
 
   if(get_idx == ((size_t)argc) - 1) {
     name = blur_getfield("name", 0);
   } else if(get_idx < ((size_t)argc) - 1) {
-    name = bg_string_from_str(argv[get_idx + 1]);
+    n_passwords_to_get = ((size_t)argc) - 1 - get_idx;
+    name = bg_string_from_str(argv[arg_idx]);
   } else {
     fprintf(stderr, "bad usage!\n");
     return -1;
   }
 
-  if((err = bgctx_find_password(ctx, name, &password))) {
-    fprintf(stderr, "could not find password!\n");
-    bg_string_free(name);
-    return err;
-  }
+  while(arg_idx < (size_t)argc) {
+    if((err = bgctx_find_password(ctx, name, &password))) {
+      fprintf(stderr, "could not find password!\n");
+      bg_string_free(name);
+      return err;
+    }
 
-  password_copy = bg_password_copy(password);
-  if((err = bgctx_decrypt_password(ctx, password_copy))) {
-    fprintf(stderr, "could not decrypt password!\n");
+    password_copy = bg_password_copy(password);
+    if((err = bgctx_decrypt_password(ctx, password_copy))) {
+      fprintf(stderr, "could not decrypt password!\n");
+      bg_password_free(password_copy);
+      bg_string_free(name);
+      return err;
+    }
+
+    send_(bg_string_data(bg_password_value(password_copy)));
+    if(arg_idx + 1 < (size_t)argc) {
+      getchar();
+    }
+
     bg_password_free(password_copy);
     bg_string_free(name);
-    return err;
+
+    ++arg_idx;
+    if(arg_idx < (size_t)argc) {
+      name = bg_string_from_str(argv[arg_idx]);
+    }
   }
 
-  send_(bg_string_data(bg_password_value(password_copy)));
-
-  bg_password_free(password_copy);
-  bg_string_free(name);
   return err;
 }
