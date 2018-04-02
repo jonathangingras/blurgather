@@ -2,6 +2,7 @@
 #define _BLURGATHER_CLIPBOARD_H_
 
 void send_to_clipboard(const char *password);
+void clear_clipboard();
 void send_to_stdout(const char *password);
 
 #endif

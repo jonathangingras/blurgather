@@ -1,4 +1,4 @@
-#include <sweetgreen/sweetgreen.h>
+#include <prufen/prufen.h>
 #include <blurgather/string.h>
 #include <blurgather/context.h>
 #include <blurgather/mcrypt_cryptor.h>
@@ -27,11 +27,11 @@ void setup_context(void) {
   bgctx_seal(ctx);
 }
 
-sweetgreen_setup(default_blur_setup) {
+pruf_setup(default_blur_setup) {
   setup_context();
 }
 
-sweetgreen_teardown(default_blur_setup) {
+pruf_teardown(default_blur_setup) {
   bgctx_finalize(ctx);
   remove(TEST_FILE_PATH);
 }
@@ -56,8 +56,8 @@ int create_password_db(void) {
 }
 
 
-sweetgreen_test_define(default_blur_setup, can_instantiate_passwords_and_save_them) {
-  sweetgreen_expect_zero(create_password_db());
+pruf_test_define(default_blur_setup, can_instantiate_passwords_and_save_them) {
+  pruf_expect_zero(create_password_db());
 }
 
 
@@ -70,7 +70,7 @@ int store_pass(bg_password *pwd, void *output) {
   return 0;
 }
 
-sweetgreen_test_define(default_blur_setup, can_read_saved_passwords) {
+pruf_test_define(default_blur_setup, can_read_saved_passwords) {
   create_password_db();
   bgctx_finalize(ctx);
   setup_context();
@@ -88,9 +88,9 @@ sweetgreen_test_define(default_blur_setup, can_read_saved_passwords) {
     bgctx_unlock(ctx, bg_secret_key_new("secret", 6));
 
     bg_password_decrypt(pwds[i], bgctx_cryptor(ctx), bgctx_access_key(ctx));
-    sweetgreen_expect_equal_string(bg_string_data(name), bg_string_data(bg_password_name(pwds[i])));
-    sweetgreen_expect_equal_string(bg_string_data(value), bg_string_data(bg_password_value(pwds[i])));
-    sweetgreen_expect_equal_string(bg_string_data(desc), bg_string_data(bg_password_description(pwds[i])));
+    pruf_expect_equal_string(bg_string_data(name), bg_string_data(bg_password_name(pwds[i])));
+    pruf_expect_equal_string(bg_string_data(value), bg_string_data(bg_password_value(pwds[i])));
+    pruf_expect_equal_string(bg_string_data(desc), bg_string_data(bg_password_description(pwds[i])));
     bg_password_crypt(pwds[i], bgctx_cryptor(ctx), bgctx_access_key(ctx));
 
     bgctx_lock(ctx);

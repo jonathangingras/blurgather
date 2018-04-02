@@ -38,13 +38,16 @@ need_init:
   goto begin;
 }
 
-int send_to_clipboard(const char *text) {
+void send_to_clipboard(const char *text) {
   pid_t child;
   if(!(child = fork())) {
-    return __send_to_clipboard(text);
+    __send_to_clipboard(text);
   } else {
     int status;
     waitpid(child, &status, 0);
-    return status;
   }
+}
+
+void clear_clipboard() {
+  send_to_clipboard("");
 }

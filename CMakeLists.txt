@@ -13,7 +13,7 @@ include(CMakeShortcuts/CTestShortcuts.cmake)
 ExternalProject_Add_Local(msgpackc-target
   GIT_REPOSITORY https://github.com/msgpack/msgpack-c.git
   GIT_TAG "cpp-2.1.1"
-  CMAKE_ARGS ${CMAKE_ARGS} -DMSGPACK_BUILD_EXAMPLES=OFF -DMSGPACK_ENABLE_CXX=OFF -DMSGPACK_ENABLE_SHARED=OFF -DCMAKE_C_FLAGS=-w
+  CMAKE_ARGS "${CMAKE_ARGS} -DMSGPACK_BUILD_EXAMPLES=OFF -DMSGPACK_ENABLE_CXX=OFF -DMSGPACK_ENABLE_SHARED=OFF -DCMAKE_C_FLAGS=-w"
 )
 
 #includes
@@ -32,8 +32,9 @@ option(BUILD_TESTING "compile tests" OFF)
 if(BUILD_TESTING)
   enable_testing()
 
-  ExternalProject_Add_Local(sweetgreen-target
-    GIT_REPOSITORY https://github.com/jonathangingras/sweetgreen
+  ExternalProject_Add_Local(prufen-target
+    GIT_REPOSITORY "https://github.com/jonathangingras/prufen"
+    GIT_TAG "v0.1.0"
   )
 
   add_subdirectory(test)

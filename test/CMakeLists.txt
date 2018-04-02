@@ -1,6 +1,6 @@
 
 add_library(bg_tests mocks.c)
-add_dependencies(bg_tests sweetgreen-target)
+add_dependencies(bg_tests prufen-target)
 target_link_libraries(bg_tests blurgather)
 
 function(add_test_case test_case)

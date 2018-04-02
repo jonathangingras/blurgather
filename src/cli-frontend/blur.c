@@ -38,6 +38,7 @@ int main(int argc, char **argv) {
   bgctx_register_memory(ctx, bg_string_from_str("persistence_filepath"),
                         default_persistence_filepath(), bg_string_free);
   bgctx_register_memory(ctx, bg_string_from_str("clipboard"), &send_to_clipboard, NULL);
+  bgctx_register_memory(ctx, bg_string_from_str("clear_clipboard"), &clear_clipboard, NULL);
 
   if((err = run_options(ctx, argc, argv))) {
     fprintf(stderr, "running options failed! (err: %d)\n", err);

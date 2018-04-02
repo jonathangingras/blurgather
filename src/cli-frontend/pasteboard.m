@@ -41,9 +41,18 @@
 
 @end
 
+
 void send_to_clipboard(const char* password) {
-  id writer = [[PasteboardWriter alloc] init];
-  [writer write: password];
-  [writer release];
+  @autoreleasepool {
+    id writer = [[PasteboardWriter alloc] init];
+    [writer write: password];
+  }
+}
+
+void clear_clipboard() {
+  @autoreleasepool {
+    id writer = [[PasteboardWriter alloc] init];
+    [writer clear];
+  }
 }
 

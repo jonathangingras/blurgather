@@ -10,13 +10,18 @@ int blur_cmd_get(bg_context* ctx, int argc, char **argv) {
   bg_string *name = NULL;
   bg_password *password, *password_copy;
   void (*send_)(const char*) = NULL;
+  void (*clear_)(void);
   size_t n_passwords_to_get = 1;
 
   send_ = bgctx_get_memory(ctx, bg_string_from_str("clipboard"));
+  clear_ = bgctx_get_memory(ctx, bg_string_from_str("clear_clipboard"));
 
   if(!send_) {
     fprintf(stderr, "cannot send value, function pointer is null!\n");
     return -2;
+  }
+  if(!clear_) {
+    fprintf(stderr, "function clipboard clearing pointer is null!\n");
   }
 
   size_t get_idx = find_string_index(argc, (const char **)argv, "get");
@@ -48,7 +53,7 @@ int blur_cmd_get(bg_context* ctx, int argc, char **argv) {
     }
 
     send_(bg_string_data(bg_password_value(password_copy)));
-    if(arg_idx + 1 < (size_t)argc) {
+    if(arg_idx < (size_t)argc) {
       getchar();
     }
 
@@ -59,6 +64,10 @@ int blur_cmd_get(bg_context* ctx, int argc, char **argv) {
     if(arg_idx < (size_t)argc) {
       name = bg_string_from_str(argv[arg_idx]);
     }
+  }
+
+  if(clear_) {
+    clear_();
   }
 
   return err;
