@@ -13,6 +13,26 @@ if(BSD OR APPLE)
 endif()
 
 add_library(blurgather
+  ../include/blurgather/array_repository.h
+  ../include/blurgather/map.h
+  ../include/blurgather/password_iterator.h
+  ../include/blurgather/stream.h
+  ../include/blurgather/context.h
+  ../include/blurgather/mcrypt_cryptor.h
+  ../include/blurgather/password_to_map.h
+  ../include/blurgather/string.h
+  ../include/blurgather/cryptor.h
+  ../include/blurgather/mcrypt_iv.h
+  ../include/blurgather/persister.h
+  ../include/blurgather/types.h
+  ../include/blurgather/encryption.h
+  ../include/blurgather/msgpack_persister.h
+  ../include/blurgather/repository.h
+  ../include/blurgather/urandom_iv.h
+  ../include/blurgather/iv.h
+  ../include/blurgather/password.h
+  ../include/blurgather/secret_key.h
+  ../include/blurgather/utilities.h
   context.c
   stream.c
   map.c
